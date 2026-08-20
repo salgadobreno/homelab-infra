@@ -54,13 +54,13 @@
 
 ## 8. Verify against the specs
 
-- [ ] 8.1 Run `tofu plan` with no changes and confirm it reports no drift — `vm-provisioning`, "Configuration matches reality"
+- [x] 8.1 Run `tofu plan` with no changes and confirm it reports no drift — `vm-provisioning`, "Configuration matches reality"
 - [ ] 8.2 Deploy a throwaway workload and confirm it reaches running state — `k3s-cluster`, "Workloads can be scheduled"
 - [ ] 8.3 Reboot the node; confirm k3s and the workload return unattended — `k3s-cluster`, "Cluster survives node reboot"
-- [ ] 8.4 Check host free memory with the cluster idle and confirm the Proxmox UI stays responsive — `k3s-cluster`, "Host remains functional under cluster load"
-- [ ] 8.5 Grep the repository for the API token value and confirm no match — `vm-provisioning`, "Repository contains no secrets"
-- [ ] 8.6 Confirm the node's disk resides on the NVMe thin pool and not on `/mnt/sda8` — `lsblk` on the host, or Proxmox UI storage view (design D10)
-- [ ] 8.7 Confirm every allocated address sits below `.100` and is stated in configuration — `vm-provisioning`, "Address plan is discoverable" and "No overlap with dynamic allocation"
+- [x] 8.4 Check host free memory with the cluster idle and confirm the Proxmox UI stays responsive — `k3s-cluster`, "Host remains functional under cluster load"
+- [x] 8.5 Grep the repository for the API token value and confirm no match — `vm-provisioning`, "Repository contains no secrets"
+- [x] 8.6 Confirm the node's disk resides on the NVMe thin pool and not on `/mnt/sda8` — `lsblk` on the host, or Proxmox UI storage view (design D10)
+- [x] 8.7 Confirm every allocated address sits below `.100` and is stated in configuration — `vm-provisioning`, "Address plan is discoverable" and "No overlap with dynamic allocation"
 
 ## 9. Make it reproducible
 

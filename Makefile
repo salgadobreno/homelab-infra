@@ -130,7 +130,7 @@ pve-ssh: ## SSH to the Proxmox host as root on the hardened port
 
 # ---------------------------------------------------------------- tofu --------
 
-.PHONY: init validate fmt plan apply destroy output
+.PHONY: init validate fmt plan apply destroy output refresh
 init: ## tofu init
 	@$(TOFU) -chdir=$(TF_DIR) init
 
@@ -149,6 +149,9 @@ apply: ## [root-ish] Apply the saved plan — needs ssh-agent loaded
 
 destroy: ## Destroy everything this repo manages (asks first)
 	@$(TOFU) -chdir=$(TF_DIR) destroy
+
+refresh: ## Persist outputs to state; touches no infrastructure
+	@$(TOFU) -chdir=$(TF_DIR) apply -refresh-only
 
 output: ## Show tofu outputs
 	@$(TOFU) -chdir=$(TF_DIR) output
