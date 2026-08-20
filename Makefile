@@ -109,6 +109,17 @@ node-exec: ## Run CMD='...' on the node
 	@ssh $(SSH_OPTS) -o BatchMode=yes $(NODE_USER)@$(NODE_IP) "$(CMD)"
 
 
+.PHONY: kubeconfig
+kubeconfig: ## Fetch the node's kubeconfig, rewritten to reach it off-node (task 7.4)
+	@umask 077; ssh $(SSH_OPTS) -o BatchMode=yes $(NODE_USER)@$(NODE_IP) \
+	  'sudo cat /etc/rancher/k3s/k3s.yaml' \
+	  | sed 's|https://127\.0\.0\.1:6443|https://$(NODE_IP):6443|' > $(KUBECONFIG_PATH).tmp
+	@grep -q 'server: https://$(NODE_IP):6443' $(KUBECONFIG_PATH).tmp \
+	  || { rm -f $(KUBECONFIG_PATH).tmp; echo "FAIL: server address not rewritten"; exit 1; }
+	@mv $(KUBECONFIG_PATH).tmp $(KUBECONFIG_PATH) && chmod 600 $(KUBECONFIG_PATH)
+	@echo "wrote $(KUBECONFIG_PATH) -> https://$(NODE_IP):6443"
+	@echo "use with:  export KUBECONFIG=$(KUBECONFIG_PATH)"
+
 .PHONY: cloud-init-log
 cloud-init-log: ## Read cloud-init output from the node (task 7.1)
 	@$(MAKE) --no-print-directory node-exec CMD='sudo cat /var/log/cloud-init-output.log'

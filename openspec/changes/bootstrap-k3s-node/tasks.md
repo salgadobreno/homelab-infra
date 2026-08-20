@@ -45,12 +45,12 @@
 
 ## 7. Cluster access
 
-- [ ] 7.1 Confirm cloud-init finished cleanly by reading `/var/log/cloud-init-output.log` on the node — do not infer success from the VM being up (design risk table)
+- [x] 7.1 Confirm cloud-init finished cleanly by reading `/var/log/cloud-init-output.log` on the node — do not infer success from the VM being up (design risk table)
 - [x] 7.2 Confirm `k3s` is running and `kubectl get nodes` on the node reports `Ready`
-- [ ] 7.3 Add an output exposing the node's declared address
-- [ ] 7.4 Template the node's kubeconfig with that address substituted for `127.0.0.1`, written to a gitignored path on the host
+- [x] 7.3 Add an output exposing the node's declared address
+- [x] 7.4 Template the node's kubeconfig with that address substituted for `127.0.0.1`, written to a gitignored path on the host
 - [x] 7.4a Pass the node address to k3s as a TLS SAN so the served certificate matches the address `kubectl` connects to
-- [ ] 7.5 Run `kubectl get nodes` from the Proxmox host using that kubeconfig and see `Ready` — **this closes milestone 1**
+- [x] 7.5 Run `kubectl get nodes` from the Proxmox host using that kubeconfig and see `Ready` — **this closes milestone 1**
 
 ## 8. Verify against the specs
 
