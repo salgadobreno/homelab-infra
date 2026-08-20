@@ -19,7 +19,20 @@ decisions. It is the authoritative source and is kept current; this file is a su
 openspec/          OpenSpec planning: config.yaml, changes/, specs/
 tofu/              OpenTofu root module — flat and unmodularised on purpose
 scripts/           bootstrap.sh (toolchain), create-proxmox-token.sh (Proxmox API token)
+Makefile           Operator console — every routine command lives here
+LEARNINGS.md       Learning log, written after the fact (see protocol in the file)
 ```
+
+## Operator console
+
+Routine administrative commands belong in the `Makefile`, not in ad-hoc shell
+invocations. `make help` lists them; `make status` gives a one-screen overview.
+
+When reaching for a status or check command, **use the target if one exists, and add a
+target if one does not.** The point is that the operator can run exactly what the agent
+ran and see the same output. A command that only ever appears in a chat log is invisible.
+
+Targets that need root are marked; the operator runs those in a real terminal.
 
 `tofu/` stays flat until there is more than one node to abstract over. Extracting
 modules is a deliberate later exercise, not an oversight.
