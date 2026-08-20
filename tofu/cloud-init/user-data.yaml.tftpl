@@ -1,0 +1,46 @@
+#cloud-config
+# Bootstrap for a k3s server node (design D6).
+#
+# This file is deliberately short. It creates the operator account, installs the
+# guest agent, and installs k3s — nothing else. Everything above the OS is the
+# cluster's job, reconciled by GitOps, not configured here.
+#
+# If this grows past what fits on one screen, that is the signal to reconsider a
+# configuration-management layer — not a reason to pre-emptively add one.
+
+hostname: ${hostname}
+fqdn: ${hostname}
+prefer_fqdn_over_hostname: false
+
+users:
+  - name: ${operator_user}
+    groups: [adm, sudo]
+    shell: /bin/bash
+    sudo: "ALL=(ALL) NOPASSWD:ALL"
+    lock_passwd: true
+    ssh_authorized_keys:
+      - "${ssh_public_key}"
+
+package_update: true
+packages:
+  - qemu-guest-agent
+
+runcmd:
+  # Guest agent first: graceful shutdown and Proxmox UI integration. Nothing
+  # depends on it for addressing — the address is static (design D7).
+  - systemctl enable --now qemu-guest-agent
+
+  # k3s, pinned. INSTALL_K3S_EXEC advertises the node's static address so the
+  # generated kubeconfig and any future agent joins both target something
+  # reachable off-node, rather than 127.0.0.1.
+  - >
+    curl -sfL https://get.k3s.io
+    | INSTALL_K3S_VERSION="${k3s_version}"
+    INSTALL_K3S_EXEC="server --tls-san ${node_address} --node-ip ${node_address} --write-kubeconfig-mode 644"
+    sh -
+
+  # A marker the provisioner can wait on, written only after k3s reports ready.
+  - k3s kubectl wait --for=condition=Ready node --all --timeout=300s
+  - touch /run/cloud-init-k3s-complete
+
+final_message: "k3s server ready on ${node_address} after $UPTIME seconds"

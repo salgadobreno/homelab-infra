@@ -57,3 +57,133 @@ variable "image_datastore" {
   type        = string
   default     = "local"
 }
+
+# --- Address plan (design D7) -----------------------------------------------------
+#
+# The single source of truth for LAN addressing. The router's DHCP pool starts at
+# .100; everything this project allocates sits strictly below that boundary, which is
+# what makes static addressing safe here. Ranges are declared even when nothing uses
+# them yet, so later milestones do not have to re-address a running cluster.
+#
+#   192.168.0.1       router / gateway
+#   192.168.0.21      Proxmox host (existing, not managed here)
+#   192.168.0.30-.32  k3s nodes — .30 server, .31/.32 agents at M5
+#   192.168.0.40-.50  reserved for MetalLB LoadBalancer addresses (M7)
+#   192.168.0.100+    DHCP pool — never allocated by this project
+
+variable "network_gateway" {
+  description = "LAN default gateway."
+  type        = string
+  default     = "192.168.0.1"
+}
+
+variable "network_cidr_bits" {
+  description = "Prefix length of the LAN subnet."
+  type        = number
+  default     = 24
+}
+
+variable "network_dns_servers" {
+  description = "Resolvers for cluster nodes. Public rather than local: the LAN runs no DNS service, which is also why addressing is static (design D7)."
+  type        = list(string)
+  default     = ["8.8.8.8", "1.1.1.1"]
+}
+
+variable "k3s_server_address" {
+  description = "Static address of the k3s server node. Known at plan time so the kubeconfig can be rewritten without waiting on the guest agent (design D7)."
+  type        = string
+  default     = "192.168.0.30"
+
+  validation {
+    condition     = can(regex("^192\\.168\\.0\\.(3[0-2])$", var.k3s_server_address))
+    error_message = "Server address must be within the .30-.32 node range of the D7 address plan."
+  }
+}
+
+variable "metallb_address_range" {
+  description = "Reserved for LoadBalancer addresses at M7. Carved out now, while free, so the cluster is not re-addressed later. Unused by this change."
+  type        = string
+  default     = "192.168.0.40-192.168.0.50"
+}
+
+# --- Node -------------------------------------------------------------------------
+
+variable "node_hostname" {
+  description = "Hostname of the k3s server node."
+  type        = string
+  default     = "k3s-server-1"
+}
+
+variable "operator_user" {
+  description = "Unprivileged account created by cloud-init for operator SSH access."
+  type        = string
+  default     = "buzaga"
+}
+
+variable "operator_ssh_public_key_path" {
+  description = "Path to the public key installed on the node. A path rather than the key itself so nothing identifying is committed, while a fresh clone still reproduces the build."
+  type        = string
+  default     = "~/.ssh/id_ed25519.pub"
+}
+
+variable "node_vcpu" {
+  description = "vCPU count for the server node."
+  type        = number
+  default     = 4
+}
+
+variable "node_memory_mib" {
+  description = "RAM for the server node, in MiB."
+  type        = number
+  default     = 6144
+}
+
+variable "node_disk_gib" {
+  description = "Thin-provisioned disk size for the server node, in GiB."
+  type        = number
+  default     = 20
+}
+
+variable "vm_datastore" {
+  description = "Datastore for VM disks. Must be the NVMe thin pool: the k8s datastore is fsync-latency-bound and the HDD cannot meet it (design D10)."
+  type        = string
+  default     = "local-lvm"
+}
+
+variable "network_bridge" {
+  description = "Proxmox bridge the node attaches to."
+  type        = string
+  default     = "vmbr0"
+}
+
+variable "k3s_version" {
+  description = "k3s release installed by cloud-init. Pinned rather than tracking 'stable' so a rebuild produces the same cluster; matches the kubectl version pinned in scripts/bootstrap.sh, keeping client and server free of version skew."
+  type        = string
+  default     = "v1.36.3+k3s1"
+}
+
+variable "snippet_datastore" {
+  description = "Datastore holding the cloud-init snippet. Must advertise the 'snippets' content type; see README for enabling it."
+  type        = string
+  default     = "local"
+}
+
+# --- Host SSH (snippet uploads only) ----------------------------------------------
+
+variable "proxmox_node_address" {
+  description = "Address the provider opens SSH to for snippet uploads. Separate from proxmox_endpoint because the API and SSH run on different ports."
+  type        = string
+  default     = "192.168.0.21"
+}
+
+variable "proxmox_ssh_port" {
+  description = "SSH port on the Proxmox host. Non-default: sshd is hardened onto 4444."
+  type        = number
+  default     = 4444
+}
+
+variable "proxmox_ssh_username" {
+  description = "SSH user for snippet uploads. Root because /var/lib/vz/snippets is root-owned and this host has no passwordless sudo. Narrowing this belongs with the scoped-token work in the secrets milestone (design D4)."
+  type        = string
+  default     = "root"
+}

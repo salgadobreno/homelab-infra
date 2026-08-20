@@ -24,3 +24,7 @@ id_ecdsa
 *.pem
 *.key
 !*.pub
+
+# Saved plan files may embed sensitive values
+tfplan
+*.tfplan
