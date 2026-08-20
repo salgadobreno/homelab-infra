@@ -187,3 +187,25 @@ variable "proxmox_ssh_username" {
   type        = string
   default     = "root"
 }
+
+variable "k3s_disable" {
+  description = <<-EOT
+    k3s bundled components to disable at install time, e.g. ["servicelb", "traefik"].
+
+    These are startup flags, so they live in the provisioning layer and only take
+    effect on a rebuild — a running cluster cannot be corrected from inside by GitOps.
+    Relevant at M7: klipper-lb (servicelb) already claims Service type=LoadBalancer,
+    so MetalLB needs "servicelb" listed here or two controllers answer for the same
+    resource. Empty by default, which keeps k3s's own defaults.
+  EOT
+  type        = list(string)
+  default     = []
+
+  validation {
+    condition = alltrue([
+      for c in var.k3s_disable :
+      contains(["coredns", "servicelb", "traefik", "local-storage", "metrics-server"], c)
+    ])
+    error_message = "Only k3s's own bundled components can be disabled: coredns, servicelb, traefik, local-storage, metrics-server."
+  }
+}

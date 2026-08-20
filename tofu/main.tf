@@ -91,6 +91,13 @@ resource "proxmox_virtual_environment_file" "cloud_init" {
       ssh_public_key = trimspace(file(pathexpand(var.operator_ssh_public_key_path)))
       k3s_version    = var.k3s_version
       node_address   = var.k3s_server_address
+
+      # Precomputed here rather than looped inside the template, so the template
+      # stays readable YAML and the flag ordering is deterministic.
+      # Leading space inside each element, joined with "": an empty list must render
+      # as the empty string, not as a trailing space. A one-character difference in the
+      # rendered file replaces the snippet, and the VM depends on it.
+      disable_flags = join("", [for c in var.k3s_disable : " --disable ${c}"])
     })
   }
 }
