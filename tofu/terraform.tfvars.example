@@ -1,0 +1,6 @@
+# Copy to terraform.tfvars and fill in, or generate it with
+# scripts/create-proxmox-token.sh. terraform.tfvars is gitignored — never commit it.
+
+proxmox_endpoint  = "https://192.168.0.21:8006/"
+proxmox_node      = "pve"
+proxmox_api_token = "root@pam!tofu=00000000-0000-0000-0000-000000000000"

@@ -1,0 +1,159 @@
+schema: spec-driven
+
+context: |
+  ## What this project is
+
+  Infrastructure-as-code for a single-host Proxmox VE homelab. The goal is twofold and
+  both halves matter: run a genuinely professional setup, and build hands-on fluency in
+  Terraform, Kubernetes, and ArgoCD for interview readiness. When the two conflict,
+  prefer the industry-standard choice over the homelab-clever one — the operator needs
+  to be able to explain each decision to an interviewer.
+
+  ## Hardware and constraints
+
+  Single host, `pve`, Proxmox VE 9.2.2 on Debian 13 (trixie), kernel 7.0.2.
+
+  - AMD Ryzen 5 3400G, 4 cores / 8 threads. Not a bottleneck at this scale.
+  - 13 GiB RAM total, ~3.2 GiB in use by the host. This is THE binding constraint —
+    it decides cluster topology and rules out generous observability. Treat any design
+    that needs more than ~10 GiB across all VMs as infeasible without justification.
+  - 35 GiB swap. Means memory pressure shows up as slowness, not OOM kills — which is
+    harder to diagnose, so state memory budgets explicitly rather than discovering them.
+  - Two storage devices with different jobs. Storage location is never incidental:
+    - **NVMe** (WD 240 GB, `nvme0n1`) — LVM volume group `pve`: `pve-root` 65.5 GiB
+      (~49 GiB free), `pve-swap` 8 GiB, and a **129.8 GiB LVM-thin pool** (`pve-data`,
+      exposed as `local-lvm`) that is currently empty. VM disks go here.
+    - **HDD** (1 TB 7200rpm Barracuda, `sda`) — `/mnt/sda8`, 427 GiB at 86% used. Bulk
+      and dump storage. Roughly 475 GiB more is reclaimable from a dead Windows install
+      (`sda4` NTFS 246.8 GiB, `sda6` ext4 228.2 GiB and unmounted).
+    - The Kubernetes datastore (sqlite, later etcd) is fsync-latency-bound. **Never put
+      node disks or a datastore on the HDD** — the cluster will appear healthy and then
+      fail under load with apiserver timeouts that look like network faults.
+    - `df` cannot see the thin pool because it is not mounted. Use `lsblk` or `lvs`
+      before drawing conclusions about free NVMe capacity.
+    - Storage tiers: VM OS and datastore on `local-lvm`; fast ephemeral PVCs on k3s
+      `local-path`; durable PVCs on an NFS export from `/mnt/sda8`. Only the NFS tier
+      survives `tofu destroy`, so anything worth keeping belongs there.
+    - NVMe health (SMART, 2026-08-19): 19% of endurance used, 100% spare, 0 integrity
+      errors, 18.9 TB written across 35,625 power-on hours (~4 years). Endurance is not
+      a constraint — a Prometheus TSDB would add roughly 10% to lifetime write volume.
+      Do not treat wear as a reason to avoid write-heavy workloads on this drive.
+    - **161 of 197 power cycles were unsafe shutdowns.** Abrupt power loss is this
+      host's normal failure mode and there is no UPS. The disposable-cluster design
+      absorbs this for anything declared in Git, but it is a real threat to etcd
+      (from the multi-node milestone) and to any durable data on the NFS tier. Do not
+      propose storing irreplaceable data without a backup story or a UPS.
+    - Upgrade path: the NVMe is nearly fully allocated, so the thin pool cannot grow
+      without another disk. Proxmox migrates VM disks between storages online, so a
+      future second NVMe can be ZFS and the nodes moved onto it without a rebuild.
+      Do not propose converting the current layout to ZFS — that means reinstalling
+      Proxmox.
+  - Ingress is a Cloudflare tunnel (`cloudflared`, running as root on the host). It is
+    outbound-only — there are no inbound port-forwards, and nothing should assume a
+    public IP or inbound reachability.
+
+  ## Networking and address plan
+
+  LAN is `192.168.0.0/24`, gateway `192.168.0.1`, bridged to VMs via `vmbr0`.
+
+  There is no local DNS. `/etc/resolv.conf` points at `8.8.8.8`, and `pve.lan` resolves
+  only through a hand-maintained `/etc/hosts` entry. Do not assume LAN hostnames
+  resolve — reference addresses, or propose standing up DNS as its own change.
+
+  Addresses are allocated statically from this plan and declared in configuration.
+  The router's DHCP pool starts at `.100` and is never allocated by this project.
+
+  | Range | Use |
+  |---|---|
+  | `192.168.0.1`      | Router / gateway |
+  | `192.168.0.21`     | Proxmox host `pve` (static, pre-existing) |
+  | `192.168.0.30-.32` | k3s nodes — `.30` server, `.31`/`.32` agents |
+  | `192.168.0.40-.50` | Reserved for LoadBalancer addresses (MetalLB, later) |
+  | `192.168.0.100+`   | DHCP pool — do not allocate |
+
+  Cluster nodes are statically addressed rather than using DHCP: there is no DNS to hide
+  a moving address behind, and the destroy/recreate cycle this project depends on gives
+  a rebuilt VM a fresh MAC and therefore a fresh lease. Before claiming an address, ping
+  it. When adding a node, update this table in the same change.
+
+  ## Current state
+
+  Proxmox has zero VMs and zero LXC containers. The actual workload — nginx serving a
+  placeholder site, a hit-counter, and redis — runs as Docker Compose directly on the
+  hypervisor from `/mnt/sda8/Projects/buzaga`. That co-location is the known
+  anti-pattern this project exists to fix. The site itself is disposable and may break.
+
+  ## Toolchain reality
+
+  Installed: `docker`, `git`, `python3`.
+  NOT installed: `tofu`, `terraform`, `ansible`, `kubectl`, `helm`, `k3s`, `argocd`,
+  `sops`, `age`, `yamllint`. None of these come from Debian apt. Never invoke them
+  speculatively — check with `command -v` first and say what is missing rather than
+  inventing output.
+
+  Proxmox CLI tools (`qm`, `pct`, `pvesm`) live in `/usr/sbin`, which is off the
+  default PATH for the non-root operator. They also require root; the operator has
+  sudo but commands should not assume it silently.
+
+  ## Chosen stack
+
+  OpenTofu (`tofu`, Terraform-compatible) with the `bpg/proxmox` provider, k3s for
+  Kubernetes, ArgoCD for GitOps, GitHub as the remote. Cloud-init handles node
+  bootstrap.
+
+  There is deliberately no configuration-management layer. Nodes are immutable and
+  disposable: cloud-init does bootstrap, everything above the OS is declared in Git and
+  reconciled by ArgoCD. Do not reintroduce Ansible without an explicit decision — an
+  earlier attempt in `../ansible/` is superseded, not a pattern to follow.
+
+  ## How to structure work
+
+  Two previous attempts at this project stalled — not on a technical wall, but because
+  they were structured layer-by-layer (Terraform, then Ansible, then Kubernetes) and
+  produced nothing observable until the final layer. The operator has ~10 hours a week.
+
+  Consequently: scope every change as a thin end-to-end slice that ends in something
+  demonstrable — a URL that serves, a command that returns, a rebuild that completes.
+  One change per milestone, never one change per layer. A change named
+  `serve-site-from-k3s` is correctly scoped; one named `add-terraform-layer` is not.
+
+  Prefer a working ugly slice over a correct partial layer. Name rabbit holes and skip
+  them explicitly, on the record, rather than doing them properly up front — hand-built
+  VM templates, scoped Proxmox API roles, and remote state backends are all deferred by
+  deliberate decision, not oversight. Refactoring working infrastructure later is both
+  the better learning exercise and the safer use of limited time.
+
+  ## Safety
+
+  This repo manages real hardware running a live tunnel. Never run `tofu apply`,
+  `kubectl apply`, `helm upgrade`, or a destructive `pct`/`qm` command unless the
+  operator explicitly asks. Produce a plan or diff (`tofu plan`, `--dry-run=client`)
+  and let the operator run the apply.
+
+  Secrets are unmanaged so far. The Cloudflare tunnel token is currently visible in the
+  `cloudflared` process arguments, and the Proxmox API token is a deliberately
+  over-privileged `root@pam` token — both are recorded shortcuts with a scheduled
+  milestone to fix them. Never commit credentials, kubeconfigs, tfstate, or private
+  keys.
+
+# Per-artifact rules (optional)
+# Add custom rules for specific artifacts.
+# Example:
+#   rules:
+#     proposal:
+#       - Keep proposals under 500 words
+#       - Always include a "Non-goals" section
+#     tasks:
+#       - Break tasks into chunks of max 2 hours
+
+# Per-operation guidance (optional)
+# Add advisory guidance for how apply and archive work should be conducted.
+# This is separate from artifact rules above.
+# Example:
+#   operations:
+#     apply:
+#       guidance:
+#         - Keep test summaries concise
+#     archive:
+#       guidance:
+#         - Summarize the archive outcome before finishing

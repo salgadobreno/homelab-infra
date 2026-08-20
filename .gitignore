@@ -1,0 +1,26 @@
+# Terraform / OpenTofu state — contains secrets in plaintext
+*.tfstate
+*.tfstate.*
+*.tfstate.backup
+.terraform/
+.terraform.lock.hcl.bak
+crash.log
+crash.*.log
+
+# Variable files carrying real values (commit only *.example)
+terraform.tfvars
+*.auto.tfvars
+!*.tfvars.example
+
+# Cluster credentials
+*.kubeconfig
+kubeconfig
+.kube/
+
+# SSH private keys
+id_rsa
+id_ed25519
+id_ecdsa
+*.pem
+*.key
+!*.pub
