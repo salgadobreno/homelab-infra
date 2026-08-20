@@ -22,26 +22,26 @@
 
 ## 4. Cloud image
 
-- [ ] 4.1 Choose the Ubuntu LTS release (design Open Question 1) and record the choice and its reason in `variables.tf`
-- [ ] 4.2 Declare a downloaded-file resource pulling the cloud image to Proxmox storage, pinning URL and checksum
-- [ ] 4.3 Apply and confirm the image lands in Proxmox storage; if the storage rejects the content type, enable it and note the fix (design Open Question 2)
+- [x] 4.1 Choose the Ubuntu LTS release (design Open Question 1) and record the choice and its reason in `variables.tf`
+- [x] 4.2 Declare a downloaded-file resource pulling the cloud image to Proxmox storage, pinning URL and checksum
+- [x] 4.3 Apply and confirm the image lands in Proxmox storage; if the storage rejects the content type, enable it and note the fix (design Open Question 2)
 
 ## 5. Cloud-init
 
-- [ ] 5.1 Write `cloud-init.yaml`: set hostname, create the operator user, install the declared SSH public key
-- [ ] 5.1a Configure the static address, gateway `192.168.0.1`, and a DNS server in cloud-init network config (design D7)
-- [ ] 5.2 Add `qemu-guest-agent` installation and enablement in `runcmd` — for graceful shutdown and Proxmox UI integration; nothing depends on it for addressing
-- [ ] 5.3 Add the k3s installation command to `runcmd` (design D6), keeping the block short enough to read at a glance
-- [ ] 5.4 Wire the cloud-init file into the VM resource as a user-data file resource
+- [x] 5.1 Write `cloud-init.yaml`: set hostname, create the operator user, install the declared SSH public key
+- [x] 5.1a Configure the static address, gateway `192.168.0.1`, and a DNS server in cloud-init network config (design D7)
+- [x] 5.2 Add `qemu-guest-agent` installation and enablement in `runcmd` — for graceful shutdown and Proxmox UI integration; nothing depends on it for addressing
+- [x] 5.3 Add the k3s installation command to `runcmd` (design D6), keeping the block short enough to read at a glance
+- [x] 5.4 Wire the cloud-init file into the VM resource as a user-data file resource
 
 ## 6. The VM
 
-- [ ] 6.1 Record the D7 address plan in `variables.tf` — node addresses, the reserved MetalLB range, and the `.100` DHCP boundary — as the single source of truth
-- [ ] 6.1a `ping 192.168.0.30` and confirm nothing answers before claiming the address
-- [ ] 6.2 Declare the VM resource: 6 GiB RAM, 4 vCPU, 20 GiB thin disk on `local-lvm` (NVMe — design D10, never the HDD), attached to `vmbr0`, static address `192.168.0.30`
-- [ ] 6.3 Run `tofu plan`, read it line by line, and confirm it creates exactly what is intended before applying
-- [ ] 6.4 Run `tofu apply` and wait for the VM to boot
-- [ ] 6.5 SSH into the VM using the declared key, with no password prompt — satisfies `vm-provisioning` scenario "Operator access after creation"
+- [x] 6.1 Record the D7 address plan in `variables.tf` — node addresses, the reserved MetalLB range, and the `.100` DHCP boundary — as the single source of truth
+- [x] 6.1a `ping 192.168.0.30` and confirm nothing answers before claiming the address
+- [x] 6.2 Declare the VM resource: 6 GiB RAM, 4 vCPU, 20 GiB thin disk on `local-lvm` (NVMe — design D10, never the HDD), attached to `vmbr0`, static address `192.168.0.30`
+- [x] 6.3 Run `tofu plan`, read it line by line, and confirm it creates exactly what is intended before applying
+- [x] 6.4 Run `tofu apply` and wait for the VM to boot
+- [x] 6.5 SSH into the VM using the declared key, with no password prompt — satisfies `vm-provisioning` scenario "Operator access after creation"
 
 ## 7. Cluster access
 
@@ -70,3 +70,14 @@
 - [ ] 9.3 Time that rebuild and record the number in the README — it is the milestone-4 demo, and it is worth having early
 - [ ] 9.4 Write the README: architecture sketch, how to apply, and why remote state and a scoped API role were deliberately deferred (design D4, D8)
 - [ ] 9.5 Push to GitHub — ArgoCD needs the repository reachable in the next milestone but two
+
+## 10. Operator visibility and learning record
+
+Added mid-change: the agent was running administrative commands ad-hoc, leaving the
+operator without the same instruments or any record of them.
+
+- [x] 10.1 Add a `Makefile` as the shared operator console — status, cluster, tofu, and check targets, self-documenting via `make help`
+- [x] 10.2 Route the routine commands used during this change through it, so both operator and agent use the same instrument
+- [x] 10.3 Add `LEARNINGS.md` with the entry protocol and the fundamentals hit during milestone 1
+- [x] 10.4 Reference both from `CLAUDE.md` and the README so they are discoverable
+- [x] 10.5 Confirm `make check` passes and `make status` reads correctly on a fresh terminal
