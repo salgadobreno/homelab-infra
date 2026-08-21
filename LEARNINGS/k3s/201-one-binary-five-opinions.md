@@ -21,7 +21,7 @@ once, which a kubeadm cluster would never do.
 
 **The datastore is sqlite, not etcd** — `/var/lib/rancher/k3s/server/db/state.db`, 11 MB
 with a 6 MB write-ahead log. This is the D10 storage argument made concrete: that WAL is
-fsync-bound, which is why node disks live on the NVMe. Milestone 5 swaps it for embedded
+fsync-bound, which is why node disks live on the NVMe. M5 swaps it for embedded
 etcd, and the requirement gets stricter, not looser.
 
 **What got deployed on top.** Seven manifests in
@@ -41,7 +41,7 @@ Traefik arrives through a `HelmChart` custom resource, served from the apiserver
 (`https://%{KUBERNETES_API}%/static/charts/…`) rather than the internet — k3s embeds a
 Helm controller so a cluster can bootstrap offline.
 
-**Forward-looking consequence, worth knowing before milestone 7:** klipper-lb already
+**Forward-looking consequence, worth knowing before M6:** klipper-lb already
 claims `Service type=LoadBalancer`. Installing MetalLB alongside it means two controllers
 answering for the same thing. k3s must be started with `--disable servicelb`, which is a
 change to the cloud-init `runcmd` and therefore to the *provisioning* layer — not

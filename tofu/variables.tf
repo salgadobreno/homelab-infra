@@ -68,7 +68,7 @@ variable "image_datastore" {
 #   192.168.0.1       router / gateway
 #   192.168.0.21      Proxmox host (existing, not managed here)
 #   192.168.0.30-.32  k3s nodes — .30 server, .31/.32 agents at M5
-#   192.168.0.40-.50  reserved for MetalLB LoadBalancer addresses (M7)
+#   192.168.0.40-.50  reserved for MetalLB LoadBalancer addresses (M6)
 #   192.168.0.100+    DHCP pool — never allocated by this project
 
 variable "network_gateway" {
@@ -101,7 +101,7 @@ variable "k3s_server_address" {
 }
 
 variable "metallb_address_range" {
-  description = "Reserved for LoadBalancer addresses at M7. Carved out now, while free, so the cluster is not re-addressed later. Unused by this change."
+  description = "Reserved for LoadBalancer addresses at M6. Carved out now, while free, so the cluster is not re-addressed later. Unused by this change."
   type        = string
   default     = "192.168.0.40-192.168.0.50"
 }
@@ -205,7 +205,7 @@ variable "k3s_disable" {
 
     These are startup flags, so they live in the provisioning layer and only take
     effect on a rebuild — a running cluster cannot be corrected from inside by GitOps.
-    Relevant at M7: klipper-lb (servicelb) already claims Service type=LoadBalancer,
+    Relevant at M6: klipper-lb (servicelb) already claims Service type=LoadBalancer,
     so MetalLB needs "servicelb" listed here or two controllers answer for the same
     resource. Empty by default, which keeps k3s's own defaults.
   EOT

@@ -3,7 +3,7 @@
 The cluster has been provisioned, torn down and rebuilt a dozen times, and has never run
 anything. Everything demonstrable so far is infrastructure describing itself. Meanwhile
 the site that actually serves the internet is a Docker Compose stack on the hypervisor,
-untouched since before milestone 0 — the thing this project exists to replace is the one
+untouched since before M0 — the thing this project exists to replace is the one
 thing it has not touched.
 
 This is also the first change where GitOps appears. Until now "declared in Git" has meant

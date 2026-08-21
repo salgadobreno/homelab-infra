@@ -77,12 +77,57 @@ context: |
   a rebuilt VM a fresh MAC and therefore a fresh lease. Before claiming an address, ping
   it. When adding a node, update this table in the same change.
 
+  ## Milestone ladder
+
+  The path. Each rung ends in something demonstrable, and one OpenSpec change delivers
+  one rung. This is the authoritative numbering — `M<n>` anywhere in the repo means a row
+  in this table.
+
+  | # | Ends when the operator can say | Change | State |
+  |---|---|---|---|
+  | M0 | "`tofu plan` talks to my Proxmox API" | `bootstrap-k3s-node` (task 3.4) | done 2026-08-21 |
+  | M1 | "One VM, built by OpenTofu, running k3s. `kubectl get nodes` works." | `bootstrap-k3s-node` | done 2026-08-21 |
+  | M2 | "Every credential holds only what its job needs, and I can prove it." | `narrow-privileges` | done 2026-08-21 |
+  | M3 | "I pushed to GitHub and ArgoCD served my site. I did not run kubectl." | `serve-site-from-k3s` | in progress |
+  | M4 | "Docker-on-host is gone. The hit counter and its data run in the cluster." | not yet proposed | next |
+  | M5 | "Three nodes. I drained one and the app stayed up." | not yet proposed | |
+  | M6 | "I can see what the cluster is doing." — observability, if RAM allows | not yet proposed | |
+
+  **The rebuild demo is not a rung.** `make rebuild CONFIRM=yes` destroying and recreating
+  the node in ~105 seconds was the original ladder's M4 and the intended centrepiece. It
+  arrived early, inside M1, and every rung since has used it as its acceptance test. It
+  is the best thing to demonstrate; it is not work that remains.
+
+  ### What M4 has to solve
+
+  Named here so it is not rediscovered: the hit counter is a locally-built image with no
+  registry, and Redis holds real state. A registry (or an equivalent) and a persistence
+  story are the two problems, and they are why M3 deliberately carries only the static
+  site. M3 leaves both public hostnames serving so M4 is a cutover with something to
+  compare against.
+
+  ### Numbering history — read this before trusting an old document
+
+  The ladder was reordered once. `narrow-privileges` was pulled forward from rung 6 to
+  rung 2, because `CLAUDE.md` carried three recorded shortcuts "with a milestone to fix
+  each" and that list drove the choice. The original rungs 2 and 3 (serve the site, then
+  add ArgoCD) merged into one M3, since installing a reconciler without anything to
+  reconcile is a layer rather than a slice.
+
+  Archived changes under `openspec/changes/archive/` use the **original** numbering and
+  are left untouched as historical record. In those documents, M6 means secrets and M7
+  means observability. Everywhere outside the archive, this table is authoritative.
+
   ## Current state
 
-  Proxmox has zero VMs and zero LXC containers. The actual workload — nginx serving a
-  placeholder site, a hit-counter, and redis — runs as Docker Compose directly on the
-  hypervisor from `/mnt/sda8/Projects/buzaga`. That co-location is the known
-  anti-pattern this project exists to fix. The site itself is disposable and may break.
+  Proxmox runs one VM: `k3s-server-1` at 192.168.0.30, provisioned entirely from `tofu/`
+  and rebuilt unattended in ~105 seconds. ArgoCD runs in it, installed by cloud-init as a
+  k3s HelmChart, so a rebuilt cluster arrives already reconciling.
+
+  The actual workload — nginx serving a placeholder site, a hit-counter, and redis — still
+  runs as Docker Compose directly on the hypervisor from `/mnt/sda8/Projects/buzaga`,
+  serving `buzaga.com.br`. That co-location is the known anti-pattern this project exists
+  to fix; retiring it is M4. The site itself is disposable and may break.
 
   ## Toolchain reality
 

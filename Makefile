@@ -87,7 +87,7 @@ net: ## Address plan versus what actually answers on the wire
 	@echo "  .1   gateway   $$(ping -c1 -W1 192.168.0.1  >/dev/null 2>&1 && echo up || echo '--')"
 	@echo "  .21  proxmox   $$(ping -c1 -W1 $(PVE_IP)    >/dev/null 2>&1 && echo up || echo '--')"
 	@echo "  .30  k3s node  $$(ping -c1 -W1 $(NODE_IP)   >/dev/null 2>&1 && echo up || echo '--')"
-	@echo "  .40-.50        reserved for MetalLB (M7, unused)"
+	@echo "  .40-.50        reserved for MetalLB (M6, unused)"
 	@echo "  .100+          router DHCP pool — never allocated here"
 
 # ---------------------------------------------------------------- cluster -----

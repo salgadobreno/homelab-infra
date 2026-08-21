@@ -39,7 +39,11 @@ modules is a deliberate later exercise, not an oversight.
 
 ## Workflow
 
-Work is planned as OpenSpec changes and applied task by task:
+Work is planned as OpenSpec changes and applied task by task. **One change delivers one
+rung of the milestone ladder in `openspec/config.yaml`** — that table is what decides
+what comes next, not the shortcut list and not an example name in a style rule.
+
+Commands:
 
 ```bash
 openspec list --json                                  # active changes
@@ -113,8 +117,13 @@ or silently "improve" them:
 
 ## Current state
 
-Milestones 1 and 2 are complete and archived. There is no active change; the permanent
-specs — `vm-provisioning`, `k3s-cluster`, `credential-scoping` — live in
+M0 to M2 are complete and archived; **M3 (`serve-site-from-k3s`) is the active change.**
+The ladder — what every `M<n>` in this repo refers to — is the `## Milestone ladder`
+table in `openspec/config.yaml`. Read it before proposing what comes next; do not infer
+the next change from a gap in the numbering. Archived changes predate a renumbering and
+use the original scheme, which that section explains.
+
+The permanent specs — `vm-provisioning`, `k3s-cluster`, `credential-scoping` — live in
 `openspec/specs/`.
 
 A single k3s node (`k3s-server-1`, 192.168.0.30) is provisioned entirely from `tofu/`.
