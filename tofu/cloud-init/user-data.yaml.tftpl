@@ -40,7 +40,20 @@ runcmd:
     sh -
 
   # A marker the provisioner can wait on, written only after k3s reports ready.
-  - k3s kubectl wait --for=condition=Ready node --all --timeout=300s
-  - touch /run/cloud-init-k3s-complete
+  #
+  # The node object does not exist the instant k3s starts, and `kubectl wait` does
+  # not block for a resource to appear — it fails immediately with "no matching
+  # resources found". Poll for existence first, then wait on the condition, and
+  # only then write the marker. `set -e` means a timeout leaves the marker absent
+  # and records a cloud-init error, rather than reporting a success that never
+  # happened.
+  - |
+    set -e
+    for i in $(seq 1 60); do
+      k3s kubectl get node ${hostname} >/dev/null 2>&1 && break
+      sleep 5
+    done
+    k3s kubectl wait --for=condition=Ready node/${hostname} --timeout=300s
+    touch /run/cloud-init-k3s-complete
 
 final_message: "k3s server ready on ${node_address} after $UPTIME seconds"

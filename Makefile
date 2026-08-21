@@ -156,6 +156,21 @@ refresh: ## Persist outputs to state; touches no infrastructure
 output: ## Show tofu outputs
 	@$(TOFU) -chdir=$(TF_DIR) output
 
+.PHONY: rebuild
+rebuild: ## [destructive] Timed destroy + apply + readiness (tasks 9.1-9.3)
+	@test "$(CONFIRM)" = "yes" || { echo "refusing: this destroys the cluster."; \
+	  echo "run:  make rebuild CONFIRM=yes"; exit 1; }
+	@test -n "$$SSH_AUTH_SOCK" || { echo "no ssh-agent: snippet upload will fail."; \
+	  echo "run:  eval \$$(ssh-agent) && ssh-add ~/.ssh/id_ed25519"; exit 1; }
+	@start=$$(date +%s); \
+	 $(TOFU) -chdir=$(TF_DIR) destroy -auto-approve -input=false && \
+	 $(TOFU) -chdir=$(TF_DIR) apply   -auto-approve -input=false && \
+	 echo "--- waiting for the node to report Ready ---" && \
+	 until ssh $(SSH_OPTS) -o BatchMode=yes $(NODE_USER)@$(NODE_IP) \
+	   'test -f /run/cloud-init-k3s-complete' 2>/dev/null; do sleep 5; done && \
+	 echo && echo "REBUILD COMPLETE in $$(( $$(date +%s) - start ))s" && \
+	 echo "(record this number in the README — task 9.3)"
+
 .PHONY: tf-state
 tf-state: ## What Terraform currently believes exists
 	@python3 -c "import json;d=json.load(open('$(TF_DIR)/terraform.tfstate'));\
