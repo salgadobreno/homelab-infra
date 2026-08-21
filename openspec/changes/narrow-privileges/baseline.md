@@ -90,3 +90,26 @@ Sections 2, 3 and 4 remain open — they are groups 4 to 6.
 Task 7.1 turns these four checks into `make check-privileges`, so the "after" state is
 verified by command rather than by repeating this by hand. Until then the commands above
 are the record.
+
+## D6 verified by accident, 2026-08-21
+
+A dry run of the rebuild recipe executed for real — a recipe line containing `$(MAKE)`
+runs even under `make -n`, and the whole destroy-then-apply chain is one continued shell
+line. The cluster was destroyed unintentionally.
+
+It happened to be the exact test D6 needed. Before the sentinel, `tofu destroy` removed
+`/var/lib/vz/snippets` along with the last snippet, and the directory came back
+root-owned. After it:
+
+```
+drwxr-xr-x 2 tofu-snippets tofu-snippets  /var/lib/vz/snippets
+-rw-r--r-- 1 root          root           .keep          (15:06, before the destroy)
+-rw-rw-r-- 1 tofu-snippets tofu-snippets  k3s-server-1-user-data.yaml  (15:13, after)
+```
+
+The `.keep` file predates the destroy and survived it, so PVE's `rmdir` failed as
+intended, the directory kept its owner, and the following apply wrote the snippet as
+`tofu-snippets` with no root SSH involved. Node Ready 71 seconds after apply began.
+
+`rebuild` no longer calls another `make` target; it inlines the same command, so a dry
+run stays dry.

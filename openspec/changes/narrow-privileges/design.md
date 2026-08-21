@@ -148,3 +148,64 @@ Any LAN host may authenticate by password. Not part of this change's scope — r
 group 5 does not withdraw root SSH while believing key-only is enforced. Also note
 `PermitRootLogin` is not set at all; the effective value is the default
 `prohibit-password`.
+
+### Correction to the Open Question 2 answer, and what 4.4 actually found
+
+The rebuild in task 4.4 failed, and it falsified part of the answer above. Both errors
+are recorded rather than edited away, because the shape of the mistake is the lesson.
+
+**Wrong: "the SSH channel is SFTP, not a shell."** The provider links `pkg/sftp`, and
+that is what `source_file` uploads use. This configuration uses `source_raw`, which the
+provider writes by piping the content through a shell:
+
+```
+tee: /var/lib/vz/snippets/k3s-server-1-user-data.yaml: Permission denied
+```
+
+Reading the binary's dependency list told me what the provider *can* do, not what this
+resource *does*. The conclusion happened to be convenient, and I did not test it against
+the code path in use — `make check-snippet-user` probed SFTP for the same reason, so the
+check agreed with the error rather than catching it.
+
+**Still right: no sudo is needed.** `tee` writes as the account. Nothing escalates; the
+directory simply was not writable at the moment of the write. The `try_sudo` finding and
+the task-log attribution both stand — no task in the lifecycle runs as a root shell.
+
+**The real obstacle is that directory ownership is not durable.** From
+`PVE/Storage/Plugin.pm`, in `free_image`:
+
+```perl
+# try to cleanup directory to not clutter storage with empty $vmid dirs if
+# all images from a guest got deleted
+my $dir = dirname($path);
+rmdir($dir);
+```
+
+After deleting any volume, PVE tries to remove the containing directory. The intent is
+per-VM `images/<vmid>/` directories. A snippet's parent is `/var/lib/vz/snippets`, so
+when `tofu destroy` removes the last snippet, `rmdir` succeeds and the directory goes
+with it. The next `activate_storage` recreates it via `File::Path::make_path` — as root,
+because PVE runs as root.
+
+So the sequence is: chown the directory, destroy, and the chown is gone. Every rebuild
+resets it. The first apply after the account was created was also the first destroy, so
+the window between the two was never observed.
+
+### D6: A dot-file sentinel keeps the snippet directory alive
+
+`rmdir` only removes an empty directory. A permanent file inside it makes PVE's cleanup
+fail harmlessly, the directory survives `tofu destroy`, and its ownership persists.
+
+It must be invisible to Proxmox, or it becomes a phantom snippet in the storage listing.
+`$get_subdir_files` enumerates with `foreach my $fn (<$path/*>)`, and glob `*` does not
+match dot-files. A file named `.keep` is therefore unlisted by the API, unlisted by the
+provider, and sufficient to block `rmdir`.
+
+*Alternatives:* group-write plus setgid (rejected: `make_path` recreates the directory
+with default ownership and mode, so it does not survive either); granting the account
+write access to `/var/lib/vz` so it can recreate the directory itself (rejected: PVE
+recreates it root-owned during storage activation, before the provider writes, so the
+account never gets the chance — and it widens the account's reach to the whole datastore
+root); switching to `source_file` so the upload really is SFTP (rejected: an SFTP write
+needs exactly the same directory permission, so it changes the mechanism without
+changing the problem).

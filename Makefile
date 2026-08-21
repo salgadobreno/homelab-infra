@@ -128,6 +128,14 @@ kubeconfig: ## Fetch the node's kubeconfig, rewritten to reach it off-node (task
 cloud-init-log: ## Read cloud-init output from the node (task 7.1)
 	@$(MAKE) --no-print-directory node-exec CMD='sudo cat /var/log/cloud-init-output.log'
 
+.PHONY: forget-node-key
+forget-node-key: ## Drop the node's old SSH host key — a rebuilt node has a new identity
+	@# Deliberately NOT called from `rebuild`: a recipe line containing $$(MAKE) is run
+	@# even under `make -n`, which turned a dry run of the destroy+apply chain into a
+	@# real one. `rebuild` inlines the same ssh-keygen instead.
+	@ssh-keygen -f "$$HOME/.ssh/known_hosts" -R $(NODE_IP) >/dev/null 2>&1 || true
+	@echo "forgot the host key for $(NODE_IP)"
+
 .PHONY: pve-ssh
 pve-ssh: ## SSH to the Proxmox host as root on the hardened port
 	@ssh $(SSH_OPTS) -p $(PVE_SSH_PORT) root@$(PVE_IP)
@@ -140,18 +148,25 @@ snippet-user: ## NEEDS ROOT, run in a real terminal: create the unprivileged sni
 	@echo "    sudo ./scripts/create-snippet-user.sh"
 
 .PHONY: check-snippet-user
-check-snippet-user: ## Confirm the snippet account is unprivileged and can write over SFTP (task 4.2)
+check-snippet-user: ## Confirm the snippet account is unprivileged and its directory survives a destroy (4.2)
 	@ssh $(SSH_OPTS) -p $(PVE_SSH_PORT) -o BatchMode=yes $(SNIPPET_USER)@$(PVE_IP) \
 	  'test "$$(id -un)" = "$(SNIPPET_USER)" && test "$$(id -u)" -ne 0' \
 	  || { echo "FAIL: $(SNIPPET_USER) is unreachable or is root — run 'make snippet-user'"; exit 1; }
 	@echo "OK: $(SNIPPET_USER) is not root"
-	@# SFTP, not a shell command: this is the channel the provider actually uses.
-	@tmp=$$(mktemp) && echo probe > $$tmp && \
-	 printf 'put %s $(SNIPPET_DIR)/.probe\nrm $(SNIPPET_DIR)/.probe\n' "$$tmp" | \
-	   sftp -b - -o BatchMode=yes -P $(PVE_SSH_PORT) $(SNIPPET_USER)@$(PVE_IP) >/dev/null; \
-	 rc=$$?; rm -f $$tmp; \
-	 test $$rc -eq 0 || { echo "FAIL: cannot write $(SNIPPET_DIR) over SFTP"; exit 1; }
-	@echo "OK: $(SNIPPET_USER) can write $(SNIPPET_DIR) over SFTP"
+	@# `tee` over an ssh exec: the channel a source_raw snippet upload actually uses.
+	@# An SFTP probe passes on a path this write fails on, which is how 4.4 got through
+	@# a green check into a broken rebuild.
+	@echo probe | ssh $(SSH_OPTS) -p $(PVE_SSH_PORT) -o BatchMode=yes $(SNIPPET_USER)@$(PVE_IP) \
+	  'tee $(SNIPPET_DIR)/.probe >/dev/null && rm -f $(SNIPPET_DIR)/.probe' \
+	  || { echo "FAIL: cannot write $(SNIPPET_DIR) as $(SNIPPET_USER)"; exit 1; }
+	@echo "OK: $(SNIPPET_USER) can write $(SNIPPET_DIR) the way the provider does"
+	@# Without the sentinel, PVE rmdir's this directory when destroy removes the last
+	@# snippet, and recreates it root-owned — so the ownership above is true now and
+	@# false after the next destroy. Design D6.
+	@ssh $(SSH_OPTS) -p $(PVE_SSH_PORT) -o BatchMode=yes $(SNIPPET_USER)@$(PVE_IP) \
+	  'test -e $(SNIPPET_DIR)/.keep' \
+	  || { echo "FAIL: $(SNIPPET_DIR)/.keep is missing — the directory will not survive a destroy"; exit 1; }
+	@echo "OK: the directory survives a destroy"
 
 # ---------------------------------------------------------------- tofu --------
 

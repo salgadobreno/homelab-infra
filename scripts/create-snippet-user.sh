@@ -9,13 +9,12 @@
 # Re-runnable. Creates nothing that already exists and never removes a key it did
 # not add.
 #
-# Why this account needs a real shell: sshd spawns the sftp subsystem through the
-# user's login shell (`Subsystem sftp /usr/lib/openssh/sftp-server` in
-# /etc/ssh/sshd_config). /usr/sbin/nologin would refuse the upload. The account is
-# still password-locked, so the shell is reachable only with the key below.
+# Why this account needs a real shell: the provider writes a `source_raw` snippet by
+# piping the content through `tee` over an SSH exec, so the login shell runs. The
+# account is still password-locked, so that shell is reachable only with the key below.
 #
-# Why no sudoers entry: the provider talks SFTP, not a shell, and this configuration
-# never takes its one escalating code path. See design.md, Open Question 2.
+# Why no sudoers entry: `tee` writes as the account. Nothing in the lifecycle
+# escalates. See design.md, Open Question 2 and its correction.
 
 set -euo pipefail
 
@@ -89,9 +88,38 @@ echo "$SNIPPET_DIR is now owned by $USER_NAME"
 
 # Existing snippets were written by root and would be unwritable by the new owner,
 # which surfaces as a rebuild failing to replace a file it is meant to own.
-find "$SNIPPET_DIR" -maxdepth 1 -type f ! -user "$USER_NAME" \
+find "$SNIPPET_DIR" -maxdepth 1 -type f ! -name .keep ! -user "$USER_NAME" \
   -exec chown "$USER_NAME:$USER_NAME" {} + -print | sed 's/^/  re-owned: /'
+
+# --- the sentinel -----------------------------------------------------------------
+#
+# PVE::Storage::Plugin::free_image calls rmdir() on a volume's parent directory after
+# deleting it, to clean up empty per-VM image directories. A snippet's parent is this
+# directory, so `tofu destroy` removing the last snippet takes the directory with it —
+# and storage activation recreates it root-owned, undoing the chown above on every
+# rebuild.
+#
+# rmdir only removes an empty directory. This file keeps it non-empty. It is a
+# dot-file because PVE enumerates snippets with glob '*', which does not match them,
+# so it never appears as a phantom volume in the storage listing. Design D6.
+
+KEEP="${SNIPPET_DIR}/.keep"
+if [ ! -e "$KEEP" ]; then
+  cat > "$KEEP" <<MARKER
+Keeps this directory non-empty.
+
+PVE removes a volume's parent directory when it becomes empty, which would drop the
+ownership that lets OpenTofu upload cloud-init snippets without root. Deleting this
+file re-introduces that failure on the next rebuild.
+
+Created by scripts/create-snippet-user.sh in homelab-infra.
+MARKER
+  chmod 644 "$KEEP"
+  echo "placed $KEEP so PVE cannot rmdir the directory on destroy"
+else
+  echo "sentinel $KEEP already present"
+fi
 
 echo
 echo "done. Verify from the operator account, with the agent loaded:"
-echo "  ssh -p 4444 ${USER_NAME}@192.168.0.21 'id -un; touch ${SNIPPET_DIR}/.probe && rm ${SNIPPET_DIR}/.probe && echo writable'"
+echo "  make check-snippet-user"
