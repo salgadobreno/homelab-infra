@@ -154,3 +154,32 @@ default `prohibit-password`.
 
 **Target:** `(publickey)` alone, `PermitRootLogin no` stated explicitly, and `buzaga`
 still reaching the host by key.
+
+## First attempt at 5.1/5.1a — reverted on a false alarm
+
+The hardening applied cleanly and did exactly what it should:
+
+```
+OK: root SSH is refused
+OK: password authentication is not offered (publickey)
+FAIL: buzaga can no longer log in — revert before continuing
+```
+
+The third line was wrong, and it was my check's fault. It tried to SSH `buzaga@pve`
+*from pve*, and `buzaga`'s own public key is not in `buzaga`'s `authorized_keys` — there
+is no reason it would be. Those ten authorised keys belong to the machines the operator
+connects **from**, and none of them can be exercised from the host itself. The probe was
+failing before the change too; it was simply never run until the change had been made.
+
+So a correct hardening was reverted because a check asserted something it had no way to
+observe. The check now asserts only what is verifiable here:
+
+- root SSH is refused;
+- the offered method list is `publickey` and does not contain `password`;
+- key authentication still works end to end, proved by logging in as `tofu-snippets`,
+  whose key does live on this host;
+- and it prints, rather than claims, that whether the operator's own client machine is
+  among the authorised keys can only be checked from that machine.
+
+The lesson is the shape of the earlier SFTP mistake repeated: a check that tests a
+different thing from the one that matters is worse than no check, because it is trusted.

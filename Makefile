@@ -150,24 +150,33 @@ harden-sshd: ## NEEDS ROOT, run in a real terminal: withdraw root and password S
 	@echo "    sudo ./scripts/harden-sshd.sh"
 
 .PHONY: check-root-ssh
-check-root-ssh: ## Confirm root SSH is refused and a key login still works (5.1b, 5.2)
+check-root-ssh: ## Confirm root SSH is refused and key auth still works (5.1b, 5.2)
 	@! ssh $(SSH_OPTS) -o BatchMode=yes -o ConnectTimeout=5 -p $(PVE_SSH_PORT) \
 	     root@$(PVE_IP) 'id -un' >/dev/null 2>&1 \
 	  || { echo "FAIL: root SSH still succeeds"; exit 1; }
 	@echo "OK: root SSH is refused"
 	@# What the server *offers* matters as much as what succeeds: an advertised
-	@# 'password' method means a LAN client may still be prompted.
+	@# 'password' method means a LAN client may still be prompted. Asking as a user
+	@# that cannot exist gets the method list without authenticating as anyone.
 	@methods=$$(ssh $(SSH_OPTS) -o PreferredAuthentications=password \
 	     -o PubkeyAuthentication=no -o NumberOfPasswordPrompts=0 -o ConnectTimeout=5 \
 	     -p $(PVE_SSH_PORT) nosuchuser@$(PVE_IP) true 2>&1 \
 	     | sed -n 's/.*(\(.*\)).*/\1/p'); \
-	 echo "$$methods" | grep -q password \
-	  && { echo "FAIL: the server still offers password auth ($$methods)"; exit 1; } \
-	  || echo "OK: password authentication is not offered ($$methods)"
+	 case "$$methods" in \
+	   *password*) echo "FAIL: the server still offers password auth ($$methods)"; exit 1;; \
+	   *publickey*) echo "OK: publickey only ($$methods)";; \
+	   *) echo "FAIL: publickey is not offered ($$methods) — nobody can get in"; exit 1;; \
+	 esac
+	@# A positive control: an account whose key lives on this host proves key auth
+	@# still works end to end. The operator's own login comes from another machine
+	@# and cannot be tested from here — see the note below.
 	@ssh $(SSH_OPTS) -o BatchMode=yes -o ConnectTimeout=5 -p $(PVE_SSH_PORT) \
-	     $(PVE_SSH_USER)@$(PVE_IP) 'id -un' >/dev/null 2>&1 \
-	  && echo "OK: $(PVE_SSH_USER) still reaches the host by key" \
-	  || { echo "FAIL: $(PVE_SSH_USER) can no longer log in — revert before continuing"; exit 1; }
+	     $(SNIPPET_USER)@$(PVE_IP) 'id -un' >/dev/null 2>&1 \
+	  && echo "OK: key authentication still works ($(SNIPPET_USER) logged in)" \
+	  || { echo "FAIL: key authentication is broken — revert before continuing"; exit 1; }
+	@printf 'NOTE: %s account(s) hold authorised keys. Whether YOUR client machine is\n' \
+	  "$$(ls -1 /home/*/.ssh/authorized_keys 2>/dev/null | wc -l)"
+	@echo "      among them can only be checked from that machine, not from here."
 
 .PHONY: snippet-user
 snippet-user: ## NEEDS ROOT, run in a real terminal: create the unprivileged snippet-upload account (task 4.2)
