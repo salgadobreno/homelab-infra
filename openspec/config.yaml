@@ -90,8 +90,9 @@ context: |
   | M2 | "Every credential holds only what its job needs, and I can prove it." | `narrow-privileges` | done 2026-08-21 |
   | M3 | "I pushed to GitHub and ArgoCD served my site. I did not run kubectl." | `serve-site-from-k3s` | in progress |
   | M4 | "Docker-on-host is gone. The hit counter and its data run in the cluster." | not yet proposed | next |
-  | M5 | "Three nodes. I drained one and the app stayed up." | not yet proposed | |
-  | M6 | "I can see what the cluster is doing." — observability, if RAM allows | not yet proposed | |
+  | M5 | "The site shows its own guts, and the picture cannot go stale." | not yet proposed | |
+  | M6 | "Three nodes. I drained one and the app stayed up." | not yet proposed | |
+  | M7 | "I can see what the cluster is doing." — observability, if RAM allows | not yet proposed | |
 
   **The rebuild demo is not a rung.** `make rebuild CONFIRM=yes` destroying and recreating
   the node in ~105 seconds was the original ladder's M4 and the intended centrepiece. It
@@ -106,6 +107,42 @@ context: |
   site. M3 leaves both public hostnames serving so M4 is a cutover with something to
   compare against.
 
+  **Retiring Compose must not take the site down.** `buzaga.com.br` stays served
+  throughout — the milestone is the origin moving, not the site pausing. The cutover is
+  repointing that hostname at traefik once the cluster copy serves the same thing, and
+  stopping the Compose stack after, not before.
+
+  ### What M5 is, and why it is a rung rather than a page
+
+  The public site renders the infrastructure it is running on, in a low-fi register —
+  text and ASCII, no dashboard chrome. Nodes, workloads, what ArgoCD last synced and from
+  which revision, the path a request took to arrive. A visitor sees the machine that
+  served them.
+
+  It is the project's demo. Everything before it is legible only by reading this
+  repository; this rung is the one that shows the work to someone who will not.
+
+  **The requirement that makes it engineering rather than content: the picture is
+  generated from live state, never drawn.** `k8s/site/content/diagram.ascii` is the
+  evidence — a hand-drawn diagram already in the repository showing `microk8s`, `ansible`
+  and a host called `buserver`, none of which exist. It was accurate once. A diagram that
+  can disagree with reality eventually will, and a self-describing site that lies is worse
+  than no diagram at all.
+
+  Two questions to settle when proposing it, both real forks:
+
+  - **Where the data comes from.** A build-time snapshot rendered at sync is simple and is
+    stale between syncs. Querying the Kubernetes API from the pod at request time is
+    always current and needs a ServiceAccount with its own narrow RBAC — which is M2's
+    argument applied inside the cluster, and the better exercise.
+  - **What it must not say.** The page is public. Node addresses, storage layout, and
+    account names are exactly what this repo spent M2 narrowing, and a page that shows its
+    guts is an information-disclosure surface. Decide what is shown before building it,
+    not after.
+
+  Later this content moves into a `projects` section of the operator's personal site, so
+  it should not assume it owns the whole page.
+
   ### Numbering history — read this before trusting an old document
 
   The ladder was reordered once. `narrow-privileges` was pulled forward from rung 6 to
@@ -115,8 +152,10 @@ context: |
   reconcile is a layer rather than a slice.
 
   Archived changes under `openspec/changes/archive/` use the **original** numbering and
-  are left untouched as historical record. In those documents, M6 means secrets and M7
-  means observability. Everywhere outside the archive, this table is authoritative.
+  are left untouched as historical record. In those documents M6 means secrets — that work
+  is M2 here. M7 means observability in both schemes, and M5 means multi-node in the old
+  scheme but is the self-describing site here. Everywhere outside the archive, this table
+  is authoritative.
 
   ## Current state
 

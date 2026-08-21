@@ -67,7 +67,7 @@ variable "image_datastore" {
 #
 #   192.168.0.1       router / gateway
 #   192.168.0.21      Proxmox host (existing, not managed here)
-#   192.168.0.30-.32  k3s nodes — .30 server, .31/.32 agents at M5
+#   192.168.0.30-.32  k3s nodes — .30 server, .31/.32 agents at M6
 #   192.168.0.40-.50  reserved for MetalLB LoadBalancer addresses (M6)
 #   192.168.0.100+    DHCP pool — never allocated by this project
 

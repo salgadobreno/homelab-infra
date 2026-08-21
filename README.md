@@ -141,7 +141,7 @@ everything above the OS is reconciled by GitOps. Bootstrap is about fifteen line
 `runcmd`. If that grows past what fits on a screen, that is the signal to reconsider —
 not a reason to add Ansible pre-emptively.
 
-**One node.** Multi-node and embedded etcd arrive at M5, at which point the
+**One node.** Multi-node and embedded etcd arrive at M6, at which point the
 datastore stops being sqlite and the fsync argument behind putting disks on the NVMe
 (design D10) gets stricter, not looser.
 

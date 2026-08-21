@@ -21,7 +21,7 @@ once, which a kubeadm cluster would never do.
 
 **The datastore is sqlite, not etcd** — `/var/lib/rancher/k3s/server/db/state.db`, 11 MB
 with a 6 MB write-ahead log. This is the D10 storage argument made concrete: that WAL is
-fsync-bound, which is why node disks live on the NVMe. M5 swaps it for embedded
+fsync-bound, which is why node disks live on the NVMe. M6 swaps it for embedded
 etcd, and the requirement gets stricter, not looser.
 
 **What got deployed on top.** Seven manifests in
