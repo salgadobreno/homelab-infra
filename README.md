@@ -107,7 +107,8 @@ openspec/       Planning: config.yaml is authoritative project context
 tofu/           OpenTofu root module — flat and unmodularised on purpose
 scripts/        Toolchain bootstrap and Proxmox token creation
 Makefile        Operator console
-LEARNINGS.md    Fundamentals this build actually ran into
+LEARNINGS.md    Things this build actually ran into
+FUNDAMENTALS.md 101-level explanations of the technologies used
 ```
 
 `tofu/` stays flat until there is more than one node to abstract over. Extracting

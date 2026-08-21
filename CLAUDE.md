@@ -21,6 +21,7 @@ tofu/              OpenTofu root module — flat and unmodularised on purpose
 scripts/           bootstrap.sh (toolchain), create-proxmox-token.sh (Proxmox API token)
 Makefile           Operator console — every routine command lives here
 LEARNINGS.md       Learning log, written after the fact (see protocol in the file)
+FUNDAMENTALS.md    101-level explanations of the technologies used
 ```
 
 ## Operator console
@@ -83,6 +84,11 @@ This repo manages real hardware running a live Cloudflare tunnel.
 `LEARNINGS.md` is a log of fundamentals this project actually hit — not a syllabus and
 not a session summary. Do not append to it automatically at the end of a task. An entry
 is earned by friction: a failure, a surprising default, a decision that mattered later.
+
+`FUNDAMENTALS.md` is the layer underneath: what a technology is and why it exists,
+written to be read cold. When the operator asks for basics, write there — plainly, and
+without narrating this project's history. An explanation that requires having followed
+the session is not a fundamental. Add entries only when asked about a topic.
 
 Ask the operator which topics are worth expanding rather than deciding alone, and keep
 the `[hit]` / `[worked]` / `[open]` markers honest — `[worked]` means they could explain
