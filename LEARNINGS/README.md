@@ -62,6 +62,7 @@ able to give one, and nobody else can assert that on their behalf.
 - [201 · decide values up front](practice/201-decide-values-up-front.md) — deciding beats discovering
 - [301 · tool output is untrusted](practice/301-tool-output-is-untrusted.md) — a warning message executed itself
 - [301 · verifying recovery](practice/301-verifying-recovery.md) — prove the disruption happened first
+- [301 · rebuilt hosts change identity](practice/301-rebuilt-hosts-change-identity.md) — fresh VM, fresh SSH host keys
 
 ## Queued
 

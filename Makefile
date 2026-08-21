@@ -167,6 +167,8 @@ rebuild: ## [destructive] Timed destroy + apply + readiness (tasks 9.1-9.3)
 	@start=$$(date +%s); \
 	 $(TOFU) -chdir=$(TF_DIR) destroy -auto-approve -input=false && \
 	 $(TOFU) -chdir=$(TF_DIR) apply   -auto-approve -input=false && \
+	 echo "--- clearing the old host key ---" && \
+	 { ssh-keygen -f "$$HOME/.ssh/known_hosts" -R $(NODE_IP) >/dev/null 2>&1 || true; } && \
 	 echo "--- waiting for the node to report Ready ---" && \
 	 until ssh $(SSH_OPTS) -o BatchMode=yes $(NODE_USER)@$(NODE_IP) \
 	   'test -f /run/cloud-init-k3s-complete' 2>/dev/null; do sleep 5; done && \
