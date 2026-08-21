@@ -184,7 +184,7 @@ tf-state: ## What Terraform currently believes exists
 # ---------------------------------------------------------------- checks ------
 
 .PHONY: check
-check: check-secrets check-drift ## Run all safety checks
+check: check-secrets check-scope check-drift ## Run all safety checks
 
 .PHONY: check-secrets
 check-secrets: ## Confirm no API token or key material is tracked by git (task 8.5)
@@ -193,6 +193,10 @@ check-secrets: ## Confirm no API token or key material is tracked by git (task 8
 	  echo "FAIL: token value found in tracked files"; exit 1; fi
 	@git ls-files | grep -E '(\.tfstate|\.tfvars$$|kubeconfig|id_[re]d?sa$$)' && \
 	  { echo "FAIL: sensitive file is tracked"; exit 1; } || echo "OK: no secrets tracked"
+
+.PHONY: check-scope
+check-scope: ## Prove the provisioning token is refused everything outside its job (task 3.2)
+	@./scripts/check-token-scope.sh
 
 .PHONY: check-drift
 check-drift: ## Confirm reality still matches configuration (task 8.1)

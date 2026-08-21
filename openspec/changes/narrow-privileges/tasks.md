@@ -19,9 +19,9 @@ the internet.
 
 ## 3. Prove the scope is real
 
-- [ ] 3.1 Run `make rebuild CONFIRM=yes` on the scoped token; it must complete unattended — `credential-scoping` "Provisioning succeeds with the scoped credential"
-- [ ] 3.2 Attempt an action outside provisioning with the scoped token — creating a host user, altering storage configuration — and record the refusal — `credential-scoping` "The scoped credential cannot exceed its purpose"
-- [ ] 3.3 Delete the `root@pam!tofu` token and confirm provisioning still works, so the old credential is gone rather than merely unused
+- [x] 3.1 Run `make rebuild CONFIRM=yes` on the scoped token; it must complete unattended — `credential-scoping` "Provisioning succeeds with the scoped credential"
+- [x] 3.2 Attempt an action outside provisioning with the scoped token — creating a host user, altering storage configuration — and record the refusal — `credential-scoping` "The scoped credential cannot exceed its purpose"
+- [x] 3.3 Delete the `root@pam!tofu` token and confirm provisioning still works, so the old credential is gone rather than merely unused
 
 ## 4. A non-root snippet upload account
 

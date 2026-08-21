@@ -76,6 +76,15 @@ snippets into a root-owned directory.
 
 **Target:** refused, with provisioning still succeeding unattended.
 
+## Outcome, sections 1-4a
+
+Section 1 is closed. `root@pam!tofu` was deleted on 2026-08-21 and returns 401; `root@pam`
+now holds no API tokens at all. OpenTofu authenticates as `terraform@pve` with privilege
+separation on, and `make check-scope` asserts all six writes above are refused, plus
+guest command execution and self-granting privileges.
+
+Sections 2, 3 and 4 remain open — they are groups 4 to 6.
+
 ## How to re-measure
 
 Task 7.1 turns these four checks into `make check-privileges`, so the "after" state is

@@ -29,6 +29,9 @@ TFVARS="$REPO_ROOT/tofu/terraform.tfvars"
 # Derived from the operations performed, then confirmed by an unattended rebuild:
 #
 #   Sys.Audit                   the nodes data source
+#   Sys.AccessNetwork           fetching the cloud image: the node queries the URL for
+#                               metadata before downloading, and that is gated separately
+#                               from storage privileges
 #   Datastore.Audit             reading storage before writing to it
 #   Datastore.AllocateTemplate  downloading the cloud image (content type "import")
 #   Datastore.AllocateSpace     the VM disk and the cloud-init drive
@@ -46,7 +49,7 @@ TFVARS="$REPO_ROOT/tofu/terraform.tfvars"
 #   VM.GuestAgent.FileWrite, VM.GuestAgent.Unrestricted  running commands in guests
 #   VM.Backup, VM.Clone, VM.Snapshot
 #   User.Modify, Permissions.Modify, Realm.*, Group.*
-PRIVS="Sys.Audit,Datastore.Audit,Datastore.AllocateTemplate,Datastore.AllocateSpace,SDN.Use,VM.Allocate,VM.Audit,VM.Config.CDROM,VM.Config.CPU,VM.Config.Cloudinit,VM.Config.Disk,VM.Config.HWType,VM.Config.Memory,VM.Config.Network,VM.Config.Options,VM.PowerMgmt,VM.GuestAgent.Audit"
+PRIVS="Sys.Audit,Sys.AccessNetwork,Datastore.Audit,Datastore.AllocateTemplate,Datastore.AllocateSpace,SDN.Use,VM.Allocate,VM.Audit,VM.Config.CDROM,VM.Config.CPU,VM.Config.Cloudinit,VM.Config.Disk,VM.Config.HWType,VM.Config.Memory,VM.Config.Network,VM.Config.Options,VM.PowerMgmt,VM.GuestAgent.Audit"
 
 die() { echo "error: $*" >&2; exit 1; }
 

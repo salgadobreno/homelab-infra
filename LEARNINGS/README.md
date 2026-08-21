@@ -55,6 +55,7 @@ able to give one, and nobody else can assert that on their behalf.
 - [201 · datastore content types](proxmox/201-datastore-content-types.md) — storage advertises what it will hold
 - [301 · the provider uses two channels](proxmox/301-provider-uses-two-channels.md) — API for most things, SSH for snippets
 - [301 · ACL paths override, not add](proxmox/301-acl-paths-override-they-do-not-add.md) — a deeper grant replaces the inherited one
+- [301 · under-scoping fails mid-apply](proxmox/301-under-scoping-fails-mid-apply.md) — after the destroy already happened
 
 ### k3s
 - [201 · one binary, five opinions](k3s/201-one-binary-five-opinions.md) — what k3s bundles, and what is Kubernetes proper
