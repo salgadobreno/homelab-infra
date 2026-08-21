@@ -43,7 +43,7 @@ the internet.
 
 ## 6. The tunnel
 
-- [ ] 6.0 Rotate the tunnel token in the Cloudflare dashboard — it is world-readable on the host and has been printed into a session transcript, so hardening its storage without rotating protects nothing
+- [ ] 6.0 Rotate the tunnel token in the Cloudflare dashboard — **deliberately deferred** by the operator, 2026-08-21. The plumbing is hardened around the existing value; see design "Rotation deferred". Rotating later needs no rework: drop a new value into `/etc/cloudflared/token` and restart
 - [ ] 6.1 Create a dedicated unprivileged `cloudflared` account
 - [ ] 6.2 Move the tunnel token into a mode-600 file read via `--token-file`, and remove it from `ExecStart` and from the world-readable unit (design D3 **revised** — `--token-file` keeps it out of the environment as well, which an `EnvironmentFile` does not)
 - [ ] 6.3 Run the service as that account; confirm the tunnel reconnects and the site still serves

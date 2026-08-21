@@ -257,3 +257,26 @@ be applied to a token that has been printed.
 The rotation is a Cloudflare dashboard action, so it is the operator's. The hardening
 script takes the new token rather than reusing what is on the host, so rotating is the
 default path rather than an extra step.
+
+### Rotation deferred — operator decision, 2026-08-21
+
+The operator chose to harden the plumbing without rotating first. Recorded rather than
+argued, with the residual risk stated plainly.
+
+**What the hardening still buys.** The token stops being readable from `cmdline` and from
+a mode-644 unit file, and never enters an environment. Those are the routes a *future*
+local account would use — the k3s work adds accounts over time, and the unit file
+survives reboots. The exposure surface closes going forward.
+
+**What it does not buy.** Anyone who has already read the value still holds a working
+credential. On this host that set is small: `buzaga` is the only human account, `ceph`
+is `nologin`, and the two service accounts created in this change have no interactive
+access. Beyond the host, it is whoever can read the session transcript.
+
+**Why this is a reasonable place to accept it.** The tunnel fronts a placeholder site
+with no data behind it. A stolen tunnel token lets someone publish to that hostname; it
+does not grant access to the host or the cluster.
+
+**Why it stays on the list.** Rotation needs no rework once the plumbing is in place:
+write the new value into `/etc/cloudflared/token` and restart. It is a two-minute job at
+any later point, which is exactly why deferring it is cheap rather than a one-way door.
