@@ -25,6 +25,17 @@ package_update: true
 packages:
   - qemu-guest-agent
 
+write_files:
+  # k3s applies this directory at startup, so dropping the file here before k3s is
+  # installed means the reconciler comes up with the cluster rather than after it.
+  # The body lives in its own file — this template stays readable, and the manifest
+  # stays valid YAML that an editor can check.
+  - path: /var/lib/rancher/k3s/server/manifests/argocd.yaml
+    owner: "root:root"
+    permissions: "0600"
+    content: |
+      ${indent(6, argocd_manifest)}
+
 runcmd:
   # Guest agent first: graceful shutdown and Proxmox UI integration. Nothing
   # depends on it for addressing — the address is static (design D7).

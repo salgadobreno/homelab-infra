@@ -127,3 +127,81 @@ kubectl top node                               # what the cluster is using
 curl -sI https://buzaga.com.br/                # the existing public copy
 curl -s  http://127.0.0.1:30000/api/hits       # the hit counter's state
 ```
+
+## Group 2: the reconciler, measured
+
+### Open Question 2 — answered: helm-controller installs the chart cleanly
+
+No pinning workaround needed, no timeout raise needed in practice, on a fresh rebuild:
+
+```
+helm-install-argocd   started 21:07:21   completed 21:08:03   (42s)
+```
+
+For comparison, the same node's bundled charts: traefik-crd 30s, traefik 43s. ArgoCD's
+chart is much larger and installed in the same time, so chart size was not the risk it
+looked like. The `timeout: 10m` in the manifest stays — it costs nothing and the default
+300s leaves no margin on a node that is also installing traefik at the same moment.
+
+Rebuild time moved from **98s to 106s**. The extra 8s is the manifest being written; the
+chart install happens after cloud-init's readiness marker, so it does not block the
+rebuild — the node reports Ready while ArgoCD is still coming up, and is fully settled
+about a minute later.
+
+### Open Question 1 — answered: ArgoCD costs about 350 MiB at the node level
+
+```
+node before   822Mi (13%)
+node after   1176Mi (19%)          → ~354Mi
+
+argocd-server              38Mi
+argocd-application-controller  23Mi
+argocd-repo-server         21Mi
+argocd-redis                5Mi
+                        ------
+                           87Mi   at the pod level, idle
+```
+
+The two numbers differ because the node figure includes the container images' page cache
+and the kubelet's own accounting; the pod figure is what the workloads are using. Both
+are worth having: 87Mi is what ArgoCD does, 354Mi is what installing it cost the node.
+
+Against 4.7 GiB of headroom, no further trimming is needed. **D2's trim is not the
+reason it fits** — it is roughly 100 MiB of savings on a node with gigabytes spare. The
+honest justification for the trim is that dex, notifications and applicationset are
+components with no purpose here, not that the node could not hold them.
+
+### The trim needed a correction the chart's values did not advertise
+
+`applicationSet.enabled: false` does nothing in chart 10.3.3. The component's Deployment
+template has no `enabled` guard at all — the value is accepted, ignored, and the
+controller runs anyway. Reading the chart's templates rather than assuming the convention
+found it before the rebuild rather than after:
+
+```
+$ grep -rn 'if .Values.applicationSet' templates/    # no Deployment guard
+$ grep -n replicas templates/argocd-applicationset/deployment.yaml
+22:  replicas: {{ .Values.applicationSet.replicas }}
+```
+
+So it is scaled to zero instead, and the result is visible:
+
+```
+argocd-applicationset-controller   0/0
+```
+
+`dex.enabled` and `notifications.enabled` are real guards — those two components have no
+Deployment at all now.
+
+### Requests are declared, and are deliberately above idle
+
+The chart declares no resource requests for any component. The node now commits:
+
+```
+cpu     425m (10%)     memory  716Mi requests / 2090Mi limits
+```
+
+against 87Mi of actual idle usage. That gap is intentional — requests should cover a
+repo-server cloning and rendering manifests, not an idle controller — but it is a gap,
+and it is recorded rather than left for someone to discover as "why is 716Mi reserved for
+something using 87".

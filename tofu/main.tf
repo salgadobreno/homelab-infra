@@ -92,6 +92,13 @@ resource "proxmox_virtual_environment_file" "cloud_init" {
       k3s_version    = var.k3s_version
       node_address   = var.k3s_server_address
 
+      # The ArgoCD manifest is rendered separately and carried in as a string, so
+      # cloud-init stays short enough to read at a glance (its own header asks for
+      # that) while the manifest stays a real YAML file rather than an escaped blob.
+      argocd_manifest = templatefile("${path.module}/cloud-init/argocd.yaml.tftpl", {
+        argocd_chart_version = var.argocd_chart_version
+      })
+
       # Precomputed here rather than looped inside the template, so the template
       # stays readable YAML and the flag ordering is deterministic.
       # Leading space inside each element, joined with "": an empty list must render

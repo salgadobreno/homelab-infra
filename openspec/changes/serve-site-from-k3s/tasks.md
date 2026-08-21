@@ -12,11 +12,11 @@ plumbing because it is the only step that touches the internet.
 
 ## 2. The reconciler
 
-- [ ] 2.1 Add the ArgoCD `HelmChart` manifest to cloud-init, written into `/var/lib/rancher/k3s/server/manifests/` (design D1), with the component trim from D2
-- [ ] 2.2 Rebuild, and confirm ArgoCD comes up unattended — `gitops` "A rebuilt cluster reconciles without operator steps"
-- [ ] 2.3 Answer Open Question 2: whether helm-controller installs the chart cleanly, or needs a pinned version and a raised timeout. Record what it did
-- [ ] 2.4 Answer Open Question 1: measure what ArgoCD consumes once settled, against the 1.2 baseline. Trim further if the headroom is gone
-- [ ] 2.5 Add `make argocd` for access — port-forward and the admin credential — so reaching the UI is a command rather than a recalled incantation
+- [x] 2.1 Add the ArgoCD `HelmChart` manifest to cloud-init, written into `/var/lib/rancher/k3s/server/manifests/` (design D1), with the component trim from D2
+- [x] 2.2 Rebuild, and confirm ArgoCD comes up unattended — `gitops` "A rebuilt cluster reconciles without operator steps"
+- [x] 2.3 Answer Open Question 2: whether helm-controller installs the chart cleanly, or needs a pinned version and a raised timeout. Record what it did
+- [x] 2.4 Answer Open Question 1: measure what ArgoCD consumes once settled, against the 1.2 baseline. Trim further if the headroom is gone
+- [x] 2.5 Add `make argocd` for access — port-forward and the admin credential — so reaching the UI is a command rather than a recalled incantation
 
 ## 3. The site, declared
 

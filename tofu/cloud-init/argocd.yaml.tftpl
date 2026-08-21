@@ -1,0 +1,71 @@
+# ArgoCD, installed by k3s itself.
+#
+# k3s applies whatever it finds in /var/lib/rancher/k3s/server/manifests/ at startup,
+# and its bundled helm-controller turns a HelmChart into an installed release. This is
+# the same mechanism k3s uses for traefik on this node — see the helm-install-traefik
+# job that runs on every boot — so the reconciler is part of node bootstrap rather than
+# something applied afterwards (design D1).
+#
+# Consequence worth stating: changing ArgoCD's own configuration means a rebuild, not a
+# push. The thing that applies changes is not changed by the thing it applies.
+apiVersion: helm.cattle.io/v1
+kind: HelmChart
+metadata:
+  name: argocd
+  namespace: kube-system
+spec:
+  repo: https://argoproj.github.io/argo-helm
+  chart: argo-cd
+  # Pinned. An unpinned chart makes a rebuild a different cluster each time, which is
+  # the opposite of what rebuilding is for.
+  version: "${argocd_chart_version}"
+  targetNamespace: argocd
+  createNamespace: true
+
+  # The bundled traefik charts install in 30-43s on this node. ArgoCD's is larger, so
+  # the default 300s is raised rather than discovered to be too short during a rebuild.
+  timeout: 10m
+
+  valuesContent: |-
+    # --- trimmed for a single 6 GiB node (design D2) ---
+
+    # External identity, when there is one operator and one browser.
+    dex:
+      enabled: false
+
+    # There is nothing to notify.
+    notifications:
+      enabled: false
+
+    # No enabled flag exists for this component in chart 10.3.3 — the Deployment has no
+    # guard, so `applicationSet.enabled: false` is accepted and silently ignored.
+    # replicas is honoured, so scale it to zero and leave the Deployment object behind.
+    applicationSet:
+      replicas: 0
+
+    configs:
+      params:
+        # TLS terminates at Cloudflare's edge and the hop from the tunnel to traefik
+        # never leaves the LAN, so argocd-server serves plain HTTP and does not
+        # redirect. Without this it answers 307 to everything on :80.
+        server.insecure: true
+
+    # The chart declares no resource requests at all. On this node the bundled addons
+    # already report six times more usage than they request, and the scheduler cannot
+    # see what it is not told — so every component gets a floor and a ceiling.
+    controller:
+      resources:
+        requests: {cpu: 100m, memory: 256Mi}
+        limits: {memory: 1Gi}
+    repoServer:
+      resources:
+        requests: {cpu: 50m, memory: 128Mi}
+        limits: {memory: 512Mi}
+    server:
+      resources:
+        requests: {cpu: 50m, memory: 128Mi}
+        limits: {memory: 256Mi}
+    redis:
+      resources:
+        requests: {cpu: 25m, memory: 64Mi}
+        limits: {memory: 128Mi}

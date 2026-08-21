@@ -188,6 +188,17 @@ variable "proxmox_ssh_username" {
   default     = "tofu-snippets"
 }
 
+variable "argocd_chart_version" {
+  description = "argo-cd Helm chart version installed by k3s at boot. Pinned so a rebuild produces the same cluster; chart 10.3.3 is ArgoCD v3.5.1."
+  type        = string
+  default     = "10.3.3"
+
+  validation {
+    condition     = can(regex("^[0-9]+\\.[0-9]+\\.[0-9]+$", var.argocd_chart_version))
+    error_message = "Pin an exact chart version, e.g. 10.3.3 — a range or empty value makes each rebuild a different cluster."
+  }
+}
+
 variable "k3s_disable" {
   description = <<-EOT
     k3s bundled components to disable at install time, e.g. ["servicelb", "traefik"].

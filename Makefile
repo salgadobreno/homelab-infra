@@ -127,6 +127,31 @@ kubeconfig: ## Fetch the node's kubeconfig, rewritten to reach it off-node (task
 	@echo "wrote $(KUBECONFIG_PATH) -> https://$(NODE_IP):6443"
 	@echo "use with:  export KUBECONFIG=$(KUBECONFIG_PATH)"
 
+.PHONY: argocd
+argocd: ## Port-forward the ArgoCD UI to localhost:8080 (task 2.5)
+	@echo "ArgoCD UI:  http://localhost:8080     user: admin"
+	@echo "password:   make argocd-password"
+	@echo "ctrl-c to stop."
+	@KUBECONFIG=$(KUBECONFIG_PATH) kubectl port-forward -n argocd svc/argocd-server 8080:80
+
+.PHONY: argocd-password
+argocd-password: ## Print the ArgoCD admin password (prints a secret — your terminal only)
+	@KUBECONFIG=$(KUBECONFIG_PATH) kubectl get secret -n argocd argocd-initial-admin-secret \
+	  -o jsonpath='{.data.password}' 2>/dev/null | base64 -d && echo \
+	  || { echo "no initial admin secret — it is deleted after the first password change"; exit 1; }
+
+.PHONY: argocd-status
+argocd-status: ## What ArgoCD is running and what it has been asked to reconcile
+	@KUBECONFIG=$(KUBECONFIG_PATH) kubectl get pods -n argocd \
+	  -o custom-columns='POD:.metadata.name,READY:.status.containerStatuses[*].ready,STATUS:.status.phase' --no-headers
+	@echo
+	@# kubectl exits 0 with empty output when nothing matches, so an empty result has
+	@# to be handled rather than relying on the exit code.
+	@apps=$$(KUBECONFIG=$(KUBECONFIG_PATH) kubectl get applications.argoproj.io -n argocd \
+	  -o custom-columns='APP:.metadata.name,SYNC:.status.sync.status,HEALTH:.status.health.status,REVISION:.status.sync.revision' \
+	  --no-headers 2>/dev/null); \
+	 if [ -n "$$apps" ]; then echo "$$apps"; else echo "(no Applications declared yet — group 4)"; fi
+
 .PHONY: cloud-init-log
 cloud-init-log: ## Read cloud-init output from the node (task 7.1)
 	@$(MAKE) --no-print-directory node-exec CMD='sudo cat /var/log/cloud-init-output.log'
