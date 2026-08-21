@@ -58,6 +58,9 @@ able to give one, and nobody else can assert that on their behalf.
 - [301 · under-scoping fails mid-apply](proxmox/301-under-scoping-fails-mid-apply.md) — after the destroy already happened
 - [301 · the role you guess is not the role you need](proxmox/301-the-role-you-guess-is-not-the-role-you-need.md) — three privileges, three different ways of being invisible
 
+### argocd
+- [101 · basics](argocd/101-basics.md) — pull instead of push, and what Git being the record actually buys
+
 ### k3s
 - [201 · one binary, five opinions](k3s/201-one-binary-five-opinions.md) — what k3s bundles, and what is Kubernetes proper
 
