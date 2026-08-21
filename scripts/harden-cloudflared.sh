@@ -4,7 +4,10 @@
 # file instead of the command line. Operator-run: it creates an account and rewrites a
 # systemd unit.
 #
-#   TUNNEL_TOKEN='<new token from the Cloudflare dashboard>' sudo -E ./scripts/harden-cloudflared.sh
+#   sudo TUNNEL_TOKEN='<new token from the Cloudflare dashboard>' ./scripts/harden-cloudflared.sh
+#
+# The assignment goes after `sudo`, not before it: sudo resets the environment, so a
+# variable set for the calling shell never reaches this script.
 #
 # Rotate the token first. The current one is world-readable on this host — it is in
 # `/proc/<pid>/cmdline` and in a mode-644 unit file — and it has been printed into a
@@ -12,13 +15,25 @@
 # theatre. Zero Trust dashboard -> Networks -> Tunnels -> the tunnel -> Configure ->
 # refresh the token.
 #
-# Reusing the existing token is possible for a dry test, but it is not the default:
+# Reusing the existing token is possible, but it is not the default:
 #
-#   REUSE_EXISTING_TOKEN=yes sudo ./scripts/harden-cloudflared.sh
+#   sudo ./scripts/harden-cloudflared.sh --reuse-existing-token
 #
 # Re-runnable. Backs up the unit, and restores it if the tunnel does not come back.
 
 set -euo pipefail
+
+# A flag rather than only an environment variable, because sudo strips the environment
+# and the failure is silent: the variable simply is not there, and the script reports
+# that no token was supplied.
+REUSE="${REUSE_EXISTING_TOKEN:-}"
+for arg in "$@"; do
+  case "$arg" in
+    --reuse-existing-token) REUSE=yes ;;
+    -h|--help) sed -n '2,/^set -euo/p' "$0" | sed 's/^# \{0,1\}//; $d'; exit 0 ;;
+    *) echo "error: unknown argument '$arg'" >&2; exit 1 ;;
+  esac
+done
 
 UNIT="/etc/systemd/system/cloudflared.service"
 SERVICE_USER="${SERVICE_USER:-cloudflared}"
@@ -39,7 +54,7 @@ fi
 if [ -n "${TUNNEL_TOKEN:-}" ]; then
   TOKEN="$TUNNEL_TOKEN"
   echo "using the token supplied in the environment"
-elif [ "${REUSE_EXISTING_TOKEN:-}" = "yes" ]; then
+elif [ "$REUSE" = "yes" ]; then
   TOKEN="$(grep -oP '(?<=--token )\S+' "$UNIT" || true)"
   [ -n "$TOKEN" ] || { echo "error: no --token found in $UNIT to reuse" >&2; exit 1; }
   echo "WARNING: reusing the existing token. It is already readable by every local"
@@ -50,11 +65,14 @@ error: no token supplied.
 
   Rotate the tunnel token in the Cloudflare Zero Trust dashboard, then:
 
-    TUNNEL_TOKEN='<new token>' sudo -E ./scripts/harden-cloudflared.sh
+    sudo TUNNEL_TOKEN='<new token>' ./scripts/harden-cloudflared.sh
 
   To harden the plumbing without rotating first (the token stays compromised):
 
-    REUSE_EXISTING_TOKEN=yes sudo ./scripts/harden-cloudflared.sh
+    sudo ./scripts/harden-cloudflared.sh --reuse-existing-token
+
+  Note where the assignment sits: `sudo VAR=value ./script`, not `VAR=value sudo`.
+  sudo resets the environment, so the second form loses the variable silently.
 USAGE
   exit 1
 fi

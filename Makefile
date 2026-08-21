@@ -167,7 +167,11 @@ harden-tunnel: ## NEEDS ROOT, run in a real terminal: run the tunnel unprivilege
 	@echo "user and has been printed into a transcript."
 	@echo "  Zero Trust -> Networks -> Tunnels -> your tunnel -> Configure -> refresh token"
 	@echo
-	@echo "    TUNNEL_TOKEN='<new token>' sudo -E ./scripts/harden-cloudflared.sh"
+	@echo "    sudo TUNNEL_TOKEN='<new token>' ./scripts/harden-cloudflared.sh"
+	@echo
+	@echo "Or, keeping the current token (it stays readable by anyone who has seen it):"
+	@echo
+	@echo "    sudo ./scripts/harden-cloudflared.sh --reuse-existing-token"
 
 .PHONY: check-tunnel
 check-tunnel: ## Confirm the tunnel holds no readable credential and is not root (6.4, 6.5)
