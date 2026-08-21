@@ -64,9 +64,9 @@
 
 ## 9. Make it reproducible
 
-- [ ] 9.1 Run `tofu destroy` and confirm the VM and its disk are gone from Proxmox
-- [ ] 9.2 Run `tofu apply` again and confirm a `Ready` cluster returns with zero manual steps — `vm-provisioning` "Rebuild after teardown" and `k3s-cluster` "Cluster is rebuilt from scratch"
-- [ ] 9.2a Confirm the rebuilt node came back on `192.168.0.30` and that the pre-existing kubeconfig still names that address — then confirm `make kubeconfig` restores access in one command. k3s mints a fresh CA on install, so the old client certificate fails TLS: what survives a rebuild is the address, not the credentials — `vm-provisioning` "Address survives destroy and recreate", `k3s-cluster` "Kubeconfig address survives a rebuild"
+- [x] 9.1 Run `tofu destroy` and confirm the VM and its disk are gone from Proxmox
+- [x] 9.2 Run `tofu apply` again and confirm a `Ready` cluster returns with zero manual steps — `vm-provisioning` "Rebuild after teardown" and `k3s-cluster` "Cluster is rebuilt from scratch"
+- [x] 9.2a Confirm the rebuilt node came back on `192.168.0.30` and that the pre-existing kubeconfig still names that address — then confirm `make kubeconfig` restores access in one command. k3s mints a fresh CA on install, so the old client certificate fails TLS: what survives a rebuild is the address, not the credentials — `vm-provisioning` "Address survives destroy and recreate", `k3s-cluster` "Kubeconfig address survives a rebuild"
 - [ ] 9.3 Time that rebuild and record the number in the README — it is the milestone-4 demo, and it is worth having early
 - [ ] 9.4 Write the README: architecture sketch, how to apply, and why remote state and a scoped API role were deliberately deferred (design D4, D8)
 - [ ] 9.5 Push to GitHub — ArgoCD needs the repository reachable in the next milestone but two
