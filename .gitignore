@@ -9,6 +9,7 @@ crash.*.log
 
 # Variable files carrying real values (commit only *.example)
 terraform.tfvars
+terraform.tfvars.bak
 *.auto.tfvars
 !*.tfvars.example
 

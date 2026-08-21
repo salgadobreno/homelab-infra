@@ -11,11 +11,11 @@ the internet.
 
 ## 2. A scoped Proxmox role
 
-- [ ] 2.1 Derive the privileges `bpg/proxmox` actually exercises for this configuration (design Open Question 1) — start from VM create/destroy, disk allocation on `local-lvm`, and file upload to `local`
-- [ ] 2.2 Create a custom role holding exactly those privileges, named so its purpose is obvious
-- [ ] 2.3 Create a `terraform@pve` user, assign the role at the narrowest workable path, and issue a token with **privilege separation on** (design D2)
-- [ ] 2.4 Extend `scripts/create-proxmox-token.sh` to create the scoped user and role rather than a `root@pam` token, keeping it re-runnable
-- [ ] 2.5 Swap `terraform.tfvars` to the new token and confirm `tofu plan` authenticates
+- [x] 2.1 Derive the privileges `bpg/proxmox` actually exercises for this configuration (design Open Question 1) — start from VM create/destroy, disk allocation on `local-lvm`, and file upload to `local`
+- [x] 2.2 Create a custom role holding exactly those privileges, named so its purpose is obvious
+- [x] 2.3 Create a `terraform@pve` user, assign the role at the narrowest workable path, and issue a token with **privilege separation on** (design D2)
+- [x] 2.4 Extend `scripts/create-proxmox-token.sh` to create the scoped user and role rather than a `root@pam` token, keeping it re-runnable
+- [x] 2.5 Swap `terraform.tfvars` to the new token and confirm `tofu plan` authenticates
 
 ## 3. Prove the scope is real
 

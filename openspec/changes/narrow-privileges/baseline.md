@@ -14,15 +14,25 @@ token id: tofu
 privsep:  0          # token inherits the full privileges of root@pam
 ```
 
-Demonstrated rather than inferred — the provisioning token can enumerate host accounts,
-which provisioning never needs to do:
+**Correction, 2026-08-21.** This section originally cited `GET /access/users -> 200` as
+evidence of over-privilege. That was a poor test: Proxmox permits that read broadly, and
+the *scoped* token returns 200 for it too (seeing only `root@pam` and itself). A read
+that everyone is allowed to make proves nothing about privilege.
+
+The meaningful evidence is what the credential can **write**. With the root token every
+one of these succeeds; the target is that every one is refused:
 
 ```
-GET /api2/json/access/users  ->  http 200
+POST   /access/users                      create a host account
+POST   /access/roles                      define a new role
+PUT    /access/password                   change any user's password
+DELETE /access/users/root@pam/token/tofu  delete the administrator's own credential
+DELETE /storage/local                     remove a datastore
+POST   /storage                           create a datastore
 ```
 
-**Target:** `terraform@pve` with a custom role, privilege separation on, and this same
-request returning 403.
+**Target:** `terraform@pve` with a custom role, privilege separation on, and all six
+refused with 403.
 
 ## 2. cloudflared — running as root
 
