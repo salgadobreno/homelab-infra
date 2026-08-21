@@ -401,7 +401,13 @@ check-ip: ## Confirm the node address is free before claiming it (task 6.1a)
 .PHONY: progress
 progress: ## Task completion for the active OpenSpec change
 	@f=openspec/changes/$(CHANGE)/tasks.md; \
-	echo "$(CHANGE): $$(grep -c '^- \[x\]' $$f)/$$(grep -c '^- \[' $$f) tasks"
+	if [ -z "$(CHANGE)" ]; then \
+	  echo "no active change — last archived: $$(ls -1 openspec/changes/archive 2>/dev/null | tail -1)"; \
+	elif [ ! -f "$$f" ]; then \
+	  echo "$(CHANGE): no tasks.md at $$f"; exit 1; \
+	else \
+	  echo "$(CHANGE): $$(grep -c '^- \[x\]' $$f)/$$(grep -c '^- \[' $$f) tasks"; \
+	fi
 
 .PHONY: todo
 todo: ## Next few unfinished tasks

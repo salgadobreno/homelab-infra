@@ -118,7 +118,10 @@ is provisioned entirely from `tofu/`, and `make rebuild CONFIRM=yes` destroys an
 recreates it unattended in 433 seconds. `kubectl` reaches it from the host with TLS
 verified. The permanent specs live in `openspec/specs/`.
 
-`narrow-privileges` is complete. OpenTofu provisions as `terraform@pve!tofu` with
+Milestone 2 is complete and archived as `2026-08-21-narrow-privileges`; the
+`credential-scoping` spec lives in `openspec/specs/`. There is no active change.
+
+OpenTofu provisions as `terraform@pve!tofu` with
 privilege separation on and a nineteen-privilege custom role; cloud-init snippets upload
 as the unprivileged `tofu-snippets`; root SSH is refused and root holds no authorised
 keys; the tunnel runs as `cloudflared` with its token in a mode-600 file rather than in
