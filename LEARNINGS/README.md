@@ -15,9 +15,9 @@ Folders are subjects. The number prefix is depth:
 So `terraform/301-one-byte-replaced-the-cluster.md` tells you the subject, the depth,
 and roughly what happened before you open it.
 
-**Gaps are meant to be visible.** There is no `terraform/101-*` yet, which says the
-basics of Terraform were never written down — the practice came first. That is worth
-seeing in the tree rather than discovering later.
+**Gaps are meant to be visible.** A subject with three `301` files and no `101` says
+the sharp edges were met before the basics were written down. That is worth seeing in
+the tree rather than discovering later.
 
 ## How entries are written
 
@@ -45,6 +45,7 @@ able to give one, and nobody else can assert that on their behalf.
 - [201 · instance identity](cloud-init/201-instance-identity.md) — why a reboot and a rebuild are different tests
 
 ### terraform
+- [101 · basics](terraform/101-basics.md) — resources, the plan/apply loop, state, and why replacement happens
 - [201 · dependency graph](terraform/201-dependency-graph.md) — ordering is inferred from references, not declared
 - [201 · state internals](terraform/201-state-internals.md) — serial, lineage, and why state is a liability
 - [301 · stale plans](terraform/301-stale-plans.md) — a plan is a promise about a known world
