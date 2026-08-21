@@ -58,16 +58,29 @@ rather than in shell history, so the same instruments are available to everyone.
 | `make cluster` | k3s and cloud-init state, read from the node |
 | `make rebuild CONFIRM=yes` | timed destroy and recreate |
 
-## Rebuild time: 433 seconds
+## Rebuild time: 105 seconds, and why the number moves
 
-A full `destroy` → `apply` → node reporting Ready takes **7 minutes 13 seconds** from a
-running cluster back to a running cluster, with no manual steps.
+A full `destroy` → `apply` → node reporting Ready, with no manual steps:
 
-Only **45 seconds** of that is boot-to-Ready — measured from the node's own boot clock
-to the readiness marker. The rest is teardown, VM creation and disk import. Worth
-knowing which number is which before quoting either.
+| Step | Time |
+|---|---|
+| cloud-init snippet upload | 1s |
+| Ubuntu image re-download (596 MB) | 30s |
+| VM creation | 46s |
+| boot → k3s `Ready` | 47s |
+| **total** | **105s** |
 
-That measurement is only trustworthy because the readiness gate was fixed first. It
+An earlier run of the same command took 433s. Nothing changed between them except
+network throughput on that 596 MB download, which `tofu destroy` removes and `apply`
+fetches again. **The rebuild time is dominated by a variable neither the configuration
+nor the hardware controls**, so quote it as a range, or quote the part that does not
+move.
+
+The stable figure is **boot to a node reporting `Ready`: 45-47 seconds** across every
+rebuild measured. That is the one worth citing, because it measures this project's
+work rather than an Ubuntu mirror's throughput.
+
+Both numbers are only trustworthy because the readiness gate was fixed first. It
 originally ran `kubectl wait --for=condition=Ready node --all` before the node object
 existed; `wait` does not block for a resource to appear, so it failed instantly and
 cloud-init wrote the completion marker regardless. See

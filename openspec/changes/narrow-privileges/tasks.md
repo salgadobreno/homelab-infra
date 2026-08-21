@@ -7,7 +7,7 @@ the internet.
 ## 1. Establish the baseline
 
 - [x] 1.1 Record today's privilege state as evidence: token user and privsep flag, `cloudflared` owning user, whether `/proc/<pid>/cmdline` leaks the tunnel token, and whether root SSH is accepted
-- [ ] 1.2 Confirm `make rebuild CONFIRM=yes` passes before anything is narrowed — this is the acceptance test for every step that follows, and it must be known-good first
+- [x] 1.2 Confirm `make rebuild CONFIRM=yes` passes before anything is narrowed — this is the acceptance test for every step that follows, and it must be known-good first
 
 ## 2. A scoped Proxmox role
 
