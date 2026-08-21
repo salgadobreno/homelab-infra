@@ -202,3 +202,24 @@ Provisioning is unaffected — `make rebuild CONFIRM=yes` → **REBUILD COMPLETE
 unattended, with root login refused throughout.
 
 **Target for 5.4:** the keys themselves gone, not merely refused.
+
+## 3 (expanded). The tunnel — a third exposure the baseline missed
+
+Recorded at the start of group 6. The baseline named `/proc/<pid>/cmdline`; there are
+three routes, not one:
+
+| Route | Readable by | Needs the process running |
+|---|---|---|
+| `/proc/<pid>/cmdline` | every local user | yes |
+| `/etc/systemd/system/cloudflared.service` (mode 644) | every local user | **no** |
+| `/proc/<pid>/environ` | owner and root only | yes |
+
+The unit file is the widest of the three and was not in the baseline. It survives
+reboots and does not require timing a read against a running process.
+
+The service runs as **root** with no `User=`, and `cloudflared 2026.7.0` supports
+`--token-file`, so the environment need never hold the token either.
+
+**Target:** the token in a mode-600 file owned by an unprivileged service account, absent
+from `cmdline`, `environ`, and the unit — and rotated, because the current value is
+known.

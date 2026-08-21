@@ -27,6 +27,8 @@ NODE_USER ?= buzaga
 PVE_IP   ?= 192.168.0.21
 PVE_SSH_PORT ?= 4444
 PVE_SSH_USER ?= buzaga
+TUNNEL_USER  ?= cloudflared
+ORIGIN_URL   ?= http://127.0.0.1:30000/
 SNIPPET_USER ?= tofu-snippets
 SNIPPET_DIR  ?= /var/lib/vz/snippets
 SSH_OPTS := -o ConnectTimeout=8 -o StrictHostKeyChecking=accept-new
@@ -158,6 +160,64 @@ withdraw-root-key: ## NEEDS ROOT, run in a real terminal: remove root's authoris
 	@echo
 	@echo "PermitRootLogin no already refuses them. This makes the withdrawal a removed"
 	@echo "credential rather than one edit away from working again."
+
+.PHONY: harden-tunnel
+harden-tunnel: ## NEEDS ROOT, run in a real terminal: run the tunnel unprivileged, token off argv (6.1-6.3)
+	@echo "Rotate the tunnel token first — the current one is readable by every local"
+	@echo "user and has been printed into a transcript."
+	@echo "  Zero Trust -> Networks -> Tunnels -> your tunnel -> Configure -> refresh token"
+	@echo
+	@echo "    TUNNEL_TOKEN='<new token>' sudo -E ./scripts/harden-cloudflared.sh"
+
+.PHONY: check-tunnel
+check-tunnel: ## Confirm the tunnel holds no readable credential and is not root (6.4, 6.5)
+	@systemctl is-active --quiet cloudflared \
+	  || { echo "FAIL: cloudflared is not running"; exit 1; }
+	@echo "OK: the tunnel is running"
+	@owner=$$(ps -o user= -p $$(systemctl show cloudflared -p MainPID --value) | tr -d ' '); \
+	 test "$$owner" != "root" \
+	  && echo "OK: it runs as $$owner, not root" \
+	  || { echo "FAIL: it still runs as root"; exit 1; }
+	@# argv is world-readable, so a token passed as --token is readable by anyone.
+	@# Assert the token-file form and the absence of an inline one, without printing
+	@# argv itself.
+	@pid=$$(systemctl show cloudflared -p MainPID --value); \
+	 tr '\0' '\n' < /proc/$$pid/cmdline | grep -q -- '--token-file' \
+	  || { echo "FAIL: not using --token-file"; exit 1; }; \
+	 tr '\0' '\n' < /proc/$$pid/cmdline | grep -qx -- '--token' \
+	  && { echo "FAIL: a token is on the command line"; exit 1; } \
+	  || echo "OK: no credential in /proc/$$pid/cmdline"
+	@pid=$$(systemctl show cloudflared -p MainPID --value); \
+	 cat /proc/$$pid/environ >/dev/null 2>&1 \
+	  && { echo "FAIL: this account can read the tunnel's environment"; exit 1; } \
+	  || echo "OK: /proc/$$pid/environ is not readable by this account"
+	@# The unit file is world-readable by design; it must therefore hold no secret.
+	@grep -qE -- '--token[[:space:]]' /etc/systemd/system/cloudflared.service \
+	  && { echo "FAIL: the unit file still carries an inline token"; exit 1; } \
+	  || echo "OK: no credential in the unit file"
+	@# Take the path from argv rather than hardcoding it, and rely on the service
+	@# being active for its existence: cloudflared would not have started if the file
+	@# were missing. `test ! -r` on a hardcoded path passes when the file is simply
+	@# absent, which would read as a pass for the wrong reason.
+	@pid=$$(systemctl show cloudflared -p MainPID --value); \
+	 f=$$(tr '\0' '\n' < /proc/$$pid/cmdline | grep -A1 -x -- '--token-file' | tail -1); \
+	 test -n "$$f" || { echo "FAIL: could not read the token path from argv"; exit 1; }; \
+	 test ! -r "$$f" \
+	  && echo "OK: $$f is unreadable by $$(id -un)" \
+	  || { echo "FAIL: $$f is readable by $$(id -un)"; exit 1; }
+	@shell=$$(getent passwd $(TUNNEL_USER) | cut -d: -f7); \
+	 case "$$shell" in \
+	   */nologin|*/false) echo "OK: $(TUNNEL_USER) has no login shell ($$shell)";; \
+	   *) echo "FAIL: $(TUNNEL_USER) has a login shell ($$shell)"; exit 1;; \
+	 esac
+	@groups=$$(id -nG $(TUNNEL_USER) 2>/dev/null); \
+	 echo "$$groups" | grep -qwE 'root|sudo|adm' \
+	  && { echo "FAIL: $(TUNNEL_USER) is in a privileged group ($$groups)"; exit 1; } \
+	  || echo "OK: $(TUNNEL_USER) holds no privileged group ($$groups)"
+	@code=$$(curl -s -o /dev/null -w '%{http_code}' $(ORIGIN_URL)); \
+	 test "$$code" = "200" \
+	  && echo "OK: the origin still answers ($(ORIGIN_URL) -> $$code)" \
+	  || { echo "FAIL: origin returned $$code"; exit 1; }
 
 .PHONY: check-root-ssh
 check-root-ssh: ## Confirm root SSH is refused and key auth still works (5.1b, 5.2)

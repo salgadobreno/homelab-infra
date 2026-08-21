@@ -43,10 +43,11 @@ the internet.
 
 ## 6. The tunnel
 
+- [ ] 6.0 Rotate the tunnel token in the Cloudflare dashboard — it is world-readable on the host and has been printed into a session transcript, so hardening its storage without rotating protects nothing
 - [ ] 6.1 Create a dedicated unprivileged `cloudflared` account
-- [ ] 6.2 Move the tunnel token into an `EnvironmentFile` at mode 600 owned by that account, and remove it from `ExecStart` (design D3, Open Question 3)
+- [ ] 6.2 Move the tunnel token into a mode-600 file read via `--token-file`, and remove it from `ExecStart` and from the world-readable unit (design D3 **revised** — `--token-file` keeps it out of the environment as well, which an `EnvironmentFile` does not)
 - [ ] 6.3 Run the service as that account; confirm the tunnel reconnects and the site still serves
-- [ ] 6.4 Confirm an unprivileged user can no longer recover the token from `cmdline` or `environ` — `credential-scoping` "A local user cannot read a service credential"
+- [ ] 6.4 Confirm an unprivileged user can no longer recover the token from `cmdline`, `environ`, or the unit file — `credential-scoping` "A local user cannot read a service credential"
 - [ ] 6.5 Confirm the account is not root and holds no password-less escalation — `credential-scoping` "A service compromise does not yield host administration"
 
 ## 7. Make it verifiable

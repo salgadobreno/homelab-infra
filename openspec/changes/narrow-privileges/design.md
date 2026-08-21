@@ -209,3 +209,51 @@ account never gets the chance — and it widens the account's reach to the whole
 root); switching to `source_file` so the upload really is SFTP (rejected: an SFTP write
 needs exactly the same directory permission, so it changes the mechanism without
 changing the problem).
+
+### Open Question 3 — answered, and D3 is superseded
+
+The shipped unit is hand-written, not vendor-supplied, so nothing constrains its shape:
+
+```ini
+[Service]
+ExecStart=/usr/bin/cloudflared --no-autoupdate tunnel run --token <the token>
+```
+
+No `User=`, so it runs as root. The unit file itself is mode 644, so the token is
+readable from `/etc/systemd/system/cloudflared.service` by anyone on the host — a second
+exposure the baseline did not record, and a wider one than `cmdline`, since it does not
+require the process to be running.
+
+### D3 (revised): `--token-file`, not an `EnvironmentFile`
+
+`cloudflared 2026.7.0` accepts `--token-file`, which D3 did not account for:
+
+```
+--token-file value   Filepath at which to read the tunnel token. [$TUNNEL_TOKEN_FILE]
+```
+
+An `EnvironmentFile` puts the token in the process environment, where
+`/proc/<pid>/environ` exposes it to the process owner and root. That is better than
+`cmdline` — which is world-readable — and D3 accepted it as inherent.
+
+It is not inherent. With `--token-file`, `argv` holds a *path* and the environment holds
+nothing; the token exists only in a mode-600 file the service account can read. The
+"trade-off accepted" clause in D3 was accepting a limit of the mechanism I had picked,
+not a limit of the problem.
+
+*Alternatives:* `EnvironmentFile` (rejected: strictly weaker, for no less work);
+converting to a locally-managed tunnel with a credentials JSON (still deferred to the
+ingress milestone, for the reason D3 gave — it means recreating a tunnel that is
+currently serving).
+
+### The current token must be rotated, and that is my doing
+
+Establishing the above meant reading the unit, and I ran `systemctl cat cloudflared`
+without redacting it. The token is now in a session transcript. It was already
+world-readable on the host, so this does not widen the exposure much — but "already
+exposed" is not a reason to be careless with a live credential, and the fix should not
+be applied to a token that has been printed.
+
+The rotation is a Cloudflare dashboard action, so it is the operator's. The hardening
+script takes the new token rather than reusing what is on the host, so rotating is the
+default path rather than an extra step.
