@@ -104,8 +104,17 @@ or silently "improve" them:
 
 ## Current state
 
-Milestone 0 is complete: OpenTofu authenticates against the Proxmox API. No VM exists
-yet. The live workload still runs as Docker Compose on the hypervisor and is untouched.
+Milestone 1 is complete and archived. A single k3s node (`k3s-server-1`, 192.168.0.30)
+is provisioned entirely from `tofu/`, and `make rebuild CONFIRM=yes` destroys and
+recreates it unattended in 433 seconds. `kubectl` reaches it from the host with TLS
+verified. The permanent specs live in `openspec/specs/`.
+
+`narrow-privileges` is the active change: the secrets milestone, planned but not
+started. Until it lands, the Proxmox token is `root@pam` with privilege separation off,
+`cloudflared` runs as root with its token readable from `/proc/<pid>/cmdline`, and the
+host accepts key-based root SSH.
+
+The live workload still runs as Docker Compose on the hypervisor and is untouched.
 
 `../homelab1/` is a superseded earlier attempt with no commits and no tracked files. Do
 not develop there.
