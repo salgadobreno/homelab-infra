@@ -48,10 +48,17 @@ workstation rather than only from inside the node.
 - **WHEN** a kubeconfig is delivered to the operator
 - **THEN** it targets the node's declared address rather than a loopback address
 
-#### Scenario: Credentials remain valid across a rebuild
+#### Scenario: Kubeconfig address survives a rebuild
 
 - **WHEN** the cluster is destroyed and recreated from the same configuration
 - **THEN** a kubeconfig obtained before the rebuild still names the correct address
+- **AND** re-fetching the credentials for that address SHALL require no manual editing
+
+The certificate authority is regenerated on every install, so the client certificate in
+an older kubeconfig will not authenticate against the rebuilt cluster. That is a
+property of a disposable cluster, not a defect: pinning a CA to make credentials
+outlive the thing they authenticate to would work against the design. What the address
+plan buys is that recovery is one command with nothing to look up or edit.
 
 #### Scenario: Credentials are excluded from version control
 
