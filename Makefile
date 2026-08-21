@@ -26,6 +26,8 @@ endif
 NODE_USER ?= buzaga
 PVE_IP   ?= 192.168.0.21
 PVE_SSH_PORT ?= 4444
+SNIPPET_USER ?= tofu-snippets
+SNIPPET_DIR  ?= /var/lib/vz/snippets
 SSH_OPTS := -o ConnectTimeout=8 -o StrictHostKeyChecking=accept-new
 
 .DEFAULT_GOAL := help
@@ -129,6 +131,27 @@ cloud-init-log: ## Read cloud-init output from the node (task 7.1)
 .PHONY: pve-ssh
 pve-ssh: ## SSH to the Proxmox host as root on the hardened port
 	@ssh $(SSH_OPTS) -p $(PVE_SSH_PORT) root@$(PVE_IP)
+
+.PHONY: snippet-user
+snippet-user: ## NEEDS ROOT, run in a real terminal: create the unprivileged snippet-upload account (task 4.2)
+	@echo "This creates a host account and changes directory ownership, so it needs root."
+	@echo "Run it yourself:"
+	@echo
+	@echo "    sudo ./scripts/create-snippet-user.sh"
+
+.PHONY: check-snippet-user
+check-snippet-user: ## Confirm the snippet account is unprivileged and can write over SFTP (task 4.2)
+	@ssh $(SSH_OPTS) -p $(PVE_SSH_PORT) -o BatchMode=yes $(SNIPPET_USER)@$(PVE_IP) \
+	  'test "$$(id -un)" = "$(SNIPPET_USER)" && test "$$(id -u)" -ne 0' \
+	  || { echo "FAIL: $(SNIPPET_USER) is unreachable or is root — run 'make snippet-user'"; exit 1; }
+	@echo "OK: $(SNIPPET_USER) is not root"
+	@# SFTP, not a shell command: this is the channel the provider actually uses.
+	@tmp=$$(mktemp) && echo probe > $$tmp && \
+	 printf 'put %s $(SNIPPET_DIR)/.probe\nrm $(SNIPPET_DIR)/.probe\n' "$$tmp" | \
+	   sftp -b - -o BatchMode=yes -P $(PVE_SSH_PORT) $(SNIPPET_USER)@$(PVE_IP) >/dev/null; \
+	 rc=$$?; rm -f $$tmp; \
+	 test $$rc -eq 0 || { echo "FAIL: cannot write $(SNIPPET_DIR) over SFTP"; exit 1; }
+	@echo "OK: $(SNIPPET_USER) can write $(SNIPPET_DIR) over SFTP"
 
 # ---------------------------------------------------------------- tofu --------
 

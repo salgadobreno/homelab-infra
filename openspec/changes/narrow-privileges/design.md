@@ -94,3 +94,57 @@ serving the internet, so it changes last, when the pattern is established.
    snippet directory?
 3. Does `cloudflared`'s systemd unit as shipped support `EnvironmentFile` cleanly, or
    does the token argument need removing from `ExecStart` by hand?
+
+## Answers
+
+### Open Question 2 — does the provider need root over SSH? **No, not for this configuration.**
+
+Established 2026-08-21 from two independent sources, before changing anything.
+
+**The provider's SSH channel is SFTP, not a shell.** The binary links
+`github.com/pkg/sftp`, and the snippet upload is a plain file write into the datastore's
+path. A file write needs write permission on the directory and nothing more.
+
+**Only one code path in the provider escalates**, and this configuration does not take
+it. Two command templates in the binary are wrapped in the provider's `try_sudo` helper:
+
+```
+imported_disk=$(try_sudo /usr/sbin/qm disk import $vm_id $source_image $datastore_id_target ...)
+try_sudo /usr/sbin/qm set $vm_id -${disk_interface} $disk_id
+```
+
+Both belong to importing a disk from a **file path**. Our `disk.import_from` points at a
+`proxmox_download_file` in an `import`-content datastore, which the provider passes to
+the API as `qmcreate`'s `import-from` parameter instead.
+
+**Confirmed against the hypervisor's own task log** (`/var/log/pve/tasks/index`), which
+records every privileged operation and the identity that requested it. A full destroy
+and rebuild produces exactly:
+
+```
+qmshutdown / qmdestroy / imgdel / download / qmcreate / resize / qmstart   terraform@pve!tofu
+```
+
+Seven tasks, all attributed to the API token. No `imgcopy`, no task attributed to
+`root@pam` from the CLI — so nothing in the lifecycle runs as a root shell.
+
+**Consequence:** task 4.3 is not needed. No sudoers entry, targeted or otherwise. The
+account owning the snippet directory can be an ordinary unprivileged user.
+
+**Caveat worth keeping:** this is a property of *this* configuration, not of the
+provider. Switching `import_from` to a file path, or adding a resource that shells out,
+re-opens the question — and it would fail loudly at apply, which is the cheap direction.
+
+### Incidental finding: `sshd_config` weakens password policy on the LAN
+
+`PasswordAuthentication no` globally, then:
+
+```
+Match Address 192.168.0.*
+	PasswordAuthentication yes
+```
+
+Any LAN host may authenticate by password. Not part of this change's scope — recorded so
+group 5 does not withdraw root SSH while believing key-only is enforced. Also note
+`PermitRootLogin` is not set at all; the effective value is the default
+`prohibit-password`.

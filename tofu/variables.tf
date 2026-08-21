@@ -183,9 +183,9 @@ variable "proxmox_ssh_port" {
 }
 
 variable "proxmox_ssh_username" {
-  description = "SSH user for snippet uploads. Root because /var/lib/vz/snippets is root-owned and this host has no passwordless sudo. Narrowing this belongs with the scoped-token work in the secrets milestone (design D4)."
+  description = "SSH user for snippet uploads. An unprivileged account owning /var/lib/vz/snippets — the provider writes the cloud-init file over SFTP and needs nothing else on the host. Created by scripts/create-snippet-user.sh."
   type        = string
-  default     = "root"
+  default     = "tofu-snippets"
 }
 
 variable "k3s_disable" {

@@ -25,9 +25,9 @@ the internet.
 
 ## 4. A non-root snippet upload account
 
-- [ ] 4.1 Determine whether the provider needs root over SSH for anything beyond writing the snippet directory (design Open Question 2)
-- [ ] 4.2 Create a dedicated account owning `/var/lib/vz/snippets`, and point the provider's `ssh` block at it
-- [ ] 4.3 If 4.1 found a root-requiring operation, add a sudoers entry for that command alone — never a blanket rule
+- [x] 4.1 Determine whether the provider needs root over SSH for anything beyond writing the snippet directory (design Open Question 2)
+- [x] 4.2 Create a dedicated account owning `/var/lib/vz/snippets`, and point the provider's `ssh` block at it
+- [x] 4.3 ~~If 4.1 found a root-requiring operation, add a sudoers entry for that command alone~~ — **not needed.** 4.1 found none: the provider's SSH channel is SFTP, and the only escalating path (`qm disk import`) is not taken by this configuration. No sudoers entry exists, which is the stronger outcome
 - [ ] 4.4 Rebuild to confirm snippet upload works as the new account
 
 ## 5. Withdraw root SSH
