@@ -34,11 +34,11 @@ the internet.
 
 ## 5. Withdraw root SSH
 
-- [ ] 5.1 Set `PermitRootLogin no` and reload sshd — the operator has console access if this goes wrong
-- [ ] 5.1a Remove the `Match Address 192.168.0.*` block that re-enables password authentication for LAN clients, so `PasswordAuthentication no` means what it says
-- [ ] 5.1b Confirm a password login is refused from a LAN address, and that `buzaga` still reaches the host by key — the operator has ten authorised keys and console access, but this is the step that can lock someone out
-- [ ] 5.2 Confirm root SSH is refused — `credential-scoping` "Administrative remote access is withdrawn once unnecessary"
-- [ ] 5.3 Rebuild once more to confirm provisioning is unaffected
+- [x] 5.1 Set `PermitRootLogin no` and reload sshd — the operator has console access if this goes wrong
+- [x] 5.1a Remove the `Match Address 192.168.0.*` block that re-enables password authentication for LAN clients, so `PasswordAuthentication no` means what it says
+- [x] 5.1b Confirm a password login is refused from a LAN address, and that `buzaga` still reaches the host by key — the operator has ten authorised keys and console access, but this is the step that can lock someone out
+- [x] 5.2 Confirm root SSH is refused — `credential-scoping` "Administrative remote access is withdrawn once unnecessary"
+- [x] 5.3 Rebuild once more to confirm provisioning is unaffected — 105s unattended with root SSH refused
 - [ ] 5.4 Remove the root entry from `/root/.ssh/authorized_keys`, so withdrawal is not just a toggle
 
 ## 6. The tunnel

@@ -183,3 +183,22 @@ observe. The check now asserts only what is verifiable here:
 
 The lesson is the shape of the earlier SFTP mistake repeated: a check that tests a
 different thing from the one that matters is worse than no check, because it is trusted.
+
+## Sections 4 and 5 closed, 2026-08-21
+
+After `scripts/harden-sshd.sh`:
+
+```
+$ make check-root-ssh
+OK: root SSH is refused
+OK: publickey only (publickey)
+OK: key authentication still works (tofu-snippets logged in)
+```
+
+The method list is the part that changed meaning: it read `(publickey,password)` before,
+so `PasswordAuthentication no` was never the effective setting for a LAN client.
+
+Provisioning is unaffected — `make rebuild CONFIRM=yes` → **REBUILD COMPLETE in 105s**,
+unattended, with root login refused throughout.
+
+**Target for 5.4:** the keys themselves gone, not merely refused.

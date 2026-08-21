@@ -149,6 +149,16 @@ harden-sshd: ## NEEDS ROOT, run in a real terminal: withdraw root and password S
 	@echo
 	@echo "    sudo ./scripts/harden-sshd.sh"
 
+.PHONY: withdraw-root-key
+withdraw-root-key: ## NEEDS ROOT, run in a real terminal: remove root's authorised keys (5.4)
+	@echo "Only root can read /root/.ssh/authorized_keys, so run this yourself:"
+	@echo
+	@echo "    sudo ./scripts/withdraw-root-key.sh              # the provisioning key"
+	@echo "    sudo PURGE=all ./scripts/withdraw-root-key.sh    # every key root holds"
+	@echo
+	@echo "PermitRootLogin no already refuses them. This makes the withdrawal a removed"
+	@echo "credential rather than one edit away from working again."
+
 .PHONY: check-root-ssh
 check-root-ssh: ## Confirm root SSH is refused and key auth still works (5.1b, 5.2)
 	@! ssh $(SSH_OPTS) -o BatchMode=yes -o ConnectTimeout=5 -p $(PVE_SSH_PORT) \
