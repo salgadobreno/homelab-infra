@@ -25,8 +25,9 @@ of the stack the operator cannot yet speak to from experience.
 
 Explicitly **not** in this change, and each deferred for a reason recorded in design:
 
-- The hit counter and Redis stay on Compose. They need an image registry and a
-  persistence story respectively; both are their own slice.
+- The hit counter and Redis stay on Compose, and are **retired rather than ported** at M4
+  (operator decision, 2026-08-21). Porting them would mean a registry and a persistence
+  story, for components that go away when this content moves to the personal site.
 - The existing public hostname keeps pointing at Compose. Cutting it over is a decision
   to make once the cluster-served copy has been observed working, not the same day.
 - No TLS termination in the cluster. The tunnel terminates TLS at Cloudflare's edge, so

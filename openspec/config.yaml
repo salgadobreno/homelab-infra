@@ -89,7 +89,7 @@ context: |
   | M1 | "One VM, built by OpenTofu, running k3s. `kubectl get nodes` works." | `bootstrap-k3s-node` | done 2026-08-21 |
   | M2 | "Every credential holds only what its job needs, and I can prove it." | `narrow-privileges` | done 2026-08-21 |
   | M3 | "I pushed to GitHub and ArgoCD served my site. I did not run kubectl." | `serve-site-from-k3s` | in progress |
-  | M4 | "Docker-on-host is gone. The hit counter and its data run in the cluster." | not yet proposed | next |
+  | M4 | "Docker-on-host is gone. The cluster serves buzaga.com.br." | not yet proposed | next |
   | M5 | "The site shows its own guts, and the picture cannot go stale." | not yet proposed | |
   | M6 | "Three nodes. I drained one and the app stayed up." | not yet proposed | |
   | M7 | "I can see what the cluster is doing." — observability, if RAM allows | not yet proposed | |
@@ -99,18 +99,36 @@ context: |
   arrived early, inside M1, and every rung since has used it as its acceptance test. It
   is the best thing to demonstrate; it is not work that remains.
 
-  ### What M4 has to solve
+  ### What M4 is, and what it deliberately does not do
 
-  Named here so it is not rediscovered: the hit counter is a locally-built image with no
-  registry, and Redis holds real state. A registry (or an equivalent) and a persistence
-  story are the two problems, and they are why M3 deliberately carries only the static
-  site. M3 leaves both public hostnames serving so M4 is a cutover with something to
-  compare against.
+  M4 is a cutover, not a migration. `buzaga.com.br` is repointed from the Compose stack
+  to traefik, and the Compose stack is stopped. That is the whole rung.
+
+  **The hit counter and Redis are retired, not ported.** Operator decision, 2026-08-21:
+  porting them means a registry for a locally-built image and a persistence story for
+  Redis — real work, for a component that is going away when this content moves into the
+  personal site's `projects` section. Building it to delete it is the expensive path.
+
+  Nothing breaks when they stop. `index.html` already degrades: *"If the API is down,
+  hide the counters — the static site still works."* The cluster copy has served it that
+  way since M3, so the behaviour after cutover is the behaviour already in production on
+  the second hostname.
+
+  A registry and durable storage are therefore **not M4 problems and not scheduled**.
+  They arrive when a workload genuinely needs them, and that workload will make the case.
 
   **Retiring Compose must not take the site down.** `buzaga.com.br` stays served
-  throughout — the milestone is the origin moving, not the site pausing. The cutover is
-  repointing that hostname at traefik once the cluster copy serves the same thing, and
-  stopping the Compose stack after, not before.
+  throughout — the milestone is the origin moving, not the site pausing. Repoint the
+  hostname once the cluster copy serves the same thing, and stop Compose after, not
+  before.
+
+  **The before state has to be captured before it is destroyed.** M4 removes the last
+  running example of the architecture this project exists to replace, so the old shape —
+  nginx, hit-counter and Redis as Docker Compose on the hypervisor, with a live count of
+  65 hits — is recorded as part of M4 rather than remembered. Two places, for two
+  reasons: `README.md` as the evergreen record, since the site's own rendering of it is
+  temporary and the README is what a reader arrives at; and the site itself, where it
+  becomes the "before" half of what M5 shows.
 
   ### What M5 is, and why it is a rung rather than a page
 
@@ -118,6 +136,10 @@ context: |
   text and ASCII, no dashboard chrome. Nodes, workloads, what ArgoCD last synced and from
   which revision, the path a request took to arrive. A visitor sees the machine that
   served them.
+
+  It shows **both halves**: what runs now, and the Compose-on-the-hypervisor arrangement
+  it replaced. The delta is the point — a diagram of the current setup alone does not say
+  what was learned, and the old shape is the thing an interviewer recognises.
 
   It is the project's demo. Everything before it is legible only by reading this
   repository; this rung is the one that shows the work to someone who will not.

@@ -20,8 +20,10 @@
 ## Non-Goals
 
 - Cutting the existing hostname over. Deliberately a separate decision — see D6.
-- The hit counter and Redis. They need a registry and a persistence story; both are
-  their own slice, and neither is needed to prove the reconcile loop.
+- The hit counter and Redis. Neither is needed to prove the reconcile loop, and neither
+  is ported later either: M4 retires them (see the ladder in `openspec/config.yaml`).
+  `index.html` already hides the counters when the API is absent, so the cluster copy is
+  the post-cutover behaviour today.
 - TLS inside the cluster. The tunnel terminates TLS at Cloudflare's edge and dials the
   origin over the LAN; adding cert-manager here would secure a hop that never leaves the
   house.
