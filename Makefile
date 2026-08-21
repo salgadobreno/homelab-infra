@@ -161,6 +161,39 @@ withdraw-root-key: ## NEEDS ROOT, run in a real terminal: remove root's authoris
 	@echo "PermitRootLogin no already refuses them. This makes the withdrawal a removed"
 	@echo "credential rather than one edit away from working again."
 
+.PHONY: check-privileges
+check-privileges: ## Assert every property narrow-privileges established (task 7.1)
+	@echo "=== the provisioning credential ==="
+	@./scripts/check-privileges.sh
+	@echo
+	@echo "=== what it is refused ==="
+	@./scripts/check-token-scope.sh
+	@echo
+	@echo "=== the snippet account ==="
+	@$(MAKE) --no-print-directory check-snippet-user
+	@echo
+	@echo "=== administrative SSH ==="
+	@$(MAKE) --no-print-directory check-root-ssh
+	@echo
+	@echo "=== the tunnel ==="
+	@$(MAKE) --no-print-directory check-tunnel
+
+.PHONY: check-privileges-regression
+check-privileges-regression: ## Show the privilege check failing on a widened role (task 7.2)
+	@echo "A check never seen to fail is not a check. Two fixtures stand in for a role"
+	@echo "change, so proving the check works does not mean granting the credential the"
+	@echo "privileges it exists to forbid."
+	@echo
+	@echo "--- a role that gained Permissions.Modify and VM.Console ---"
+	@! PERMISSIONS_FIXTURE=tests/permissions-regressed.json ./scripts/check-privileges.sh \
+	  || { echo "FAIL: the check passed a widened role"; exit 1; }
+	@echo
+	@echo "--- a role that quietly lost Sys.AccessNetwork ---"
+	@! PERMISSIONS_FIXTURE=tests/permissions-narrowed.json ./scripts/check-privileges.sh \
+	  || { echo "FAIL: the check passed a role missing a privilege provisioning needs"; exit 1; }
+	@echo
+	@echo "OK: the check fails in both directions"
+
 .PHONY: harden-tunnel
 harden-tunnel: ## NEEDS ROOT, run in a real terminal: run the tunnel unprivileged, token off argv (6.1-6.3)
 	@echo "Rotate the tunnel token first — the current one is readable by every local"
@@ -334,7 +367,7 @@ tf-state: ## What Terraform currently believes exists
 # ---------------------------------------------------------------- checks ------
 
 .PHONY: check
-check: check-secrets check-scope check-drift ## Run all safety checks
+check: check-secrets check-privileges check-drift ## Run all safety checks
 
 .PHONY: check-secrets
 check-secrets: ## Confirm no API token or key material is tracked by git (task 8.5)

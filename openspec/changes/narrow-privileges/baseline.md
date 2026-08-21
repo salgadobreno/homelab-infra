@@ -223,3 +223,30 @@ The service runs as **root** with no `User=`, and `cloudflared 2026.7.0` support
 **Target:** the token in a mode-600 file owned by an unprivileged service account, absent
 from `cmdline`, `environ`, and the unit — and rotated, because the current value is
 known.
+
+## Section 3 closed, and one thing the check reports rather than asserts
+
+`make check-privileges` runs five groups: the credential's own privileges, what it is
+refused, the snippet account, administrative SSH, and the tunnel. Thirty assertions,
+all green, wired into `make check` alongside `check-secrets` and `check-drift`.
+
+**Privilege separation is reported, not asserted.** Reading a token's `privsep` flag
+needs `User.Modify` on `/access/users/<user>`, which this token is refused — correctly.
+The check says so and prints the admin command, rather than asserting something adjacent
+and calling it proof. It also cannot be inferred behaviourally here: the role is granted
+to the user *and* to the token at the same paths, so a privsep-off token would have the
+same effective set as a privsep-on one. The two are indistinguishable from outside until
+the user gains a privilege the token does not have.
+
+**The path is `/`.** Task 2.3 asked for "the narrowest workable path" and the answer
+recorded there was `/` — narrow *privileges* over the whole tree, rather than broad
+privileges over a subtree. The check reports the paths so this stays visible rather than
+being discovered later:
+
+```
+granted at: / /access /access/groups /nodes /pool /sdn /storage /storage/local /vms
+```
+
+Narrowing to `/vms`, `/storage/local` and `/nodes/pve` is a real follow-up, and belongs
+with whatever adds the second node — the paths a one-node configuration needs are not
+the paths a cluster needs.

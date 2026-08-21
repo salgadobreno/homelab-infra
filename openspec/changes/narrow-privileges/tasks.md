@@ -39,22 +39,22 @@ the internet.
 - [x] 5.1b Confirm a password login is refused from a LAN address, and that `buzaga` still reaches the host by key — the operator has ten authorised keys and console access, but this is the step that can lock someone out
 - [x] 5.2 Confirm root SSH is refused — `credential-scoping` "Administrative remote access is withdrawn once unnecessary"
 - [x] 5.3 Rebuild once more to confirm provisioning is unaffected — 105s unattended with root SSH refused
-- [ ] 5.4 Remove the root entry from `/root/.ssh/authorized_keys`, so withdrawal is not just a toggle
+- [x] 5.4 Remove the root entry from `/root/.ssh/authorized_keys`, so withdrawal is not just a toggle
 
 ## 6. The tunnel
 
 - [ ] 6.0 Rotate the tunnel token in the Cloudflare dashboard — **deliberately deferred** by the operator, 2026-08-21. The plumbing is hardened around the existing value; see design "Rotation deferred". Rotating later needs no rework: drop a new value into `/etc/cloudflared/token` and restart
-- [ ] 6.1 Create a dedicated unprivileged `cloudflared` account
-- [ ] 6.2 Move the tunnel token into a mode-600 file read via `--token-file`, and remove it from `ExecStart` and from the world-readable unit (design D3 **revised** — `--token-file` keeps it out of the environment as well, which an `EnvironmentFile` does not)
-- [ ] 6.3 Run the service as that account; confirm the tunnel reconnects and the site still serves
-- [ ] 6.4 Confirm an unprivileged user can no longer recover the token from `cmdline`, `environ`, or the unit file — `credential-scoping` "A local user cannot read a service credential"
-- [ ] 6.5 Confirm the account is not root and holds no password-less escalation — `credential-scoping` "A service compromise does not yield host administration"
+- [x] 6.1 Create a dedicated unprivileged `cloudflared` account
+- [x] 6.2 Move the tunnel token into a mode-600 file read via `--token-file`, and remove it from `ExecStart` and from the world-readable unit (design D3 **revised** — `--token-file` keeps it out of the environment as well, which an `EnvironmentFile` does not)
+- [x] 6.3 Run the service as that account; confirm the tunnel reconnects and the site still serves
+- [x] 6.4 Confirm an unprivileged user can no longer recover the token from `cmdline`, `environ`, or the unit file — `credential-scoping` "A local user cannot read a service credential"
+- [x] 6.5 Confirm the account is not root and holds no password-less escalation — `credential-scoping` "A service compromise does not yield host administration"
 
 ## 7. Make it verifiable
 
-- [ ] 7.1 Add `make check-privileges` asserting: token user is not root, privsep is on, no credential in `cmdline` or `environ`, `cloudflared` is not root, root SSH refused
-- [ ] 7.2 Confirm it fails when a property is deliberately regressed — a check never seen to fail is not a check — `credential-scoping` "A regression is caught by the check"
-- [ ] 7.3 Wire it into `make check`
+- [x] 7.1 Add `make check-privileges` asserting: token user is not root, no credential in `cmdline` or `environ`, `cloudflared` is not root, root SSH refused — **privsep is reported, not asserted**: reading a token's `privsep` flag needs `User.Modify`, which this token is correctly refused, so the check prints the admin command instead of claiming proof
+- [x] 7.2 Confirm it fails when a property is deliberately regressed — a check never seen to fail is not a check — `credential-scoping` "A regression is caught by the check"
+- [x] 7.3 Wire it into `make check`
 
 ## 8. Close the record
 
