@@ -113,3 +113,20 @@ intended, the directory kept its owner, and the following apply wrote the snippe
 
 `rebuild` no longer calls another `make` target; it inlines the same command, so a dry
 run stays dry.
+
+## Section 4a closed, 2026-08-21
+
+`make rebuild CONFIRM=yes` → **REBUILD COMPLETE in 108s**, unattended, with no root
+involved on either channel:
+
+```
+qmshutdown / qmdestroy / imgdel / imgdel / download / qmcreate / resize / qmstart
+                                                             terraform@pve!tofu
+
+-rw-rw-r-- 1 tofu-snippets tofu-snippets  k3s-server-1-user-data.yaml
+-rw-r--r-- 1 root          root           .keep    (15:06 — older than the destroy)
+```
+
+The API work is the scoped token's; the snippet is the unprivileged account's; the
+sentinel is older than the destroy that ran through it. Root SSH is still *accepted* —
+withdrawing it is group 5 — but nothing uses it any more.

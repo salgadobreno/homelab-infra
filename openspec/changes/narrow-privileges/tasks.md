@@ -30,7 +30,7 @@ the internet.
 - [x] 4.3 ~~If 4.1 found a root-requiring operation, add a sudoers entry for that command alone~~ — **not needed.** Nothing in the lifecycle escalates: the only `try_sudo` path (`qm disk import`) is not taken by this configuration, and the write itself succeeds as the account once the directory is writable. No sudoers entry exists, which is the stronger outcome
 - [x] 4.2a Keep the snippet directory alive across `tofu destroy` with a dot-file sentinel, so its ownership is durable (design D6)
 - [x] 4.2b Make `make check-snippet-user` probe the channel `source_raw` actually uses, and survive a destroy
-- [ ] 4.4 Rebuild to confirm snippet upload works as the new account — **first attempt failed**, see design "Correction to the Open Question 2 answer"
+- [x] 4.4 Rebuild to confirm snippet upload works as the new account — 108s unattended, snippet written by `tofu-snippets`. The first attempt failed; see design "Correction to the Open Question 2 answer"
 
 ## 5. Withdraw root SSH
 
