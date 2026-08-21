@@ -130,3 +130,27 @@ qmshutdown / qmdestroy / imgdel / imgdel / download / qmcreate / resize / qmstar
 The API work is the scoped token's; the snippet is the unprivileged account's; the
 sentinel is older than the destroy that ran through it. Root SSH is still *accepted* —
 withdrawing it is group 5 — but nothing uses it any more.
+
+## 5. Password authentication on the LAN — accepted (before)
+
+`sshd_config` sets `PasswordAuthentication no` globally and then overrides it:
+
+```
+Match Address 192.168.0.*
+	PasswordAuthentication yes
+```
+
+What the server offers a LAN client, before any change:
+
+```
+$ ssh -o PreferredAuthentications=password -o PubkeyAuthentication=no \
+      -o NumberOfPasswordPrompts=0 -p 4444 nosuchuser@192.168.0.21 true
+nosuchuser@192.168.0.21: Permission denied (publickey,password).
+```
+
+`password` in that list is the finding: the global setting is not the effective one, so
+"this host is key-only" was not true. `PermitRootLogin` is also unset, leaving the
+default `prohibit-password`.
+
+**Target:** `(publickey)` alone, `PermitRootLogin no` stated explicitly, and `buzaga`
+still reaching the host by key.

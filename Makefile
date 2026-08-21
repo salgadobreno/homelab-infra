@@ -26,6 +26,7 @@ endif
 NODE_USER ?= buzaga
 PVE_IP   ?= 192.168.0.21
 PVE_SSH_PORT ?= 4444
+PVE_SSH_USER ?= buzaga
 SNIPPET_USER ?= tofu-snippets
 SNIPPET_DIR  ?= /var/lib/vz/snippets
 SSH_OPTS := -o ConnectTimeout=8 -o StrictHostKeyChecking=accept-new
@@ -137,8 +138,36 @@ forget-node-key: ## Drop the node's old SSH host key — a rebuilt node has a ne
 	@echo "forgot the host key for $(NODE_IP)"
 
 .PHONY: pve-ssh
-pve-ssh: ## SSH to the Proxmox host as root on the hardened port
-	@ssh $(SSH_OPTS) -p $(PVE_SSH_PORT) root@$(PVE_IP)
+pve-ssh: ## SSH to the Proxmox host on the hardened port (not as root — group 5)
+	@ssh $(SSH_OPTS) -p $(PVE_SSH_PORT) $(PVE_SSH_USER)@$(PVE_IP)
+
+.PHONY: harden-sshd
+harden-sshd: ## NEEDS ROOT, run in a real terminal: withdraw root and password SSH (5.1, 5.1a)
+	@echo "This edits /etc/ssh/sshd_config and reloads sshd, so it needs root."
+	@echo "It backs the file up, validates with 'sshd -t', and reloads rather than"
+	@echo "restarts, so your current session survives a mistake."
+	@echo
+	@echo "    sudo ./scripts/harden-sshd.sh"
+
+.PHONY: check-root-ssh
+check-root-ssh: ## Confirm root SSH is refused and a key login still works (5.1b, 5.2)
+	@! ssh $(SSH_OPTS) -o BatchMode=yes -o ConnectTimeout=5 -p $(PVE_SSH_PORT) \
+	     root@$(PVE_IP) 'id -un' >/dev/null 2>&1 \
+	  || { echo "FAIL: root SSH still succeeds"; exit 1; }
+	@echo "OK: root SSH is refused"
+	@# What the server *offers* matters as much as what succeeds: an advertised
+	@# 'password' method means a LAN client may still be prompted.
+	@methods=$$(ssh $(SSH_OPTS) -o PreferredAuthentications=password \
+	     -o PubkeyAuthentication=no -o NumberOfPasswordPrompts=0 -o ConnectTimeout=5 \
+	     -p $(PVE_SSH_PORT) nosuchuser@$(PVE_IP) true 2>&1 \
+	     | sed -n 's/.*(\(.*\)).*/\1/p'); \
+	 echo "$$methods" | grep -q password \
+	  && { echo "FAIL: the server still offers password auth ($$methods)"; exit 1; } \
+	  || echo "OK: password authentication is not offered ($$methods)"
+	@ssh $(SSH_OPTS) -o BatchMode=yes -o ConnectTimeout=5 -p $(PVE_SSH_PORT) \
+	     $(PVE_SSH_USER)@$(PVE_IP) 'id -un' >/dev/null 2>&1 \
+	  && echo "OK: $(PVE_SSH_USER) still reaches the host by key" \
+	  || { echo "FAIL: $(PVE_SSH_USER) can no longer log in — revert before continuing"; exit 1; }
 
 .PHONY: snippet-user
 snippet-user: ## NEEDS ROOT, run in a real terminal: create the unprivileged snippet-upload account (task 4.2)
