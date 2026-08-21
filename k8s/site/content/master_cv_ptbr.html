@@ -1,0 +1,712 @@
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html">
+  <meta charset="UTF-8">
+  <style>
+    body {
+      font-size: 11px;
+      font-family: 'Calibri', 'Arial', sans-serif;
+      padding: 0;
+    }
+
+    a:link, a:visited {
+      color: blue;
+      text-decoration: underline;
+    }
+
+    h1 { width: 100%; text-align: center; }
+    h2 { border-bottom: 1px solid black; }
+
+    /* layout */
+    .header-subtitle { font-size: 15px; }
+    .contact-left    { float: left; }
+    .contact-right   { float: right; text-align: right; }
+    .clearfix        { clear: both; }
+
+    /* tables */
+    table          { width: 100%; border-collapse: collapse; }
+    table, tr, td  { border: 0; vertical-align: top; }
+
+    /* job header columns */
+    .col-first    {
+      /*
+      */
+      width: 25%;
+    }
+    .col-second   {
+      width: 50%;
+      text-align: center;
+    }
+    .col-last {
+      /*
+      */
+      width: 20%;
+      text-align: right;
+    }
+    .italic {
+      font-style: italic;
+    }
+    .small {
+      font-size: 10px;
+    }
+
+    /* skills table */
+    .col-skill-label { width: 15%; }
+
+    /* early career table */
+    .col-early-label { width: 33%; }
+
+    /* education table */
+    .col-edu-left  { text-align: left; }
+    .col-edu-right { text-align: right; }
+
+    /* shared */
+    .bold       { font-weight: bold; }
+    .job-spacer { display: block; height: 12px; }
+    tr td li    { margin-left: 5px; }
+    li.no-bullet { list-style: none; }
+  </style>
+</head>
+<body>
+
+  <!-- Cabeçalho -->
+  <h1>
+    Breno Santos Salgado
+    <br>
+    <span class="header-subtitle">Engenheiro de Software Backend | Ruby on Rails | AWS | CI/CD | DevOps | Arquitetura | Infraestrutura</span>
+  </h1>
+
+  <div class="contact-left">
+    <div>Brasília, BR</div>
+    <div><a href="mailto:breno@buzaga.com.br">breno@buzaga.com.br</a></div>
+    <div><a href="https://www.buzaga.com.br">www.buzaga.com.br</a></div>
+  </div>
+  <div class="contact-right">
+    <div><a href="https://github.com/salgadobreno">github.com/salgadobreno</a></div>
+    <div><a href="https://www.linkedin.com/in/breno-salgado-a579ab149">linkedin.com/in/breno-salgado-a579ab149</a></div>
+    <div><a href="https://stackoverflow.com/users/586033/breno-salgado">stackoverflow.com/users/586033/breno-salgado</a></div>
+  </div>
+  <div class="clearfix"></div>
+
+  <!-- Habilidades -->
+  <section>
+    <h2>Habilidades, Tecnologias &amp; Ferramentas</h2>
+    <table>
+      <tr>
+        <td class="col-skill-label"><strong>Linguagens:</strong></td>
+        <td>Ruby, Java, SQL, JavaScript, TypeScript, Bash</td>
+      </tr>
+      <tr>
+        <td class="col-skill-label"><strong>Frameworks &amp; Bibliotecas:</strong></td>
+        <td>Rails, React, Sidekiq, Solid Queue, RSpec, Minitest, Swagger/OpenAPI, JUnit/Mockito, Android (nativo)</td>
+      </tr>
+      <tr>
+        <td class="col-skill-label"><strong>Bancos de Dados &amp; Middleware:</strong></td>
+        <td>PostgreSQL, RabbitMQ, MongoDB, Redis, TimescaleDB, Hasura GraphQL, Prometheus</td>
+      </tr>
+      <tr>
+        <td class="col-skill-label"><strong>Cloud &amp; DevOps:</strong></td>
+        <td>Pipelines CI/CD, AWS (ECS, EC2, S3, CloudWatch, CDK, CloudFront, CloudFormation), Docker, IaC, Linux, scripting</td>
+      </tr>
+      <tr>
+        <td class="col-skill-label"><strong>Ferramentas:</strong></td>
+        <td>Vim, Tmux, Claude Code, Git</td>
+      </tr>
+      <tr>
+        <td class="col-skill-label"><strong>Design &amp; Arquitetura:</strong></td>
+        <td>monolítico, distribuído/microsserviços, orientado a eventos, Clean, Hexagonal, SOLID, DDD, Máquinas de Estado</td>
+      </tr>
+      <tr>
+        <td class="col-skill-label"><strong>Outros:</strong></td>
+        <td>APIs REST, integrações, observabilidade, IoT / edge-to-cloud, QR Codes, APIs Criptográficas, Scrum</td>
+      </tr>
+    </table>
+  </section>
+
+  <!-- Experiência Profissional -->
+  <section>
+    <h2>Experiência Profissional</h2>
+
+    <!-- Nuuvem -->
+    <article>
+      <table>
+        <tr>
+          <td class="col-first">
+            <span class="bold">Engenheiro de Software Backend</span><br>
+          </td>
+          <td class="col-second">
+            <span class="bold">Nuuvem | Rio de Janeiro, BR (remoto)</span>
+            <br><span class="small italic">WebGaming • E-commerce • Web</span>
+          </td>
+          <td class="col-last">
+            Mar 2025 – Jun 2026
+            <br><span class="small italic">(1a4m)</span>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="3">
+            <li class="no-bullet">Inicialmente contratado via consultoria Startamus para liderar o desenvolvimento backend do MVP de uma nova plataforma de web-gaming que ajudou a maior distribuidora digital de jogos da América Latina a se tornar a primeira empresa brasileira a receber investimento da Square-Enix. Posteriormente retido diretamente pela empresa para contribuir com a plataforma principal e o desenvolvimento contínuo do spawnd.gg:</li>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="3">
+            <li>Entreguei o backend da API MVP do Spawnd em Rails 8: catálogo de jogos, gerenciamento de ciclo de vida de builds e jogos, autenticação e autorização de usuários, eventos e uma API REST robusta baseada em especificações OpenAPI/Swagger.</li>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="3">
+            <li>Construí uma API de Telemetria orientada a eventos e um pipeline de coleta de dados sobre SolidQueue, fornecendo a proprietários da plataforma e parceiros acesso autenticado a dados ricos de comportamento de usuários e gameplay.</li>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="3">
+            <li>Adotei Claude Code e desenvolvimento assistido por IA como ferramentas padrão no dia a dia de codificação, testes e exploração.</li>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="3">
+            <li>Conduzi melhorias arquiteturais no codebase do Spawnd introduzindo modelagem de domínio rica e gerenciamento de ciclo de vida por máquinas de estado nas entidades centrais do domínio.</li>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="3">
+            <li>Construí e mantive pipelines de CI/CD no GitLab integrados com runners customizados.</li>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="3">
+            <li>Configurei infraestrutura cloud (Render IaC, PostgreSQL, AWS S3, AWS CloudFront CDN) e instrumentei observabilidade da aplicação através de Sentry, Mission Control: Jobs e Loggly.</li>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="3">
+            <li>Prototipei funcionalidades em sprints de inovação para o Spawnd: sistemas de ranking, geração de conteúdo em vídeo e integrações com APIs da plataforma principal.</li>
+          </td>
+        </tr>
+      </table>
+      <span class="job-spacer"></span>
+    </article>
+
+    <!-- Origem -->
+    <article>
+      <table>
+        <tr>
+          <td class="col-first">
+            <span class="bold">Engenheiro de Software Backend (Equipe Fundadora)</span><br>
+            <span class="bold">Engenheiro DevOps</span><br>
+          </td>
+          <td class="col-second">
+            <span class="bold">Origem Motos Elétricas | Brasília, BR</span>
+            <br><span class="small italic">Infraestrutura IoT • Infraestrutura Cloud • Engenharia de Hardware &amp; Software</span>
+          </td>
+          <td class="col-last">
+            Fev 2019 – Ago 2024
+            <br><span class="small italic">(5a7m)</span>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="3">
+            <li class="no-bullet">Primeiro cargo de backend em uma startup de Mobilidade como Serviço e engenharia ponta-a-ponta; escalei com a empresa de 5 para mais de 60 funcionários, uma fábrica e uma frota de centenas de ativos conectados implantados por toda Brasília, processando mais de 1M de telemetrias diárias:
+</li>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="3">
+            <li>Arquitetei e construí a plataforma de gestão de frota IoT da empresa, fornecendo a estrutura, interfaces e observabilidade por trás das operações e desenvolvimento de produto em toda a organização; escalei para processar mais de 1M de eventos diários de mais de 400 dispositivos operando em campo.</li>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="3">
+            <li>Provisionei e gerenciei infraestrutura cloud escalável na AWS: liderei a migração de infraestrutura para aplicações containerizadas no ECS via scripts IaC CDK em TypeScript para suportar escala 10x após Serie A.</li>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="3">
+            <li>Construí o ToolInfra, uma plataforma baseada em Rake consolidando IaC, scripts de desenvolvimento e deploy, possibilitando a evolução do sistema de monolito Rails para um sistema distribuído orientado a eventos sobre RabbitMQ e Hasura GraphQL; Ajudei a arquitetar a migração que posteriormente gerou serviços e UIs dedicados para Core, Ingestão de Dados, Fábrica, Reservas (Mobile), Auth e ferramentas internas de suporte às operações diárias de diversas equipes.</li>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="3">
+            <li>Projetei e construí sistemas de mensageria de dispositivos baseados em MQTT suportando comandos de frota em tempo real, alertas e atualizações de firmware over-the-air.</li>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="3">
+            <li>Construí e mantive pipelines de CI/CD no GitLab, possibilitando entrega contínua segura entre serviços.</li>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="3">
+            <li>Desenvolvi observabilidade através de instrumentações customizadas, Sentry, CloudWatch, Metabase e construí dashboards operacionais expondo o comportamento da frota para equipes de produto e operações.</li>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="3">
+            <li>Responsável pelas operações de banco de dados em PostgreSQL/TimescaleDB e MongoDB: design de schema, otimização de queries, réplicas, backups automatizados.</li>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="3">
+            <li>Projetei e construí o FunTest, uma ferramenta automatizando testes end-to-end e testes de carga de funcionalidades críticas de IoT; co-projetei máquinas de estado de protocolos de comunicação via rádio de placas de bateria e impulsionei a adoção de TDD na equipe embarcada.</li>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="3">
+            <li>Mentorei engenheiros juniores e impulsionei a cultura de engenharia através de SOLID, DDD, Clean e TDD.</li>
+          </td>
+        </tr>
+      </table>
+      <span class="job-spacer"></span>
+    </article>
+
+    <!-- AIS Digital -->
+    <article>
+      <table>
+        <tr>
+          <td class="col-first">
+            <span class="bold">Desenvolvedor Android</span><br>
+            <span class="bold">Desenvolvedor Ruby on Rails</span><br>
+          </td>
+          <td class="col-second">
+            <span class="bold">AIS Digital | Brasília, BR</span>
+            <br><span class="small italic">Consultoria de Software</span>
+          </td>
+          <td class="col-last">
+            Out 2017 – Jan 2019
+            <br><span class="small italic">(1a4m)</span>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="3">
+            <li>Contribuí com desenvolvimento de funcionalidades e manutenção na plataforma SaaS de contabilidade ZeroPaper da Intuit Brasil como desenvolvedor Ruby on Rails.</li>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="3">
+            <li>Contribuí com desenvolvimento mobile para o BMW Connected Car Services como parte de uma equipe liderada pela BMW Chicago como Desenvolvedor Android; Tive a oportunidade de passar uma semana em Chicago conhecendo a equipe e o pipeline de entrega de software de uma Aplicação Mobile Multinacional.</li>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="3">
+            <li>Resolvi problemas de produção e entreguei desenvolvimento ad-hoc em engajamentos adicionais com clientes.</li>
+          </td>
+        </tr>
+      </table>
+      <span class="job-spacer"></span>
+    </article>
+
+    <!-- Avixy (2017) -->
+    <article>
+      <table>
+        <tr>
+          <td class="col-first">
+            <span class="bold">Engenheiro de Software</span><br>
+          </td>
+          <td class="col-second">
+            <span class="bold">Avixy Tecnologia | Brasília, BR</span>
+            <br><span class="small italic">Engenharia de Hardware &amp; Software</span>
+          </td>
+          <td class="col-last">
+            Fev 2017 – Ago 2017
+            <br><span class="small italic">(7m)</span>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="3">
+            <li>Projetei e prototipei uma plataforma de gestão de laboratório de manutenção em Ruby, React e MongoDB; modelei fluxos variáveis de reparo de dispositivos através de máquinas de estado finitas.</li>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="3">
+            <li>Entreguei o protótipo para dar suporte a uma Joint Venture em negociação com um grande fabricante chinês de dispositivos POS.</li>
+          </td>
+        </tr>
+      </table>
+      <span class="job-spacer"></span>
+    </article>
+
+    <!-- Sicoob -->
+    <article>
+      <table>
+        <tr>
+          <td class="col-first">
+            <span class="bold">Desenvolvedor Java</span><br>
+          </td>
+          <td class="col-second">
+            <span class="bold">Sicoob (Banco) | Brasília, BR</span>
+            <br><span class="small italic">Bancário</span>
+          </td>
+          <td class="col-last">
+            2015 – 2017
+            <br><span class="small italic">(~1,5a)</span>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="3">
+            <li>Atuei na equipe de integrações com serviços governamentais mantendo sistemas que lidam com transações ISO 8583.</li>
+          </td>
+        </tr>
+      </table>
+      <span class="job-spacer"></span>
+    </article>
+
+    <!-- Avixy (2014) -->
+    <article>
+      <table>
+        <tr>
+          <td class="col-first">
+            <span class="bold">Engenheiro de Software</span><br>
+          </td>
+          <td class="col-second">
+            <span class="bold">Avixy Tecnologia | Brasília, BR</span>
+            <br><span class="small italic">Engenharia de Hardware &amp; Software</span>
+          </td>
+          <td class="col-last">
+            2014 – 2015
+            <br><span class="small italic">(~1a)</span>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="3">
+            <li>Responsável pelo aplicativo desktop de suporte, SDK e protocolo binário de um dispositivo de segurança QR-token anti-fraude voltado para as indústrias financeira, de segurança e defesa.</li>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="3">
+            <li>Projetei e implementei o protocolo binário conectando o dispositivo QR-token com o aplicativo desktop de suporte e o SDK.</li>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="3">
+            <li>Implementei operações criptográficas, autenticação, atualização de Firmware via QR Codes e customizações em tempo de execução de aplicação rodando no token.</li>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="3">
+            <li>Apliquei SOLID, TDD, Injeção de Dependência para entregar um sistema sólido pronto pra produção; atingimos integração livre de bugs entre backend e embarcado através de uma abordagem TDD espelhada ao longo do ciclo de desenvolvimento.</li>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="3">
+            <li>Desenvolvido como contramedida bancária ao malware de fraude de boleto descoberto pela RSA, que havia custado à indústria US$3,75B; a implantação incluiu um piloto com o Exército Brasileiro para comunicações seguras.</li>
+          </td>
+        </tr>
+      </table>
+      <span class="job-spacer"></span>
+    </article>
+
+    <!-- CirclePOS -->
+    <article>
+      <table>
+        <tr>
+          <td class="col-first">
+            <span class="bold">Desenvolvedor Ruby on Rails</span><br>
+          </td>
+          <td class="col-second">
+            <span class="bold">CirclePOS | Remoto, NZ</span>
+            <br><span class="small italic">E-commerce, POS &amp; SaaS de Backoffice</span>
+          </td>
+          <td class="col-last">
+            Set 2013 – Jun 2014
+            <br><span class="small italic">(10m)</span>
+          </td>
+        </tr>
+      </table>
+      <span class="job-spacer"></span>
+    </article>
+
+    <!-- Privi.to -->
+    <article>
+      <table>
+        <tr>
+          <td class="col-first">
+            <span class="bold">Desenvolvedor Ruby on Rails</span><br>
+          </td>
+          <td class="col-second">
+            <span class="bold">Privi.to | Remoto, EUA</span>
+            <br><span class="small italic">Rede Social Fechada</span>
+          </td>
+          <td class="col-last">
+            Mar 2013 – Ago 2013
+            <br><span class="small italic">(6m)</span>
+          </td>
+        </tr>
+      </table>
+      <span class="job-spacer"></span>
+    </article>
+
+    <!-- SEA Tecnologia -->
+    <article>
+      <table>
+        <tr>
+          <td class="col-first">
+            <span class="bold">Desenvolvedor Ruby on Rails</span><br>
+          </td>
+          <td class="col-second">
+            <span class="bold">SEA Tecnologia | Brasília, DF</span>
+            <br><span class="small italic">Software Empresarial</span>
+          </td>
+          <td class="col-last">
+            2012 – 2013
+            <br><span class="small italic">(~1a)</span>
+          </td>
+        </tr>
+      </table>
+      <span class="job-spacer"></span>
+    </article>
+
+    <!-- Journatic LLC -->
+    <article>
+      <table>
+        <tr>
+          <td class="col-first">
+            <span class="bold">Desenvolvedor Ruby on Rails</span><br>
+          </td>
+          <td class="col-second">
+            <span class="bold">Journatic LLC | Remoto, EUA</span>
+            <br><span class="small italic">Web &amp; Jornalismo</span>
+          </td>
+          <td class="col-last">
+            Ago 2011 – Fev 2012
+            <br><span class="small italic">(7m)</span>
+          </td>
+        </tr>
+      </table>
+      <span class="job-spacer"></span>
+    </article>
+
+    <!-- Mirante Tecnologia -->
+    <article>
+      <table>
+        <tr>
+          <td class="col-first">
+            <span class="bold">Estagiário Java</span><br>
+          </td>
+          <td class="col-second">
+            <span class="bold">Mirante Tecnologia | Brasília, BR</span>
+            <br><span class="small italic">Software Empresarial</span>
+          </td>
+          <td class="col-last">
+            Jun 2009 – Jan 2010
+            <br><span class="small italic">(8m)</span>
+          </td>
+        </tr>
+      </table>
+      <span class="job-spacer"></span>
+    </article>
+
+    <!-- TST -->
+    <article>
+      <table>
+        <tr>
+          <td class="col-first">
+            <span class="bold">Estagiário Java</span><br>
+          </td>
+          <td class="col-second">
+            <span class="bold">TST (Tribunal Superior do Trabalho) | Brasília, BR</span>
+            <br><span class="small italic">Governo</span>
+          </td>
+          <td class="col-last">
+            2008 – 2010
+            <br><span class="small italic">(~1,5a)</span>
+          </td>
+        </tr>
+      </table>
+      <span class="job-spacer"></span>
+    </article>
+  </section>
+
+  <!-- Projetos -->
+  <section>
+    <h2>Projetos</h2>
+
+    <!-- BudgetPunk -->
+    <article>
+      <table>
+        <tr>
+          <td class="col-first">
+            <span class="bold">BudgetPunk</span><br>
+          </td>
+          <td class="col-second">
+            <span class="bold">App Mobile de Finanças Pessoais</span>
+            <br><span class="small italic">Android • OOAD • TDD • DDD</span>
+          </td>
+          <td class="col-last">
+            2016 – 2018
+          </td>
+        </tr>
+        <tr>
+          <td colspan="3">
+            <li class="no-bullet">Projeto pessoal de app mobile de Finanças Pessoais gamificado, desenvolvido enquanto aprendia Desenvolvimento Android e aprofundava habilidades de Design de Software (DDD, OOAD, TDD), com as seguintes funcionalidades:</li>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="3">
+            <li>Widget na tela inicial para lançamentos rápidos em movimento.</li>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="3">
+            <li>3 tipos de lançamento: diário, mensal e parcelado.</li>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="3">
+            <li>O app divide tudo por dia, fornecendo uma renda diária virtual e um saldo diário virtual para gamificar o comportamento financeiro ao longo do tempo.</li>
+          </td>
+        </tr>
+      </table>
+      <span class="job-spacer"></span>
+    </article>
+
+    <!-- Fubuia -->
+    <article>
+      <table>
+        <tr>
+          <td class="col-first">
+            <span class="bold">www.fubuia.com.br</span><br>
+          </td>
+          <td class="col-second">
+            <span class="bold">Agregador de Eventos do Facebook</span>
+            <br><span class="small italic">Ruby on Rails • AWS EC2 • Facebook API</span>
+          </td>
+          <td class="col-last">
+            2011 – 2012
+          </td>
+        </tr>
+        <tr>
+          <td colspan="3">
+            <li class="no-bullet">Primeiro webapp desenvolvido de ponta a ponta, construído após seguir o `Agile Web Development Rails` da Pragmatic: Um agregador de eventos do Facebook para Brasília:</li>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="3">
+            <li>Primeiro webapp desenvolvido de ponta a ponta: primeiro app Rails, primeiro deploy AWS EC2, primeiro design responsivo, primeiros background workers, primeira integração com API REST.</li>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="3">
+            <li>Jobs em background importavam eventos para o banco de dados do site via Facebook API sempre que o perfil do site no FB era convidado para um evento.</li>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="3">
+            <li>Calendário semanal rotativo com visualizações de 7/5/3 dias baseadas no viewport.</li>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="3">
+            <li>Agregou ~1.600 eventos e atraiu mais de 3.000 visitantes únicos organicamente via Google Search.</li>
+          </td>
+        </tr>
+      </table>
+      <span class="job-spacer"></span>
+    </article>
+
+    <!-- Pocket Sakura -->
+    <article>
+      <table>
+        <tr>
+          <td class="col-first">
+            <span class="bold">M.U.G.E.N. Pocket Sakura</span><br>
+          </td>
+          <td class="col-second">
+            <span class="bold">Personagem Customizada de Jogo de Luta 2D</span>
+            <br><span class="small italic">M.U.G.E.N. Engine • Edição de Sprites • Photoshop</span>
+          </td>
+          <td class="col-last">
+            ~2003
+          </td>
+        </tr>
+        <tr>
+          <td colspan="3">
+            <li class="no-bullet">Primeira experiência com programação: construindo uma personagem customizada para o engine de jogo de luta 2D M.U.G.E.N. como parte de um projeto colaborativo de um fórum brasileiro de M.U.G.E.N.:</li>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="3">
+            <li>Extraí e editei sprite sheets de Neo Geo Pocket Fighters usando capturas de emulador e Photoshop.</li>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="3">
+            <li>Implementei ataques básicos em pé, um projétil Hadouken e um Shoryuken na linguagem de script do M.U.G.E.N.</li>
+          </td>
+        </tr>
+      </table>
+      <span class="job-spacer"></span>
+    </article>
+  </section>
+
+  <!-- Educação e Certificações -->
+  <section>
+    <h2>Educação e Certificações</h2>
+
+    <article>
+      <table>
+        <tr>
+          <td class="col-first">
+            <span class="bold">Ensino Superior</span><br>
+          </td>
+          <td class="col-second">
+            <span class="bold">UNEB | Brasília, BR</span>
+          </td>
+          <td class="col-last">
+            2006 – 2010
+          </td>
+        </tr>
+        <tr>
+          <td colspan="3">
+            <li>Curso Superior em Tecnologias de Processamento de Dados, com ênfase em Programação</li>
+          </td>
+        </tr>
+      </table>
+      <span class="job-spacer"></span>
+    </article>
+
+    <article>
+      <table>
+        <tr>
+          <td class="col-first">
+            <span class="bold">OCPJP</span><br>
+          </td>
+          <td class="col-second">
+            <span class="bold">Oracle Certification Program</span>
+          </td>
+          <td class="col-last">
+            Abr 2014
+          </td>
+        </tr>
+        <tr>
+          <td colspan="3">
+            <li>Oracle Certified Professional, Java SE 6 Programmer</li>
+          </td>
+        </tr>
+      </table>
+      <span class="job-spacer"></span>
+    </article>
+
+    <article>
+      <table>
+        <tr>
+          <td class="col-first">
+            <span class="bold">Inglês</span><br>
+          </td>
+          <td class="col-second">
+            <span class="bold">Casa Thomas Jefferson | Brasília, BR</span>
+          </td>
+          <td class="col-last">
+            Jun 2002 – Jun 2006
+          </td>
+        </tr>
+        <tr>
+          <td colspan="3">
+            <li>Inglês Básico, Intermediário &amp; Avançado</li>
+          </td>
+        </tr>
+      </table>
+    </article>
+  </section>
+
+</body>
+</html>

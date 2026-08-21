@@ -149,3 +149,44 @@ Both default to off, and turning them on later is the change nobody makes.
 3. Should the site's `Ingress` match on hostname or on path? Hostname is the honest
    shape for a second public name, but it means the LAN cannot reach it without a `Host`
    header or a hosts entry — which affects how the check in `site-delivery` is written.
+
+## Answers
+
+### Open Question 3 — host-based, not a catch-all
+
+The `Ingress` matches on `host: k8s.buzaga.com.br`.
+
+A rule with no host claims traefik's default route: every request arriving at the node on
+port 80, for any name, reaches this Service. That is convenient with one workload deployed
+and wrong with two, and the wrongness arrives as "why is my new app serving the old site"
+rather than as an error.
+
+Matching on the hostname also tests the real path. The tunnel forwards the original `Host`
+header, so a host rule exercises what production does; a catch-all would pass even if the
+tunnel were sending something else entirely.
+
+*Cost, accepted:* a LAN request must supply the header, which makes the check in task 6.1
+slightly less obvious:
+
+```
+curl -H 'Host: k8s.buzaga.com.br' http://192.168.0.30/
+```
+
+That is a better trade than a check that passes for the wrong reason.
+
+**The hostname is chosen here and used by the operator in task 5.1.** Changing it is a
+one-line commit that ArgoCD picks up — it is not baked into anything.
+
+### The cluster copy serves the static site only
+
+The Compose stack's nginx also proxies `/api/` to the hit counter. The cluster copy does
+not, because the hit counter is not in this slice.
+
+That is not merely an omission to tidy up later: an nginx `proxy_pass` to a hostname is
+resolved when the configuration is loaded, so a `/api/` block pointing at a Service that
+does not exist would stop the container from starting at all. Leaving it out is required,
+not just tidier.
+
+It is also the concrete reason D6 keeps both copies running. The existing hostname serves
+a site with a working hit counter; the new one serves a site without one. Cutting over
+today would be a visible regression, not a migration.

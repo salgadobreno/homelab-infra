@@ -20,10 +20,10 @@ plumbing because it is the only step that touches the internet.
 
 ## 3. The site, declared
 
-- [ ] 3.1 Create `k8s/site/` with Deployment, Service, and a kustomize `configMapGenerator` over the HTML content (design D3)
-- [ ] 3.2 Copy the site content into the repository, and confirm it is what is served rather than the hypervisor path — `site-delivery` "no content copied from the hypervisor by hand"
-- [ ] 3.3 Decide the `Ingress` shape (Open Question 3) and write it
-- [ ] 3.4 Confirm the site answers from inside the cluster — `site-delivery` "The site answers from inside the cluster"
+- [x] 3.1 Create `k8s/site/` with Deployment, Service, and a kustomize `configMapGenerator` over the HTML content (design D3)
+- [x] 3.2 Copy the site content into the repository, and confirm it is what is served rather than the hypervisor path — `site-delivery` "no content copied from the hypervisor by hand"
+- [x] 3.3 Decide the `Ingress` shape (Open Question 3) and write it
+- [ ] 3.4 Confirm the site answers from inside the cluster — `site-delivery` "The site answers from inside the cluster". **Lands with group 4**: nothing deploys it until the Application exists, and applying it by hand to tick this off would prove the opposite of what the change is about
 
 ## 4. Reconciliation, proved
 

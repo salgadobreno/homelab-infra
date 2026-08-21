@@ -1,0 +1,29 @@
+# Host-based, not a catch-all (Open Question 3).
+#
+# A rule with no host claims traefik's default route for every request that reaches the
+# node, which is fine while one thing is deployed and wrong the moment a second is. The
+# hostname is also what the tunnel actually sends, so matching on it tests the real path
+# rather than a convenience path.
+#
+# The cost is that a LAN request needs the header supplied:
+#   curl -H 'Host: k8s.buzaga.com.br' http://192.168.0.30/
+#
+# No TLS block: the tunnel terminates TLS at Cloudflare's edge and the hop to traefik
+# does not leave the LAN.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: site
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: k8s.buzaga.com.br
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: site
+                port:
+                  name: http

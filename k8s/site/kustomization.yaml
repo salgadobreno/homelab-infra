@@ -1,0 +1,29 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: web
+
+resources:
+  - namespace.yaml
+  - deployment.yaml
+  - service.yaml
+  - ingress.yaml
+
+# The generator appends a hash of the content to the ConfigMap's name, and rewrites the
+# Deployment's reference to match. Editing a page therefore changes the pod spec, which
+# rolls the pods — so a push actually redeploys.
+#
+# A hand-written ConfigMap updates in place. The Deployment would not change, the pods
+# would not restart, and the old content would keep being served from the already-mounted
+# volume until something unrelated caused a restart. The demonstration would appear to
+# work and then intermittently not.
+configMapGenerator:
+  - name: site-content
+    files:
+      - content/index.html
+      - content/cv.html
+      - content/cv2.html
+      - content/cv_fiotec.html
+      - content/cv_howdy.html
+      - content/master_cv_ptbr.html
+      - content/diagram.ascii

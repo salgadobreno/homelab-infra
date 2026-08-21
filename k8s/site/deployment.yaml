@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: site
+  labels: {app: site}
+spec:
+  replicas: 1
+  selector:
+    matchLabels: {app: site}
+  template:
+    metadata:
+      labels: {app: site}
+    spec:
+      containers:
+        - name: nginx
+          # The unprivileged variant: listens on 8080 and runs as uid 101, so no
+          # capability to bind a low port is needed and the container is not root.
+          # Pinned rather than :latest — an unpinned tag makes a rebuild a different
+          # deployment, which is what rebuilding exists to disprove.
+          image: nginxinc/nginx-unprivileged:1.31.4-alpine
+          ports:
+            - name: http
+              containerPort: 8080
+          volumeMounts:
+            - name: content
+              mountPath: /usr/share/nginx/html
+              readOnly: true
+            # nginx writes its pid to /tmp and buffers to /var/cache/nginx, so a
+            # read-only root filesystem needs somewhere for both.
+            - name: tmp
+              mountPath: /tmp
+            - name: cache
+              mountPath: /var/cache/nginx
+          # The bundled addons on this node report six times more memory than they
+          # request, and the scheduler only sees what it is told.
+          resources:
+            requests: {cpu: 10m, memory: 16Mi}
+            limits: {memory: 64Mi}
+          securityContext:
+            runAsNonRoot: true
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: [ALL]
+          readinessProbe:
+            httpGet: {path: /, port: http}
+            initialDelaySeconds: 2
+            periodSeconds: 10
+          livenessProbe:
+            httpGet: {path: /, port: http}
+            initialDelaySeconds: 10
+            periodSeconds: 20
+      volumes:
+        - name: content
+          configMap:
+            name: site-content
+        - name: tmp
+          emptyDir: {}
+        - name: cache
+          emptyDir: {}
