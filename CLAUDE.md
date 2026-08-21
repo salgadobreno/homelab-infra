@@ -20,8 +20,7 @@ openspec/          OpenSpec planning: config.yaml, changes/, specs/
 tofu/              OpenTofu root module — flat and unmodularised on purpose
 scripts/           bootstrap.sh (toolchain), create-proxmox-token.sh (Proxmox API token)
 Makefile           Operator console — every routine command lives here
-LEARNINGS.md       Learning log, written after the fact (see protocol in the file)
-FUNDAMENTALS.md    101-level explanations of the technologies used
+LEARNINGS/         Notes by subject, numbered by depth (see LEARNINGS/README.md)
 ```
 
 ## Operator console
@@ -81,18 +80,17 @@ This repo manages real hardware running a live Cloudflare tunnel.
 
 ## Learning record
 
-`LEARNINGS.md` is a log of fundamentals this project actually hit — not a syllabus and
-not a session summary. Do not append to it automatically at the end of a task. An entry
-is earned by friction: a failure, a surprising default, a decision that mattered later.
+`LEARNINGS/` holds notes by subject, with a numeric prefix for depth: `101` readable
+cold, `201` working knowledge, `301` a sharp edge hit in practice. `LEARNINGS/README.md`
+carries the full protocol and the index — read it before adding anything.
 
-`FUNDAMENTALS.md` is the layer underneath: what a technology is and why it exists,
-written to be read cold. When the operator asks for basics, write there — plainly, and
-without narrating this project's history. An explanation that requires having followed
-the session is not a fundamental. Add entries only when asked about a topic.
+Two rules matter most. Do not append entries automatically when a task ends; an entry is
+earned by friction. And `101` entries must not narrate this project's history — an
+explanation that requires having followed the work is not a fundamental.
 
-Ask the operator which topics are worth expanding rather than deciding alone, and keep
-the `[hit]` / `[worked]` / `[open]` markers honest — `[worked]` means they could explain
-it unprompted, which is not something the agent can assert on their behalf.
+`[worked]` is the operator's marker to claim, never the agent's to assert on their
+behalf. Ask which queued topics are worth expanding rather than deciding alone, and add
+new entries to the index in `LEARNINGS/README.md`.
 
 ## Known shortcuts
 

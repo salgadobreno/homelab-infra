@@ -70,7 +70,8 @@ knowing which number is which before quoting either.
 That measurement is only trustworthy because the readiness gate was fixed first. It
 originally ran `kubectl wait --for=condition=Ready node --all` before the node object
 existed; `wait` does not block for a resource to appear, so it failed instantly and
-cloud-init wrote the completion marker regardless. See `LEARNINGS.md`.
+cloud-init wrote the completion marker regardless. See
+`LEARNINGS/practice/301-verifying-recovery.md`.
 
 ## Deliberately deferred
 
@@ -107,8 +108,7 @@ openspec/       Planning: config.yaml is authoritative project context
 tofu/           OpenTofu root module — flat and unmodularised on purpose
 scripts/        Toolchain bootstrap and Proxmox token creation
 Makefile        Operator console
-LEARNINGS.md    Things this build actually ran into
-FUNDAMENTALS.md 101-level explanations of the technologies used
+LEARNINGS/      Notes, by subject and depth — 101 basics, 201 how it works, 301 what bit us
 ```
 
 `tofu/` stays flat until there is more than one node to abstract over. Extracting

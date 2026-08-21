@@ -1,0 +1,67 @@
+# Learning
+
+Notes from building this homelab, arranged so the file tree answers questions on its own.
+
+## How to read the tree
+
+Folders are subjects. The number prefix is depth:
+
+| Prefix | Means |
+|---|---|
+| `101` | What this is and why it exists. Readable cold, assumes no project knowledge. |
+| `201` | Working knowledge. How the thing behaves, and why it behaves that way. |
+| `301` | A sharp edge hit in practice. Something broke, or nearly did. |
+
+So `terraform/301-one-byte-replaced-the-cluster.md` tells you the subject, the depth,
+and roughly what happened before you open it.
+
+**Gaps are meant to be visible.** There is no `terraform/101-*` yet, which says the
+basics of Terraform were never written down — the practice came first. That is worth
+seeing in the tree rather than discovering later.
+
+## How entries are written
+
+An entry is added **after the fact**, when something was hit in practice: a failure, a
+surprising default, a decision that turned out to matter later. `101` entries are the
+exception — they are written when the operator asks for the basics of something, and
+they must not narrate this project's history. An explanation that needs you to have
+followed the work is not a fundamental.
+
+Nothing goes in because a session ended. No entry is generated to look thorough.
+
+Each entry carries a marker:
+
+- `[hit]` — encountered, recorded, not yet examined properly
+- `[worked]` — gone through deliberately; could be explained unprompted
+- `[open]` — flagged as worth understanding, not yet touched
+
+`[worked]` is the operator's to claim. Reading an explanation is not the same as being
+able to give one, and nobody else can assert that on their behalf.
+
+## Index
+
+### cloud-init
+- [101 · basics](cloud-init/101-basics.md) — what it is, what you write, when it runs
+- [201 · instance identity](cloud-init/201-instance-identity.md) — why a reboot and a rebuild are different tests
+
+### terraform
+- [201 · dependency graph](terraform/201-dependency-graph.md) — ordering is inferred from references, not declared
+- [201 · state internals](terraform/201-state-internals.md) — serial, lineage, and why state is a liability
+- [301 · stale plans](terraform/301-stale-plans.md) — a plan is a promise about a known world
+- [301 · one byte replaced the cluster](terraform/301-one-byte-replaced-the-cluster.md) — a trailing space proposed a teardown
+
+### proxmox
+- [201 · datastore content types](proxmox/201-datastore-content-types.md) — storage advertises what it will hold
+- [301 · the provider uses two channels](proxmox/301-provider-uses-two-channels.md) — API for most things, SSH for snippets
+
+### k3s
+- [201 · one binary, five opinions](k3s/201-one-binary-five-opinions.md) — what k3s bundles, and what is Kubernetes proper
+
+### practice
+- [201 · decide values up front](practice/201-decide-values-up-front.md) — deciding beats discovering
+- [301 · tool output is untrusted](practice/301-tool-output-is-untrusted.md) — a warning message executed itself
+- [301 · verifying recovery](practice/301-verifying-recovery.md) — prove the disruption happened first
+
+## Queued
+
+Topics marked as worth understanding, not yet written: [queue.md](queue.md)

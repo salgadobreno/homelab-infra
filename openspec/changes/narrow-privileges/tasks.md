@@ -54,5 +54,5 @@ the internet.
 ## 8. Close the record
 
 - [ ] 8.1 Move the three entries out of "Known shortcuts" in `CLAUDE.md` and `README.md`, stating what replaced each
-- [ ] 8.2 Record in `LEARNINGS.md` what the scoped role actually needed versus what was guessed — the gap is the interesting part
+- [ ] 8.2 Record in `LEARNINGS/` what the scoped role actually needed versus what was guessed — the gap is the interesting part
 - [ ] 8.3 Update `openspec/config.yaml`: secrets are no longer unmanaged
