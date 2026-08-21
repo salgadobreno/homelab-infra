@@ -6,9 +6,9 @@ plumbing because it is the only step that touches the internet.
 
 ## 1. Establish the baseline
 
-- [ ] 1.1 Record what serves today: the Compose stack's containers, the public hostname, and the response from the existing site — the "unaffected" half of `site-delivery` needs a before to compare against
-- [ ] 1.2 Record the node's memory headroom with nothing deployed, so D2's budget is measured rather than asserted
-- [ ] 1.3 Confirm `make rebuild CONFIRM=yes` still passes before anything is added to the node's bootstrap
+- [x] 1.1 Record what serves today: the Compose stack's containers, the public hostname, and the response from the existing site — the "unaffected" half of `site-delivery` needs a before to compare against
+- [x] 1.2 Record the node's memory headroom with nothing deployed, so D2's budget is measured rather than asserted
+- [x] 1.3 Confirm `make rebuild CONFIRM=yes` still passes before anything is added to the node's bootstrap
 
 ## 2. The reconciler
 

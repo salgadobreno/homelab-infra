@@ -75,8 +75,10 @@ costs.
 
 ### D3: Site content ships as a kustomize `configMapGenerator`
 
-The content is 132 KiB of self-contained HTML — comfortably under the 1 MiB ConfigMap
-limit, with no images or bundles to fetch. Kustomize is built into ArgoCD, and
+The content is 132 KiB of HTML with no local assets — comfortably under the 1 MiB
+ConfigMap limit, and nothing to bundle alongside it. (The pages do pull
+`cdn.tailwindcss.com` at render time, which is the browser's problem, not the
+ConfigMap's.) Kustomize is built into ArgoCD, and
 `configMapGenerator` appends a hash of the content to the ConfigMap name, so editing an
 HTML file produces a new ConfigMap name, which changes the Deployment's pod spec, which
 rolls the pods.
