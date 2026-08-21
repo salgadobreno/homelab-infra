@@ -10,6 +10,9 @@ crash.*.log
 # Variable files carrying real values (commit only *.example)
 terraform.tfvars
 terraform.tfvars.bak
+
+# Temporary administrative token, used once to create the scoped one
+.bootstrap-token
 *.auto.tfvars
 !*.tfvars.example
 

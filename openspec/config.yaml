@@ -48,7 +48,8 @@ context: |
       future second NVMe can be ZFS and the nodes moved onto it without a rebuild.
       Do not propose converting the current layout to ZFS — that means reinstalling
       Proxmox.
-  - Ingress is a Cloudflare tunnel (`cloudflared`, running as root on the host). It is
+  - Ingress is a Cloudflare tunnel (`cloudflared`, running as an unprivileged service
+    account on the host). It is
     outbound-only — there are no inbound port-forwards, and nothing should assume a
     public IP or inbound reachability.
 
@@ -130,11 +131,18 @@ context: |
   operator explicitly asks. Produce a plan or diff (`tofu plan`, `--dry-run=client`)
   and let the operator run the apply.
 
-  Secrets are unmanaged so far. The Cloudflare tunnel token is currently visible in the
-  `cloudflared` process arguments, and the Proxmox API token is a deliberately
-  over-privileged `root@pam` token — both are recorded shortcuts with a scheduled
-  milestone to fix them. Never commit credentials, kubeconfigs, tfstate, or private
-  keys.
+  Credentials are scoped, and the scoping is asserted rather than described: run
+  `make check-privileges`. OpenTofu provisions as `terraform@pve!tofu` with privilege
+  separation on and a custom nineteen-privilege role; `root@pam` holds no API tokens.
+  Cloud-init snippets upload as the unprivileged `tofu-snippets`, which is why root SSH
+  could be withdrawn — `PermitRootLogin no`, and root's authorised keys removed. The
+  tunnel runs as `cloudflared` with its token in a mode-600 file read via `--token-file`,
+  so it appears in neither `argv` nor the environment.
+
+  Storage of secrets is still a separate, unsolved problem from their scope: they are
+  files on disk, not held in a manager. Never commit credentials, kubeconfigs, tfstate,
+  or private keys. Never write an administrative token into `tofu/terraform.tfvars` —
+  that file is the scoped credential, and widening it would be invisible.
 
 # Per-artifact rules (optional)
 # Add custom rules for specific artifacts.

@@ -39,7 +39,13 @@ API endpoint for them.
 
 ```bash
 scripts/bootstrap.sh                      # tofu + kubectl, pinned, no root needed
-scripts/create-proxmox-token.sh           # writes tofu/terraform.tfvars, mode 600
+
+# Credentials, on a fresh host. The admin token exists only to create the scoped one.
+scripts/create-bootstrap-token.sh                              # root@pam!bootstrap
+PVE_ADMIN_TOKEN="$(cat tofu/.bootstrap-token)" \
+  scripts/create-terraform-user.sh                             # -> terraform.tfvars
+sudo pveum user token remove root@pam bootstrap && shred -u tofu/.bootstrap-token
+sudo scripts/create-snippet-user.sh                            # owns the snippet dir
 
 eval "$(ssh-agent)" && ssh-add ~/.ssh/id_ed25519
 make plan                                 # read it before applying
@@ -54,7 +60,8 @@ rather than in shell history, so the same instruments are available to everyone.
 | | |
 |---|---|
 | `make status` | host, VMs, node reachability, state, task progress |
-| `make check` | no secrets tracked, and reality still matches configuration |
+| `make check` | no secrets tracked, credentials still narrow, no drift |
+| `make check-privileges` | thirty assertions across the token, SSH, and the tunnel |
 | `make cluster` | k3s and cloud-init state, read from the node |
 | `make rebuild CONFIRM=yes` | timed destroy and recreate |
 
@@ -86,6 +93,39 @@ existed; `wait` does not block for a resource to appear, so it failed instantly 
 cloud-init wrote the completion marker regardless. See
 `LEARNINGS/practice/301-verifying-recovery.md`.
 
+## Credentials, and what each one can do
+
+Three credentials ran with more authority than their job needed. Each was narrowed, and
+each narrowing is asserted by `make check-privileges` rather than described here and
+hoped for.
+
+**Provisioning: `terraform@pve!tofu`, privilege separation on.** A custom role holding
+nineteen privileges, derived by starting minimal and rebuilding until it stopped failing
+— not by reading documentation and guessing. It is refused creating a host account,
+defining a role, changing a password, altering storage configuration, running a command
+inside a guest, and granting itself anything. `root@pam` holds no API tokens at all.
+
+**Snippet uploads: `tofu-snippets`, an unprivileged account.** Cloud-init files go over
+SSH because Proxmox exposes no API for the snippets content type, and the directory used
+to be root-owned, which is the only reason root SSH existed. The account owns the
+directory instead. No sudoers entry: the provider's write needs no privilege once the
+directory is writable.
+
+**Administrative SSH: withdrawn.** `PermitRootLogin no`, and root's `authorized_keys`
+emptied rather than merely refused. A `Match Address 192.168.0.*` block was also
+re-enabling password authentication for the whole LAN, so `PasswordAuthentication no`
+had never been the effective setting; the server now offers `publickey` alone.
+
+**The tunnel: `cloudflared`, unprivileged, token in a mode-600 file.** It ran as root
+with the token in `ExecStart`, readable from `/proc/<pid>/cmdline` and from a mode-644
+unit file by any local user. `--token-file` keeps it out of `argv` and out of the
+environment; the service account has no shell and no privileged group.
+
+The one thing not closed: that token was not rotated when the plumbing was hardened, so
+anyone who had already read it still holds a working credential. A tunnel token
+publishes to a hostname — it does not reach the host or the cluster — and rotating later
+is a write and a restart. Recorded rather than quietly dropped.
+
 ## Deliberately deferred
 
 Recorded as decisions, not oversights. Each has a milestone attached.
@@ -95,15 +135,6 @@ problems a single operator does not have. The cost of being wrong is one `tofu i
 with a backend block. Note that state holds resource attributes in plaintext — the full
 cloud-init body, SSH public key included — which is why `*.tfstate` is gitignored rather
 than merely untidy to commit.
-
-**A `root@pam` API token with privilege separation off** (design D4). A scoped
-`terraform@pve` user with only the roles the provider needs is the correct answer and
-belongs to the secrets milestone. The token is real credentials in `terraform.tfvars`,
-gitignored and mode 600; `make check-secrets` asserts it has never reached a commit.
-
-**Key-based root SSH on a non-default port.** The provider needs it for snippet uploads
-and `/var/lib/vz/snippets` is root-owned. It widens the attack surface and narrows with
-the same scoped-user work.
 
 **No configuration management.** Nodes are immutable: cloud-init bootstraps them and
 everything above the OS is reconciled by GitOps. Bootstrap is about fifteen lines of
@@ -119,7 +150,7 @@ datastore stops being sqlite and the fsync argument behind putting disks on the 
 ```
 openspec/       Planning: config.yaml is authoritative project context
 tofu/           OpenTofu root module — flat and unmodularised on purpose
-scripts/        Toolchain bootstrap and Proxmox token creation
+scripts/        Toolchain bootstrap, credential creation, host hardening
 Makefile        Operator console
 LEARNINGS/      Notes, by subject and depth — 101 basics, 201 how it works, 301 what bit us
 ```

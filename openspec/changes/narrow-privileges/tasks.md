@@ -14,7 +14,7 @@ the internet.
 - [x] 2.1 Derive the privileges `bpg/proxmox` actually exercises for this configuration (design Open Question 1) — start from VM create/destroy, disk allocation on `local-lvm`, and file upload to `local`
 - [x] 2.2 Create a custom role holding exactly those privileges, named so its purpose is obvious
 - [x] 2.3 Create a `terraform@pve` user, assign the role at the narrowest workable path, and issue a token with **privilege separation on** (design D2)
-- [x] 2.4 Extend `scripts/create-proxmox-token.sh` to create the scoped user and role rather than a `root@pam` token, keeping it re-runnable
+- [x] 2.4 ~~Extend `scripts/create-proxmox-token.sh`~~ — split instead: `scripts/create-terraform-user.sh` creates the scoped user, role and token, and `create-proxmox-token.sh` became `create-bootstrap-token.sh`, a one-shot admin credential that exists to run the first and is deleted after
 - [x] 2.5 Swap `terraform.tfvars` to the new token and confirm `tofu plan` authenticates
 
 ## 3. Prove the scope is real
@@ -58,6 +58,6 @@ the internet.
 
 ## 8. Close the record
 
-- [ ] 8.1 Move the three entries out of "Known shortcuts" in `CLAUDE.md` and `README.md`, stating what replaced each
-- [ ] 8.2 Record in `LEARNINGS/` what the scoped role actually needed versus what was guessed — the gap is the interesting part
-- [ ] 8.3 Update `openspec/config.yaml`: secrets are no longer unmanaged
+- [x] 8.1 Move the three entries out of "Known shortcuts" in `CLAUDE.md` and `README.md`, stating what replaced each
+- [x] 8.2 Record in `LEARNINGS/` what the scoped role actually needed versus what was guessed — the gap is the interesting part
+- [x] 8.3 Update `openspec/config.yaml`: secrets are no longer unmanaged
