@@ -113,19 +113,21 @@ or silently "improve" them:
 
 ## Current state
 
-Milestone 1 is complete and archived. A single k3s node (`k3s-server-1`, 192.168.0.30)
-is provisioned entirely from `tofu/`, and `make rebuild CONFIRM=yes` destroys and
-recreates it unattended in 433 seconds. `kubectl` reaches it from the host with TLS
-verified. The permanent specs live in `openspec/specs/`.
+Milestones 1 and 2 are complete and archived. There is no active change; the permanent
+specs — `vm-provisioning`, `k3s-cluster`, `credential-scoping` — live in
+`openspec/specs/`.
 
-Milestone 2 is complete and archived as `2026-08-21-narrow-privileges`; the
-`credential-scoping` spec lives in `openspec/specs/`. There is no active change.
+A single k3s node (`k3s-server-1`, 192.168.0.30) is provisioned entirely from `tofu/`.
+`make rebuild CONFIRM=yes` destroys and recreates it unattended in about 105 seconds,
+rising to roughly 430 when the 596 MB cloud image is re-downloaded. `kubectl` reaches it
+from the host with TLS verified.
 
-OpenTofu provisions as `terraform@pve!tofu` with
-privilege separation on and a nineteen-privilege custom role; cloud-init snippets upload
-as the unprivileged `tofu-snippets`; root SSH is refused and root holds no authorised
-keys; the tunnel runs as `cloudflared` with its token in a mode-600 file rather than in
-`argv`. `make check-privileges` asserts all of it, and `make check` runs it.
+Every credential is scoped, and the scoping is asserted rather than described: OpenTofu
+provisions as `terraform@pve!tofu` with privilege separation on and a nineteen-privilege
+custom role; cloud-init snippets upload as the unprivileged `tofu-snippets`; root SSH is
+refused and root holds no authorised keys; the tunnel runs as `cloudflared` with its
+token in a mode-600 file rather than in `argv`. `make check-privileges` asserts all of
+it, and `make check` runs it.
 
 Do not reintroduce a `root@pam` API token. `scripts/create-bootstrap-token.sh` creates
 one deliberately, for the single purpose of creating the scoped user on a fresh host,
