@@ -9,7 +9,9 @@
 
 TOFU     := tofu
 TF_DIR   := tofu
-CHANGE   := bootstrap-k3s-node
+# The active change, discovered rather than hardcoded — a pinned name silently
+# breaks the moment a change is archived.
+CHANGE   ?= $(shell ls -1 openspec/changes 2>/dev/null | grep -v '^archive$$' | head -1)
 KUBECONFIG_PATH := $(CURDIR)/kubeconfig
 
 # Read the node address from Terraform, so the address plan has exactly one home.
