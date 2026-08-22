@@ -69,37 +69,3 @@ spec:
       resources:
         requests: {cpu: 25m, memory: 64Mi}
         limits: {memory: 128Mi}
-
-    # --- the one Application that has to be bootstrapped ---
-    #
-    # Everything ArgoCD manages comes from Git. This object is the exception, because
-    # something has to tell ArgoCD where Git is. Shipping it inside the same Helm
-    # release means Helm's own ordering applies it after the Application CRD, and a
-    # rebuilt cluster arrives already pointed at the repository.
-    #
-    # It is the only Kubernetes object in this repository that is not in k8s/.
-    extraObjects:
-      - apiVersion: argoproj.io/v1alpha1
-        kind: Application
-        metadata:
-          name: site
-          namespace: argocd
-        spec:
-          project: default
-          source:
-            repoURL: ${repo_url}
-            path: k8s/site
-            targetRevision: ${repo_revision}
-          destination:
-            server: https://kubernetes.default.svc
-            namespace: web
-          syncPolicy:
-            automated:
-              # Revert changes made directly against the cluster. Without this a
-              # kubectl edit survives and ArgoCD reports OutOfSync forever.
-              selfHeal: true
-              # Delete what is removed from Git. Without this, deleting a file leaves
-              # the resource running indefinitely.
-              prune: true
-            syncOptions:
-              - CreateNamespace=true

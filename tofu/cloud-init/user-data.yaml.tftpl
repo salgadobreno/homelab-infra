@@ -36,6 +36,14 @@ write_files:
     content: |
       ${indent(6, argocd_manifest)}
 
+  # Separate file, deliberately: k3s applies each manifest independently and retries
+  # failures, which is what lets this land after the chart has created its CRDs.
+  - path: /var/lib/rancher/k3s/server/manifests/argocd-app-site.yaml
+    owner: "root:root"
+    permissions: "0600"
+    content: |
+      ${indent(6, argocd_app_manifest)}
+
 runcmd:
   # Guest agent first: graceful shutdown and Proxmox UI integration. Nothing
   # depends on it for addressing — the address is static (design D7).
