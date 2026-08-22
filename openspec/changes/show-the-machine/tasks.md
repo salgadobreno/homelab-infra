@@ -26,8 +26,8 @@ first generated output is inside the boundary rather than retrofitted into it.
 ## 4. The drift check
 
 - [x] 4.1 Add `make check-diagram`: regenerate into a temporary file, diff against what is committed, fail on any difference (design D2)
-- [ ] 4.2 Confirm it fails when the cluster changes — change something the page reports and watch the check name it. **Scaling `site` cannot demonstrate this: ArgoCD selfHeal reverts it in ~310 ms, measured, which is faster than the generator can read the cluster.** Needs a change to something the `site` Application does not manage — `self-description` "A change in the cluster fails the check"
-- [ ] 4.3 Confirm the failure is resolved by `make diagram` and nothing else
+- [x] 4.2 Confirm it fails when the cluster changes — change something the page reports and watch the check name it. Scaling `site` cannot demonstrate this: ArgoCD selfHeal reverts it in ~310 ms, measured, faster than the generator can read the cluster. Done instead by scaling `argocd-applicationset-controller` 0→1, which no Application manages — `self-description` "A change in the cluster fails the check"
+- [x] 4.3 Confirm the failure is resolved by `make diagram` and nothing else
 - [x] 4.4 Confirm it passes when the page is current — `self-description` "The check passes when the page is current"
 
 ## 5. The page
