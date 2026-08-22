@@ -16,9 +16,13 @@ metadata:
   name: site
 spec:
   ingressClassName: traefik
+  # Every public name the tunnel forwards. traefik matches on the Host header the
+  # tunnel passes through unchanged, so a name that is not listed here gets a 404 from
+  # traefik — which looks like the site being missing rather than the routing being
+  # incomplete.
   rules:
-    - host: k8s.buzaga.com.br
-      http:
+    - host: buzaga.com.br
+      http: &site
         paths:
           - path: /
             pathType: Prefix
@@ -27,3 +31,7 @@ spec:
                 name: site
                 port:
                   name: http
+    - host: www.buzaga.com.br
+      http: *site
+    - host: k8s.buzaga.com.br
+      http: *site
