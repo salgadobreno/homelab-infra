@@ -5,8 +5,8 @@ first generated output is inside the boundary rather than retrofitted into it.
 
 ## 1. Establish the baseline
 
-- [ ] 1.1 Record what the site says today, and the raw `kubectl` output the page will be made from, so "generated" can be compared against a known input
-- [ ] 1.2 Confirm `make check` and `make check-public` are green before anything is added
+- [x] 1.1 Record what the site says today, and the raw `kubectl` output the page will be made from, so "generated" can be compared against a known input
+- [x] 1.2 Confirm `make check` and `make check-public` are green before anything is added
 
 ## 2. The boundary, before the thing it bounds
 
@@ -35,7 +35,7 @@ first generated output is inside the boundary rather than retrofitted into it.
 - [ ] 5.1 Generate the current-state half and commit it; confirm it reaches the public site through ArgoCD with no command run against the cluster
 - [ ] 5.2 Write the "before" half from the record M4 made, labelled as history rather than as a reading (design D5) — `self-description` "The two halves are not presented as equivalent"
 - [ ] 5.3 Decide Open Question 3: whether the page names the commit it was generated from
-- [ ] 5.4 Delete `k8s/site/content/diagram.ascii` — `self-description` "A hand-written description cannot be served"
+- [ ] 5.4 Confirm nothing hand-written describes the system: `diagram.ascii` is already gone (commit `6bfba43`), so the live case is the dead `/api/hits` call recorded in `baseline.md` — `self-description` "A hand-written description cannot be served"
 - [ ] 5.5 Read the finished page as someone who has never seen this repository. The audience test, and the only one here that cannot be automated
 
 ## 6. Prove it survives
