@@ -6,7 +6,7 @@
 #   node name, Ready state, kubelet          node IP, hypervisor hostname
 #   CPU and memory capacity                  storage class, paths, volume names
 #   workload names, desired counts           pod IPs, cluster IPs, pod name suffixes
-#   ArgoCD sync status and revision          account names, token IDs
+#   ArgoCD sync status and health            account names, token IDs, synced revision
 #   image names and tags                     anything about the tunnel or hypervisor
 #
 # This file is the authority. scripts/check-disclosure.sh reads it; nothing

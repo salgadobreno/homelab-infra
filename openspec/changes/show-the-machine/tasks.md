@@ -17,11 +17,11 @@ first generated output is inside the boundary rather than retrofitted into it.
 
 ## 3. The generator
 
-- [ ] 3.1 Answer design Open Question 2 and decide where the generated fragment lives
-- [ ] 3.2 Write `scripts/generate-diagram.sh`, reading the cluster and emitting the fragment, with the determinism rules from D3 applied deliberately rather than discovered
-- [ ] 3.3 Add `make diagram`
-- [ ] 3.4 Run it twice against an unchanged cluster and confirm byte-identical output — `self-description` "The description is reproducible"
-- [ ] 3.5 Confirm the output is inside the disclosure boundary — `self-description` "A forbidden value cannot reach the page"
+- [x] 3.1 Answer design Open Question 2 and decide where the generated fragment lives — a separate file, `k8s/site/content/machine.html`, so the drift diff is over a file that is entirely generated
+- [x] 3.2 Write `scripts/generate-diagram.sh`, reading the cluster and emitting the fragment, with the determinism rules from D3 applied deliberately rather than discovered
+- [x] 3.3 Add `make diagram`
+- [x] 3.4 Run it twice against an unchanged cluster and confirm byte-identical output — `self-description` "The description is reproducible"
+- [x] 3.5 Confirm the output is inside the disclosure boundary — `self-description` "A forbidden value cannot reach the page"
 
 ## 4. The drift check
 
@@ -34,7 +34,7 @@ first generated output is inside the boundary rather than retrofitted into it.
 
 - [ ] 5.1 Generate the current-state half and commit it; confirm it reaches the public site through ArgoCD with no command run against the cluster
 - [ ] 5.2 Write the "before" half from the record M4 made, labelled as history rather than as a reading (design D5) — `self-description` "The two halves are not presented as equivalent"
-- [ ] 5.3 Decide Open Question 3: whether the page names the commit it was generated from
+- [x] 5.3 Decide Open Question 3: whether the page names the commit it was generated from — no, and it cannot: see the fixpoint argument in `generate-diagram.sh` and design D3
 - [ ] 5.4 Confirm nothing hand-written describes the system: `diagram.ascii` is already gone (commit `6bfba43`), so the live case is the dead `/api/hits` call recorded in `baseline.md` — `self-description` "A hand-written description cannot be served"
 - [ ] 5.5 Read the finished page as someone who has never seen this repository. The audience test, and the only one here that cannot be automated
 

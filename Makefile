@@ -452,6 +452,10 @@ tf-state: ## What Terraform currently believes exists
 .PHONY: check
 check: check-secrets check-privileges check-site check-drift ## Run all safety checks
 
+.PHONY: diagram
+diagram: ## Regenerate k8s/site/content/machine.html from the cluster (task 3.3)
+	@./scripts/generate-diagram.sh
+
 .PHONY: check-disclosure
 check-disclosure: ## Assert nothing served crosses the disclosure boundary (task 2.2)
 	@./scripts/check-disclosure.sh

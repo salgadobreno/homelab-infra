@@ -76,6 +76,18 @@ spurious difference to suppress deliberately:
 - **Anything ephemeral.** Pod name suffixes, resource versions, IPs — most of which the
   disclosure boundary already excludes.
 
+**A fifth source turned up while building the generator, and it cannot be normalised —
+it has to be left out.** ArgoCD's synced revision is the commit that contains this file.
+Publishing it means every push changes what the page should say, so the drift check goes
+red after each commit; and the fix — regenerate and commit — is itself a new commit, which
+changes the value again. There is no fixpoint.
+
+Normalising the revision away instead would let the page display a stale commit and stay
+green, which is exactly what D2 forbids. So sync status and health are published and the
+revision is not. **This also answers Open Question 3: the page cannot name the commit it
+was generated from, for the same reason.** A value that changes *because* it was
+committed cannot appear in a file whose correctness is a byte diff.
+
 A generator that fails this makes `make check` fail at random, which trains the operator
 to ignore it — the same way the three wrong checks in M2 trained trust in a green result
 that meant nothing.
@@ -89,7 +101,7 @@ Operator decision: **shapes, not addresses.**
 | node name, Ready state, kubelet version | node IP, hypervisor hostname |
 | CPU and memory capacity | storage class, paths, volume names |
 | workload names and desired counts | pod IPs, cluster IPs, pod name suffixes |
-| ArgoCD sync status and revision | account names, token IDs |
+| ArgoCD sync status and health | account names, token IDs, the synced revision (D3) |
 | image names and tags | anything about the tunnel or the hypervisor |
 
 A deny-list would be wrong: it enumerates what is known sensitive today, against a
@@ -120,12 +132,12 @@ as long as it was.
 
 ## Open Questions
 
-1. What does the generator read the cluster *with* — the operator's kubeconfig, which
-   means `make diagram` only works from this host, and that is probably correct for a
-   single-operator project.
-2. Where does the generated fragment live: a second file included into `index.html`, or a
-   marked region of `index.html` the generator rewrites in place? The second keeps one
-   page; the first keeps the generator away from hand-written markup.
-3. Does the page name the commit it was generated from? It is the most useful single fact
-   for a reader deciding whether to believe it, and it makes the drift check's failure
-   legible without running anything.
+1. ~~What does the generator read the cluster *with*?~~ **Answered: `$(CURDIR)/kubeconfig`**,
+   the same credential every other target uses. `make diagram` works only from this host.
+   Resolved in `baseline.md`.
+2. ~~Where does the generated fragment live?~~ **Answered: a separate file,
+   `k8s/site/content/machine.html`.** Operator decision 2026-08-22. The drift diff is then
+   over a file that is 100% generated, and the generator never touches hand-written markup.
+3. ~~Does the page name the commit it was generated from?~~ **Answered: no, and it
+   cannot.** See the fixpoint argument in D3. Resolved 2026-08-22 while building the
+   generator, not by preference.
