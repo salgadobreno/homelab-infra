@@ -31,7 +31,7 @@ TUNNEL_USER  ?= cloudflared
 ORIGIN_URL   ?= http://127.0.0.1:30000/
 SITE_HOST    ?= k8s.buzaga.com.br
 SITE_MARKER  ?= served-by: k3s
-LEGACY_HOST  ?= buzaga.com.br
+APEX_HOSTS   ?= buzaga.com.br www.buzaga.com.br
 SNIPPET_USER ?= tofu-snippets
 SNIPPET_DIR  ?= /var/lib/vz/snippets
 SSH_OPTS := -o ConnectTimeout=8 -o StrictHostKeyChecking=accept-new
@@ -285,21 +285,21 @@ check-tunnel: ## Confirm the tunnel holds no readable credential and is not root
 	  || { echo "FAIL: origin returned $$code"; exit 1; }
 
 .PHONY: check-public
-check-public: ## Confirm both public hostnames serve the copy they should (tasks 5.2, 5.3)
+check-public: ## Confirm every public hostname is served by the cluster
 	@# Deliberately NOT part of `make check`: it depends on DNS, Cloudflare and the
-	@# internet, so it can fail for reasons that say nothing about this system. Run it
-	@# when the public pair matters — most of all immediately before the M4 cutover.
+	@# internet, so it can fail for reasons that say nothing about this system.
 	@# Both return 200, so a status code cannot tell them apart. The marker can.
 	@curl -s -m 15 https://$(SITE_HOST)/ | grep -q '$(SITE_MARKER)' \
 	  && echo "OK: https://$(SITE_HOST)/ serves the cluster's copy" \
 	  || { echo "FAIL: https://$(SITE_HOST)/ is not serving the cluster's copy"; exit 1; }
-	@curl -s -m 15 https://$(LEGACY_HOST)/ | grep -q '$(SITE_MARKER)' \
-	  && { echo "FAIL: https://$(LEGACY_HOST)/ has moved to the cluster — it should still be Compose"; exit 1; } \
-	  || echo "OK: https://$(LEGACY_HOST)/ still serves the Compose copy"
-	@code=$$(curl -s -o /dev/null -m 15 -w '%{http_code}' https://$(LEGACY_HOST)/api/hits); \
-	 test "$$code" = "200" \
-	  && echo "OK: the hit counter still answers on $(LEGACY_HOST) (HTTP $$code)" \
-	  || { echo "FAIL: the hit counter returned $$code — the Compose stack is degraded"; exit 1; }
+	@# Inverted at the M4 cutover. This previously asserted the apex had NOT moved to the
+	@# cluster, which was correct while both copies ran and became wrong the moment the
+	@# hostname was repointed.
+	@for h in $(APEX_HOSTS); do \
+	   curl -s -m 15 "https://$$h/" | grep -q '$(SITE_MARKER)' \
+	     && echo "OK: https://$$h/ serves the cluster's copy" \
+	     || { echo "FAIL: https://$$h/ is not being served by the cluster"; exit 1; }; \
+	 done
 
 .PHONY: check-site
 check-site: ## Confirm the cluster is serving the site (task 6.1)
@@ -324,6 +324,12 @@ check-site: ## Confirm the cluster is serving the site (task 6.1)
 	@curl -s -m 10 -H 'Host: $(SITE_HOST)' http://$(NODE_IP)/ | grep -q '$(SITE_MARKER)' \
 	  && echo "OK: it is the cluster's copy (marker present)" \
 	  || { echo "FAIL: served a page without the '$(SITE_MARKER)' marker — something else answered"; exit 1; }
+	@# The hypervisor must not be serving the site any more. A listener here means the
+	@# retired Compose stack came back, and two origins for one site is the state M4
+	@# exists to end. Local, so it belongs in the routine suite.
+	@curl -s -o /dev/null -m 3 http://127.0.0.1:30000/ 2>/dev/null \
+	  && { echo "FAIL: something serves on the hypervisor's :30000 — the retired stack is back"; exit 1; } \
+	  || echo "OK: the hypervisor serves nothing"
 	@KUBECONFIG=$(KUBECONFIG_PATH) kubectl get application -n argocd site \
 	  -o jsonpath='{.status.sync.status}/{.status.health.status}' 2>/dev/null \
 	  | grep -qx 'Synced/Healthy' \

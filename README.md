@@ -45,9 +45,9 @@ and are built concurrently.
 
 ## What this replaces
 
-Recorded before it is switched off, because after that it can only be remembered. This
-is the arrangement the project exists to replace, measured on 2026-08-22 while it was
-still serving `buzaga.com.br`.
+Recorded before it was switched off, because after that it could only be remembered.
+This was the arrangement the project existed to replace, measured on 2026-08-22 while it
+was still serving `buzaga.com.br`. It was retired the same day.
 
 ```
 Docker Compose on the hypervisor  ·  /mnt/sda8/Projects/buzaga/docker-compose.yml
@@ -59,8 +59,8 @@ Docker Compose on the hypervisor  ·  /mnt/sda8/Projects/buzaga/docker-compose.y
 - **nginx** served `/mnt/sda8/Projects/buzaga/plain_site/` from a bind mount and proxied
   `/api/` to the hit counter.
 - **The hit counter** was a Node service recording visits. Its final reading:
-  `{"state":"first","total":69,"returning":6}` — two Redis keys, `hits:total` and
-  `hits:returning`.
+  `{"state":"first","total":72,"returning":6}` — two Redis keys, `hits:total` and
+  `hits:returning`, read from Redis directly a second before the volume was destroyed.
 - **Redis** held those two keys in a named volume.
 
 Three properties of that setup are the whole argument for what replaced it:
@@ -78,6 +78,9 @@ rebuilding the image from source or losing the service.
 The cluster version answers each of those: content in Git, stock images pinned by tag,
 and a reconciler that restores the whole thing from an empty node in 190 seconds without
 being asked.
+
+The counter is gone rather than ported. Its 72 visits are recorded here, which is all
+that survives it — and all that was worth surviving it.
 
 ## Quick start
 

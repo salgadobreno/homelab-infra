@@ -87,3 +87,56 @@ curl -s http://127.0.0.1:30000/api/hits           # the counter, while it exists
 docker compose -f ../docker-compose.yml ps        # the stack
 systemctl list-unit-files | grep -i buzaga        # the unit that would bring it back
 ```
+
+## The cutover, and the outage it caused
+
+**`site-delivery` "The cutover does not take the site down" was not met.** Recorded as a
+failure rather than ticked, because it is the only requirement in this change that had a
+chance of failing and it did.
+
+When the apex was repointed at traefik, it arrived carrying `Host: buzaga.com.br`. The
+`Ingress` listed only `k8s.buzaga.com.br`, so traefik matched no rule and answered 404.
+Both public names returned 404 until the Ingress was corrected and reconciled — a few
+minutes.
+
+The cause was in M3's work, not in the repoint. The Ingress was written when exactly one
+public name reached the cluster, and nothing made that assumption visible; a second name
+arriving was all it took. Design D1 sequenced the cutover so a fault would be caught
+before the teardown, and it was — the outage happened at step 3 and the teardown was not
+attempted until step 4 passed.
+
+What the ordering did buy: the Compose stack was still running and one dashboard edit
+from being live again for the whole window.
+
+**The diagnosis to keep.** A wrong origin port gives a 502 from Cloudflare, because
+nothing accepts the connection. A 404 means something accepted it and had no route. That
+distinction pointed straight at traefik rather than at the tunnel configuration, and it
+is the first thing to check next time.
+
+## The teardown
+
+```
+$ curl -s http://127.0.0.1:30000/api/hits
+{"state":"first","total":72,"returning":6}
+$ docker compose down -v
+  ... 3 containers removed, volume buzaga_redis-data removed, network removed
+```
+
+Immediately after:
+
+```
+buzaga.com.br        HTTP 200      <- unaffected, which proves the repoint took effect
+www.buzaga.com.br    HTTP 200
+k8s.buzaga.com.br    HTTP 200
+
+127.0.0.1:30000      no answer
+127.0.0.1:443        no answer
+docker ps -a         no buzaga containers exist
+docker volume ls     0 buzaga volumes
+systemd              0 installed buzaga units
+```
+
+The apex answering 200 *after* the stack stopped is what proves step 3 actually took
+effect. Had the repoint silently failed, everything would have looked correct until this
+moment and the site would have gone down here — with the teardown blamed for a fault
+introduced two steps earlier.
