@@ -1,54 +1,49 @@
 # Tasks
 
-The disclosure check is built before the thing it checks, so the first rendered output is
-already inside the boundary rather than being retrofitted into it.
+The disclosure boundary and the drift check are built before the page they govern, so the
+first generated output is inside the boundary rather than retrofitted into it.
 
 ## 1. Establish the baseline
 
-- [ ] 1.1 Record what the site says today, and what the cluster would report — the raw `kubectl` output the page will be made from, so "generated" can be compared against a known input
-- [ ] 1.2 Confirm the cluster has no ServiceAccount, Role or RoleBinding of this project's making, so what this change adds is the whole of it
-- [ ] 1.3 Confirm `make check` and `make check-public` are green before anything is added
+- [ ] 1.1 Record what the site says today, and the raw `kubectl` output the page will be made from, so "generated" can be compared against a known input
+- [ ] 1.2 Confirm `make check` and `make check-public` are green before anything is added
 
 ## 2. The boundary, before the thing it bounds
 
-- [ ] 2.1 Write the disclosure allow-list into the repository as the authority the check reads (design D3)
-- [ ] 2.2 Add `make check-disclosure`, which fails on an IPv4 address, an absolute path, or a known account name in the rendered output
+- [ ] 2.1 Write the disclosure allow-list into the repository as the authority the check reads (design D4)
+- [ ] 2.2 Add `make check-disclosure`, failing on an IPv4 address, an absolute path, or a known account name in the generated fragment
 - [ ] 2.3 Confirm it fails on a fixture containing each forbidden shape — a check never seen to fail is not a check
 
-## 3. An identity that can read almost nothing
+## 3. The generator
 
-- [ ] 3.1 Add a ServiceAccount, Role and RoleBinding granting exactly the reads the page makes, and nothing else
-- [ ] 3.2 Confirm the identity is refused a Secret read — `self-description` "The renderer cannot read secrets"
-- [ ] 3.3 Confirm the identity is refused every write — `self-description` "The renderer cannot write"
-- [ ] 3.4 Add `make check-renderer-scope` so both refusals are a command rather than a memory
+- [ ] 3.1 Answer design Open Question 2 and decide where the generated fragment lives
+- [ ] 3.2 Write `scripts/generate-diagram.sh`, reading the cluster and emitting the fragment, with the determinism rules from D3 applied deliberately rather than discovered
+- [ ] 3.3 Add `make diagram`
+- [ ] 3.4 Run it twice against an unchanged cluster and confirm byte-identical output — `self-description` "The description is reproducible"
+- [ ] 3.5 Confirm the output is inside the disclosure boundary — `self-description` "A forbidden value cannot reach the page"
 
-## 4. Render it
+## 4. The drift check
 
-- [ ] 4.1 Add the sidecar to the site Deployment: stock `kubectl` image pinned, writing into an `emptyDir` nginx already serves (design D1, D2)
-- [ ] 4.2 Answer design Open Question 1 — what the sidecar needs in `securityContext` to write to the shared volume while the site container stays read-only
-- [ ] 4.3 Answer design Open Question 2 and set the refresh interval deliberately
-- [ ] 4.4 Confirm the rendered output appears and is inside the disclosure boundary — `self-description` "A forbidden value cannot reach the page"
+- [ ] 4.1 Add `make check-diagram`: regenerate into a temporary file, diff against what is committed, fail on any difference (design D2)
+- [ ] 4.2 Confirm it fails when the cluster changes — change something the page reports and watch the check name it — `self-description` "A change in the cluster fails the check"
+- [ ] 4.3 Confirm the failure is resolved by `make diagram` and nothing else
+- [ ] 4.4 Confirm it passes when the page is current — `self-description` "The check passes when the page is current"
 
-## 5. Make it true rather than plausible
+## 5. The page
 
-- [ ] 5.1 Change something the page reports, and confirm the page follows without any edit to the repository — `self-description` "The description follows a change in the cluster"
-- [ ] 5.2 Stop the renderer and confirm the page says it is stale rather than showing old data as current — `self-description` "A failed renderer is visible rather than silent"
-- [ ] 5.3 Confirm a dead renderer does not take the site down
+- [ ] 5.1 Generate the current-state half and commit it; confirm it reaches the public site through ArgoCD with no command run against the cluster
+- [ ] 5.2 Write the "before" half from the record M4 made, labelled as history rather than as a reading (design D5) — `self-description` "The two halves are not presented as equivalent"
+- [ ] 5.3 Decide Open Question 3: whether the page names the commit it was generated from
+- [ ] 5.4 Delete `k8s/site/content/diagram.ascii` — `self-description` "A hand-written description cannot be served"
+- [ ] 5.5 Read the finished page as someone who has never seen this repository. The audience test, and the only one here that cannot be automated
 
-## 6. Both halves
+## 6. Prove it survives
 
-- [ ] 6.1 Write the "before" — the Compose arrangement — as static content, labelled as a story rather than a reading (design D5)
-- [ ] 6.2 Delete `k8s/site/content/diagram.ascii` — `self-description` "A hand-written description cannot be served"
-- [ ] 6.3 Decide Open Question 3: whether the page shows which node and pod served the request
-- [ ] 6.4 Confirm the page reads as one thing to someone who has never seen this repository — the audience test, and the only one that cannot be automated
+- [ ] 6.1 Wire `check-diagram` and `check-disclosure` into `make check`
+- [ ] 6.2 Run `make rebuild CONFIRM=yes` and confirm the page returns and still matches the cluster — a rebuilt cluster reports the same shapes, so the check should stay green without regeneration
+- [ ] 6.3 Confirm `make check` fails if the page is deliberately edited by hand, which is the whole point
 
-## 7. Prove it survives
+## 7. Close the record
 
-- [ ] 7.1 Run `make rebuild CONFIRM=yes` and confirm the page returns, rendering current state, with no step beyond the rebuild
-- [ ] 7.2 Wire `check-disclosure` and `check-renderer-scope` into `make check`
-
-## 8. Close the record
-
-- [ ] 8.1 Update `README.md`, `CLAUDE.md` and `openspec/config.yaml`
-- [ ] 8.2 Record what the RBAC actually needed versus what was guessed — the same gap M2 found, one layer up
-- [ ] 8.3 Record in `LEARNINGS/` anything the rung taught, if it was earned
+- [ ] 7.1 Update `README.md`, `CLAUDE.md` and `openspec/config.yaml`
+- [ ] 7.2 Record in `LEARNINGS/` anything the rung taught, if it was earned

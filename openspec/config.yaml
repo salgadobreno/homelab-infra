@@ -145,22 +145,29 @@ context: |
   repository; this rung is the one that shows the work to someone who will not.
 
   **The requirement that makes it engineering rather than content: the picture is
-  generated from live state, never drawn.** `k8s/site/content/diagram.ascii` is the
-  evidence — a hand-drawn diagram already in the repository showing `microk8s`, `ansible`
-  and a host called `buserver`, none of which exist. It was accurate once. A diagram that
-  can disagree with reality eventually will, and a self-describing site that lies is worse
-  than no diagram at all.
+  generated from the cluster's own output by a command, never drawn by hand.**
+  `k8s/site/content/diagram.ascii` is the evidence — a hand-drawn diagram already in the
+  repository showing `microk8s`, `ansible` and a host called `buserver`, none of which
+  exist. It was accurate once. A diagram that can disagree with reality eventually will,
+  and a self-describing site that lies is worse than no diagram at all.
 
-  Two questions to settle when proposing it, both real forks:
+  It is **static content**, generated and committed like any other page. It is not
+  rendered at request time and there is no service in the cluster reading the API — that
+  reading of "generated" was an agent's escalation of "not hand-drawn", corrected
+  2026-08-22, and it would have bought a runtime dependency and an RBAC surface for a page
+  that changes a few times a month.
 
-  - **Where the data comes from.** A build-time snapshot rendered at sync is simple and is
-    stale between syncs. Querying the Kubernetes API from the pod at request time is
-    always current and needs a ServiceAccount with its own narrow RBAC — which is M2's
-    argument applied inside the cluster, and the better exercise.
+  Staleness is handled by a check rather than by a renderer: `make diagram` regenerates
+  from live state, and `make check` fails when what is committed differs from what would
+  be generated now. Drift becomes a failing check with a one-command fix.
+
+  One question to settle when proposing it, and it is real:
+
   - **What it must not say.** The page is public. Node addresses, storage layout, and
     account names are exactly what this repo spent M2 narrowing, and a page that shows its
-    guts is an information-disclosure surface. Decide what is shown before building it,
-    not after.
+    guts is an information-disclosure surface. Decided 2026-08-22: shapes, versions,
+    counts and sync state are published; addresses, storage paths and account names are
+    not.
 
   Later this content moves into a `projects` section of the operator's personal site, so
   it should not assume it owns the whole page.

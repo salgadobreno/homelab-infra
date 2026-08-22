@@ -1,50 +1,53 @@
 ## Purpose
 
 The public site describes the infrastructure serving it, from what that infrastructure
-actually reports, so the description cannot drift away from the thing it describes.
+actually reports, so the description cannot drift away from the thing it describes without
+something failing.
 
 ## ADDED Requirements
 
-### Requirement: The description is generated from live state
+### Requirement: The description is generated, not written
 
-The system SHALL render the site's infrastructure description from state read from the
-cluster at runtime, and SHALL NOT serve a description stored as content in the repository.
+The system SHALL produce the site's infrastructure description from the cluster's own
+output by a repeatable command, and SHALL NOT accept a description composed by hand.
 
-#### Scenario: The description follows a change in the cluster
+#### Scenario: The description is reproducible
 
-- **WHEN** something the description reports changes in the cluster
-- **THEN** the rendered description SHALL reflect the change without any edit to the
-  repository
-- **AND** the change SHALL appear within the renderer's stated refresh interval
+- **WHEN** the generator is run twice against an unchanged cluster
+- **THEN** it SHALL produce identical output both times
+
+A generator whose output varies between runs makes the drift check below fire on noise,
+and a check that cries wolf is a check people learn to skip.
 
 #### Scenario: A hand-written description cannot be served
 
-- **WHEN** the repository is searched for a stored diagram or description of the
-  infrastructure
+- **WHEN** the repository is searched for a stored diagram of the infrastructure that no
+  command produces
 - **THEN** none SHALL exist
 
-The hand-drawn diagram this replaces named three technologies the project does not use.
-It was accurate when written. Deleting it is part of the requirement, not tidying.
+The hand-drawn diagram this replaces named three technologies the project does not use. It
+was accurate when written. Deleting it is part of the requirement, not tidying.
 
-### Requirement: The renderer reads only what the page shows
+### Requirement: Disagreement with reality fails a check
 
-The system SHALL give the renderer an identity scoped to the reads the page makes, and
-that identity SHALL be refused anything else.
+The system SHALL provide a check that compares the committed description against the
+cluster as it is now, SHALL fail when they differ, and that check SHALL be part of the
+routine check suite.
 
-#### Scenario: The renderer cannot read secrets
+#### Scenario: A change in the cluster fails the check
 
-- **WHEN** the renderer's identity is used to read a Secret, or to read across namespaces
-  it does not render
-- **THEN** the cluster SHALL refuse it
-- **AND** the refusal SHALL be recorded as evidence, not assumed
+- **WHEN** something the description reports changes in the cluster
+- **THEN** the check SHALL fail
+- **AND** it SHALL name what differs
+- **AND** the failure SHALL be resolvable by re-running the generator
 
-#### Scenario: The renderer cannot write
+#### Scenario: The check passes when the page is current
 
-- **WHEN** the renderer's identity is used to modify any resource
-- **THEN** the cluster SHALL refuse it
+- **WHEN** the committed description matches what the generator would produce now
+- **THEN** the check SHALL pass
 
-A page that reads the cluster is a way into the cluster. The negative test is the
-requirement, exactly as it was for the provisioning credential.
+This is what replaces a runtime renderer. The page can still be wrong; it cannot be wrong
+*and* green.
 
 ### Requirement: The description stays within a stated disclosure boundary
 
@@ -54,23 +57,23 @@ command rather than by review.
 
 #### Scenario: A forbidden value cannot reach the page
 
-- **WHEN** the rendered description is checked against the disclosure boundary
+- **WHEN** the generated description is checked against the disclosure boundary
 - **THEN** no network address, storage path or account name SHALL appear
 - **AND** the check SHALL fail if one does
 
 Written down before it is built, because "what is safe to show" decided after the fact is
-decided by what happens to already be on the page.
+decided by whatever happens to already be on the page.
 
-### Requirement: A failed renderer is visible rather than silent
+### Requirement: The description shows what was replaced
 
-The system SHALL make a stale or failed description evident on the page itself, and SHALL
-NOT present unavailable data as though it were current.
+The system SHALL present both the current arrangement and the one it replaced, and SHALL
+distinguish which of the two is generated from live state.
 
-#### Scenario: The renderer stops and the page says so
+#### Scenario: The two halves are not presented as equivalent
 
-- **WHEN** the renderer has not produced fresh output within its refresh interval
-- **THEN** the page SHALL say the description is stale, and as of when
-- **AND** it SHALL NOT display the last successful reading as if it were current
+- **WHEN** a reader views the description
+- **THEN** the current arrangement SHALL be identifiable as read from the cluster
+- **AND** the previous arrangement SHALL be identifiable as recorded history
 
-nginx will keep serving whatever file is there. A panel that looks right and is hours old
-is worse than an error, because nothing prompts anyone to look.
+The old stack cannot be queried; it no longer exists. Presenting a remembered thing and a
+measured thing in the same register is the habit this rung exists to break.
