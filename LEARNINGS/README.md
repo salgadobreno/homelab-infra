@@ -69,11 +69,16 @@ able to give one, and nobody else can assert that on their behalf.
 ### k3s
 - [201 · one binary, five opinions](k3s/201-one-binary-five-opinions.md) — what k3s bundles, and what is Kubernetes proper
 
+### ai-engineering
+- [101 · evals and guardrails](ai-engineering/101-evals-and-guardrails.md) — how you test output you cannot predict, and where a check should sit
+- [201 · construct validity](ai-engineering/201-construct-validity.md) — the green check that measures something adjacent
+
 ### practice
 - [201 · decide values up front](practice/201-decide-values-up-front.md) — deciding beats discovering
 - [301 · tool output is untrusted](practice/301-tool-output-is-untrusted.md) — a warning message executed itself
 - [301 · verifying recovery](practice/301-verifying-recovery.md) — prove the disruption happened first
 - [301 · rebuilt hosts change identity](practice/301-rebuilt-hosts-change-identity.md) — fresh VM, fresh SSH host keys
+- [301 · guardrails arrive too late](practice/301-guardrails-arrive-too-late.md) — every control here detects, almost none prevent
 
 ## Queued
 
