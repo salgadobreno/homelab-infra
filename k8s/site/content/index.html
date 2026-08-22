@@ -22,41 +22,17 @@
         <div class="max-w-2xl w-full mx-4">
             <div class="border-2 border-dashed border-gray-400 p-8 bg-white">
                 <h1 class="text-2xl mb-6">Welcome to buzaga.com.br</h1>
-                <p class="mb-4">Hi, I'm Breno and I'm a Software Engineer from Brazil.</p><p> This website is being served from the homelab 😎! <span id="dynamic-msg">That's all I got for you atm, maybe come back later?</span></p>
+                <p class="mb-4">Hi, I'm Breno and I'm a Software Engineer from Brazil.</p><p> This website is being served from the homelab 😎! That's all I got for you atm, maybe come back later?</p>
           <br>
                 <p>Reach out:</p>
           <ul>
                 <li>breno@buzaga.com.br</li>
           </ul>
           <br>
-                <p class="text-gray-400 text-sm">Visitors: <span id="hit-total">...</span> · Returning: <span id="hit-returning">...</span></p>
+                <p class="text-sm"><a class="underline" href="/machine.html">What is serving this page &rarr;</a></p>
             </div>
         </div>
     </div>
-    <script>
-        // Fetch counters and visitor state, then update the page accordingly
-        fetch("/api/hits")
-            .then(res => res.json())
-            .then(data => {
-                // Update counters
-                document.getElementById("hit-total").textContent = data.total;
-                document.getElementById("hit-returning").textContent = data.returning;
-
-                // Swap the dynamic message based on visitor state
-                const msg = document.getElementById("dynamic-msg");
-                if (data.state === "new") {
-                    msg.textContent = "Thank you for coming back!";
-                } else if (data.state === "returning") {
-                    msg.textContent = "Thank you for coming back! Sorry, got nothing new for you yet!";
-                }
-                // "first" → keep the default message already in the HTML
-            })
-            .catch(() => {
-                // If the API is down, hide the counters — the static site still works
-                document.getElementById("hit-total").textContent = "";
-                document.getElementById("hit-returning").textContent = "";
-            });
-    </script>
 <!-- served-by: k3s -->
 </body>
 </html>
