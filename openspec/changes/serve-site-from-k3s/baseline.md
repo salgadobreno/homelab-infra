@@ -313,3 +313,29 @@ assertions deterministically.
 Worth noticing rather than working around — it is the same property task 4.3 demonstrates,
 met from the other direction. Once a cluster self-heals, "break it and see" stops being
 a repeatable test.
+
+## Group 7: it comes back from nothing
+
+```
+$ make rebuild CONFIRM=yes
+REBUILD COMPLETE in 107s
+  site serving again 190s after the rebuild began
+$ make check-site
+OK: the node answers and the API accepts this kubeconfig
+OK: traefik serves k8s.buzaga.com.br (HTTP 200)
+OK: it is the cluster's copy (marker present)
+OK: ArgoCD reports the app Synced and Healthy
+```
+
+Destroy to serving, unattended: **190 seconds**. The node reports Ready at ~106s; the
+remaining ~85s is the ArgoCD chart installing and its first reconcile, neither of which
+blocks the node from being Ready. No content was copied from the hypervisor, and no
+command was run against the cluster.
+
+## What remains: group 5, and only group 5
+
+The tunnel is token-based, so its ingress rules are dashboard configuration. Adding
+`k8s.buzaga.com.br` as a public hostname pointing at `http://192.168.0.30:80` is the one
+step in this chain that Git cannot describe, and it is the operator's.
+
+Everything on this side of that seam is done and asserted by `make check`.

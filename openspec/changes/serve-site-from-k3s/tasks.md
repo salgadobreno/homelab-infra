@@ -34,6 +34,11 @@ plumbing because it is the only step that touches the internet.
 
 ## 5. The internet
 
+**Blocked on the operator.** The tunnel is token-based, so its ingress rules live in the
+Cloudflare dashboard and nothing in this repository can declare them (design D5). Every
+other group is complete; these three are the whole of what remains.
+
+
 - [ ] 5.1 Add the second public hostname in the Cloudflare dashboard, pointing at traefik on 192.168.0.30 (design D5) — operator action
 - [ ] 5.2 Confirm the new hostname serves the cluster's copy — `site-delivery` "The public hostname serves the cluster copy"
 - [ ] 5.3 Confirm the existing hostname still serves the Compose copy, unchanged — the other half of the same requirement, and the reason for D6
@@ -46,11 +51,11 @@ plumbing because it is the only step that touches the internet.
 
 ## 7. Prove it survives
 
-- [ ] 7.1 Run `make rebuild CONFIRM=yes` and confirm the site serves again with no step beyond the rebuild — `site-delivery` "The site survives a rebuild"
-- [ ] 7.2 Record the rebuild time now that a workload reconciles on boot, and update the README if the number has moved
+- [x] 7.1 Run `make rebuild CONFIRM=yes` and confirm the site serves again with no step beyond the rebuild — `site-delivery` "The site survives a rebuild"
+- [x] 7.2 Record the rebuild time now that a workload reconciles on boot, and update the README if the number has moved
 
 ## 8. Close the record
 
-- [ ] 8.1 Update `README.md`, `CLAUDE.md` and `openspec/config.yaml`: the cluster serves something, and `k8s/` is deployed by ArgoCD rather than by OpenTofu
-- [ ] 8.2 Record the boundary between what `tofu/` owns and what ArgoCD owns, so the next change does not have to rediscover it
-- [ ] 8.3 Record in `LEARNINGS/` whatever the reconcile loop turned out to actually do — an entry only if something was learned the hard way
+- [x] 8.1 Update `README.md`, `CLAUDE.md` and `openspec/config.yaml`: the cluster serves something, and `k8s/` is deployed by ArgoCD rather than by OpenTofu
+- [x] 8.2 Record the boundary between what `tofu/` owns and what ArgoCD owns, so the next change does not have to rediscover it
+- [x] 8.3 Record in `LEARNINGS/` whatever the reconcile loop turned out to actually do — `argocd/301-a-release-cannot-contain-its-own-crd.md`: the bootstrap Application inside the Helm release failed the whole install, because Helm resolves every object against the API before applying any

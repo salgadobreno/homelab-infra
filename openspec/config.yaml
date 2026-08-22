@@ -202,6 +202,17 @@ context: |
   default PATH for the non-root operator. They also require root; the operator has
   sudo but commands should not assume it silently.
 
+  ## What owns what
+
+  `tofu/` provisions the node and installs ArgoCD as part of node bootstrap. `k8s/` holds
+  what ArgoCD reconciles. The boundary is the directory, and it is worth keeping obvious:
+  nothing in `k8s/` may need to exist before ArgoCD does, and no Kubernetes resource
+  belongs in `tofu/`. The single exception is the bootstrap `Application` in
+  `tofu/cloud-init/`, because something has to tell ArgoCD where Git is.
+
+  Anything under `k8s/` is deployed by being pushed. Applying it with `kubectl` gets the
+  right result for the wrong reason and conceals whether reconciliation works at all.
+
   ## Chosen stack
 
   OpenTofu (`tofu`, Terraform-compatible) with the `bpg/proxmox` provider, k3s for

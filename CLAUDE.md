@@ -18,6 +18,7 @@ decisions. It is the authoritative source and is kept current; this file is a su
 ```
 openspec/          OpenSpec planning: config.yaml, changes/, specs/
 tofu/              OpenTofu root module — flat and unmodularised on purpose
+k8s/               Manifests ArgoCD reconciles — deployed by commit, not by apply
 scripts/           toolchain bootstrap, credential creation, host hardening, checks
 Makefile           Operator console — every routine command lives here
 LEARNINGS/         Notes by subject, numbered by depth (see LEARNINGS/README.md)
@@ -137,6 +138,16 @@ custom role; cloud-init snippets upload as the unprivileged `tofu-snippets`; roo
 refused and root holds no authorised keys; the tunnel runs as `cloudflared` with its
 token in a mode-600 file rather than in `argv`. `make check-privileges` asserts all of
 it, and `make check` runs it.
+
+**`tofu/` and `k8s/` are different jobs and must not overlap.** OpenTofu provisions the
+node and installs the reconciler; everything above that is `k8s/`, applied by ArgoCD. Do
+not add a Kubernetes resource to `tofu/`, and do not put anything in `k8s/` that has to
+exist before ArgoCD does. The one exception is the bootstrap `Application`, which lives
+in `tofu/cloud-init/` because something has to tell ArgoCD where Git is.
+
+Do not `kubectl apply` anything under `k8s/`. It is deployed by being pushed. Applying
+it by hand produces the right result for the wrong reason and hides whether
+reconciliation actually works.
 
 Do not reintroduce a `root@pam` API token. `scripts/create-bootstrap-token.sh` creates
 one deliberately, for the single purpose of creating the scoped user on a fresh host,

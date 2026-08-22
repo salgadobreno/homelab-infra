@@ -24,9 +24,20 @@ industry-standard choice wins over the homelab-clever one.
    │     192.168.0.30/24  ── static, declared, never DHCP                     │
    │            │                                                             │
    │            └── k3s v1.36.3+k3s1 · sqlite datastore · flannel · traefik   │
+   │                     │                                                    │
+   │                     └── ArgoCD ──► reconciles k8s/ from this repository   │
+   │                                        │                                 │
+   │                                        └── the static site, served       │
+   │                                            at k8s.buzaga.com.br          │
    │                                                                          │
    └──────────────────────────────────────────────────────────────────────────┘
 ```
+
+Nothing is deployed by hand. ArgoCD is installed by cloud-init as a k3s `HelmChart`, so
+a cluster built from nothing arrives already reconciling; the site is a Deployment,
+Service, Ingress and a kustomize-generated ConfigMap in `k8s/site/`. Editing a page and
+pushing is the whole deployment — the ConfigMap's content hash changes, the Deployment's
+reference follows it, and the pods roll.
 
 Terraform is told none of the ordering. The VM references the image and the snippet, so
 the dependency graph is inferred; the two upstream resources have no edge between them
@@ -65,7 +76,7 @@ rather than in shell history, so the same instruments are available to everyone.
 | `make cluster` | k3s and cloud-init state, read from the node |
 | `make rebuild CONFIRM=yes` | timed destroy and recreate |
 
-## Rebuild time: 105 seconds, and why the number moves
+## Rebuild time: 105 seconds to a node, 190 to a serving site
 
 A full `destroy` → `apply` → node reporting Ready, with no manual steps:
 
@@ -75,7 +86,9 @@ A full `destroy` → `apply` → node reporting Ready, with no manual steps:
 | Ubuntu image re-download (596 MB) | 30s |
 | VM creation | 46s |
 | boot → k3s `Ready` | 47s |
-| **total** | **105s** |
+| **total, node Ready** | **105s** |
+| ArgoCD installed and the site Synced and serving | +85s |
+| **total, site answering** | **190s** |
 
 An earlier run of the same command took 433s. Nothing changed between them except
 network throughput on that 596 MB download, which `tofu destroy` removes and `apply`
@@ -84,7 +97,9 @@ nor the hardware controls**, so quote it as a range, or quote the part that does
 move.
 
 The stable figure is **boot to a node reporting `Ready`: 45-47 seconds** across every
-rebuild measured. That is the one worth citing, because it measures this project's
+rebuild measured, and **190 seconds from `make rebuild` to the site answering again** —
+the extra time is the ArgoCD chart installing and its first reconcile, neither of which
+blocks the node from reporting Ready. That is the one worth citing, because it measures this project's
 work rather than an Ubuntu mirror's throughput.
 
 Both numbers are only trustworthy because the readiness gate was fixed first. It
@@ -150,6 +165,7 @@ datastore stops being sqlite and the fsync argument behind putting disks on the 
 ```
 openspec/       Planning: config.yaml is authoritative project context
 tofu/           OpenTofu root module — flat and unmodularised on purpose
+k8s/            Manifests ArgoCD reconciles. Deployed by being committed, not applied
 scripts/        Toolchain bootstrap, credential creation, host hardening
 Makefile        Operator console
 LEARNINGS/      Notes, by subject and depth — 101 basics, 201 how it works, 301 what bit us
