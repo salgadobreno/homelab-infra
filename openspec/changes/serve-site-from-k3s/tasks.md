@@ -34,14 +34,13 @@ plumbing because it is the only step that touches the internet.
 
 ## 5. The internet
 
-**Blocked on the operator.** The tunnel is token-based, so its ingress rules live in the
-Cloudflare dashboard and nothing in this repository can declare them (design D5). Every
-other group is complete; these three are the whole of what remains.
+The tunnel is token-based, so its ingress rules live in the Cloudflare dashboard and
+nothing in this repository can declare them (design D5). 5.1 was the operator's.
 
 
-- [ ] 5.1 Add the second public hostname in the Cloudflare dashboard, pointing at traefik on 192.168.0.30 (design D5) — operator action
-- [ ] 5.2 Confirm the new hostname serves the cluster's copy — `site-delivery` "The public hostname serves the cluster copy"
-- [ ] 5.3 Confirm the existing hostname still serves the Compose copy, unchanged — the other half of the same requirement, and the reason for D6
+- [x] 5.1 Add the second public hostname in the Cloudflare dashboard, pointing at traefik on 192.168.0.30 (design D5) — operator action
+- [x] 5.2 Confirm the new hostname serves the cluster's copy — `site-delivery` "The public hostname serves the cluster copy"
+- [x] 5.3 Confirm the existing hostname still serves the Compose copy, unchanged — the other half of the same requirement, and the reason for D6
 
 ## 6. Make it verifiable
 

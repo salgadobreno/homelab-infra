@@ -31,6 +31,7 @@ TUNNEL_USER  ?= cloudflared
 ORIGIN_URL   ?= http://127.0.0.1:30000/
 SITE_HOST    ?= k8s.buzaga.com.br
 SITE_MARKER  ?= served-by: k3s
+LEGACY_HOST  ?= buzaga.com.br
 SNIPPET_USER ?= tofu-snippets
 SNIPPET_DIR  ?= /var/lib/vz/snippets
 SSH_OPTS := -o ConnectTimeout=8 -o StrictHostKeyChecking=accept-new
@@ -282,6 +283,23 @@ check-tunnel: ## Confirm the tunnel holds no readable credential and is not root
 	 test "$$code" = "200" \
 	  && echo "OK: the origin still answers ($(ORIGIN_URL) -> $$code)" \
 	  || { echo "FAIL: origin returned $$code"; exit 1; }
+
+.PHONY: check-public
+check-public: ## Confirm both public hostnames serve the copy they should (tasks 5.2, 5.3)
+	@# Deliberately NOT part of `make check`: it depends on DNS, Cloudflare and the
+	@# internet, so it can fail for reasons that say nothing about this system. Run it
+	@# when the public pair matters — most of all immediately before the M4 cutover.
+	@# Both return 200, so a status code cannot tell them apart. The marker can.
+	@curl -s -m 15 https://$(SITE_HOST)/ | grep -q '$(SITE_MARKER)' \
+	  && echo "OK: https://$(SITE_HOST)/ serves the cluster's copy" \
+	  || { echo "FAIL: https://$(SITE_HOST)/ is not serving the cluster's copy"; exit 1; }
+	@curl -s -m 15 https://$(LEGACY_HOST)/ | grep -q '$(SITE_MARKER)' \
+	  && { echo "FAIL: https://$(LEGACY_HOST)/ has moved to the cluster — it should still be Compose"; exit 1; } \
+	  || echo "OK: https://$(LEGACY_HOST)/ still serves the Compose copy"
+	@code=$$(curl -s -o /dev/null -m 15 -w '%{http_code}' https://$(LEGACY_HOST)/api/hits); \
+	 test "$$code" = "200" \
+	  && echo "OK: the hit counter still answers on $(LEGACY_HOST) (HTTP $$code)" \
+	  || { echo "FAIL: the hit counter returned $$code — the Compose stack is degraded"; exit 1; }
 
 .PHONY: check-site
 check-site: ## Confirm the cluster is serving the site (task 6.1)

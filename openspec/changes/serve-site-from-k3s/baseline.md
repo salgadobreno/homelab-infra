@@ -339,3 +339,45 @@ The tunnel is token-based, so its ingress rules are dashboard configuration. Add
 step in this chain that Git cannot describe, and it is the operator's.
 
 Everything on this side of that seam is done and asserted by `make check`.
+
+## Group 5: both copies serving, side by side
+
+The operator added `k8s.buzaga.com.br` in the Cloudflare dashboard, pointing at traefik
+on 192.168.0.30.
+
+**The new hostname serves the cluster's copy** — established by the marker, not by a
+status code, since both copies would return 200:
+
+```
+$ curl -sI https://k8s.buzaga.com.br/
+HTTP 200, 2902B, via 104.21.10.136
+  served-by: k3s          present
+  /cv.html                404      <- removed from the repository
+  /diagram.ascii          404
+```
+
+**The existing hostname is unchanged**, which is the other half of the requirement:
+
+```
+$ curl -s https://buzaga.com.br/
+HTTP 200, 2878B          <- byte-identical to the baseline figure
+  served-by: k3s          absent
+  /cv.html                200      <- Compose still has them
+  /master_cv_ptbr.html    200
+  /api/hits               {"state":"first","total":67,"returning":6}
+```
+
+67 hits against the baseline's 65. The Compose stack is not merely still running; it is
+still being used, and its state is still accumulating.
+
+### Why the pair is worth having, briefly
+
+The two hostnames now differ in three visible ways — the marker, the removed CV pages,
+and the hit counter — and every one of those differences is a thing that could have been
+missed by a cutover done on the same day as the migration. D6's argument is no longer
+hypothetical: there is a working copy to diff against, and it found real differences.
+
+## The change is complete
+
+27 of 27. `make check` asserts the whole chain, and `make rebuild CONFIRM=yes` restores
+it in 190 seconds.
