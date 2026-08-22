@@ -58,6 +58,18 @@ temporary file and compares it with what is committed, failing on any difference
 This is the property the runtime renderer was reaching for, obtained for a script and a
 `diff`.
 
+*What it can and cannot catch, measured 2026-08-22:* for resources the `site` Application
+manages, cluster-side drift is **not observable by this check at all**. Scaling `site` to
+2 replicas was reverted by ArgoCD selfHeal in ~310 ms — faster than the generator can make
+its `kubectl` calls, so the drifted value can never be read. That is selfHeal working
+exactly as intended, and it means the drift check's real subject is everything ArgoCD does
+*not* revert: the kubelet version after a k3s upgrade, node capacity after a resize, image
+tags, workloads outside `k8s/site`, ingress hosts, and the app's own sync and health.
+
+The two mechanisms are complementary rather than redundant. selfHeal keeps the cluster
+matching Git; this check keeps the *page* matching the cluster. Neither covers the other's
+ground.
+
 *Consequence accepted:* this is the first check here that fails because the world moved
 rather than because the repository did. `make check` stops being purely a statement about
 this repository. That is the correct trade for a page whose entire purpose is to agree

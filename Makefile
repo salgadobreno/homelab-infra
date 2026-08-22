@@ -456,6 +456,10 @@ check: check-secrets check-privileges check-site check-drift ## Run all safety c
 diagram: ## Regenerate k8s/site/content/machine.html from the cluster (task 3.3)
 	@./scripts/generate-diagram.sh
 
+.PHONY: check-diagram
+check-diagram: ## Fail if machine.html and the cluster disagree (task 4.1)
+	@./scripts/check-diagram.sh
+
 .PHONY: check-disclosure
 check-disclosure: ## Assert nothing served crosses the disclosure boundary (task 2.2)
 	@./scripts/check-disclosure.sh
