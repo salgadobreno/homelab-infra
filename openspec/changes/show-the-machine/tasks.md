@@ -10,10 +10,10 @@ first generated output is inside the boundary rather than retrofitted into it.
 
 ## 2. The boundary, before the thing it bounds
 
-- [ ] 2.1 Write the disclosure allow-list into the repository as the authority the check reads (design D4)
-- [ ] 2.2 Add `make check-disclosure`, failing on an IPv4 address, an absolute path, or a known account name in the generated fragment
-- [ ] 2.3 Confirm it fails on a fixture containing each forbidden shape — a check never seen to fail is not a check
-- [ ] 2.4 Move the guardrail left: fire `check-disclosure` from a `PostToolUse` hook in `.claude/settings.json` on writes under `k8s/site/`, so a forbidden value is refused at the write rather than reported after the commit. Confirm the hook blocks a deliberate violation
+- [x] 2.1 Write the disclosure allow-list into the repository as the authority the check reads (design D4)
+- [x] 2.2 Add `make check-disclosure`, failing on an IPv4 address, an absolute path, or a known account name in the generated fragment
+- [x] 2.3 Confirm it fails on a fixture containing each forbidden shape — a check never seen to fail is not a check
+- [x] 2.4 Move the guardrail left: fire `check-disclosure` from a `PostToolUse` hook in `.claude/settings.json` on writes under `k8s/site/`, so a forbidden value is refused at the write rather than reported after the commit. Confirm the hook blocks a deliberate violation
 
 ## 3. The generator
 

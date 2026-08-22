@@ -452,6 +452,14 @@ tf-state: ## What Terraform currently believes exists
 .PHONY: check
 check: check-secrets check-privileges check-site check-drift ## Run all safety checks
 
+.PHONY: check-disclosure
+check-disclosure: ## Assert nothing served crosses the disclosure boundary (task 2.2)
+	@./scripts/check-disclosure.sh
+
+.PHONY: check-disclosure-selftest
+check-disclosure-selftest: ## Prove each disclosure rule fires on a fixture (task 2.3)
+	@./scripts/check-disclosure.sh --selftest
+
 .PHONY: check-secrets
 check-secrets: ## Confirm no API token or key material is tracked by git (task 8.5)
 	@TOKEN=$$(sed -n 's/.*!\([^=]*\)=\(.*\)"/\2/p' $(TF_DIR)/terraform.tfvars 2>/dev/null); \

@@ -1,0 +1,26 @@
+# Disclosure boundary for anything served from k8s/site/
+#
+# Operator decision, 2026-08-22: shapes, not addresses.
+#
+# PUBLISHED                                WITHHELD
+#   node name, Ready state, kubelet          node IP, hypervisor hostname
+#   CPU and memory capacity                  storage class, paths, volume names
+#   workload names, desired counts           pod IPs, cluster IPs, pod name suffixes
+#   ArgoCD sync status and revision          account names, token IDs
+#   image names and tags                     anything about the tunnel or hypervisor
+#
+# This file is the authority. scripts/check-disclosure.sh reads it; nothing
+# else encodes the boundary. See openspec/changes/show-the-machine/design.md D4
+# for why this is shape-matching rather than a list of known-bad values: the
+# generator will report whatever the cluster returns tomorrow, and a deny-list
+# of today's values does not cover that.
+#
+# Format:  <label>|<POSIX extended regex>
+# A match anywhere in a scanned file is a failure. Blank lines and # are ignored.
+
+ipv4 address|(^|[^0-9.])(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])(\.(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])){3}([^0-9.]|$)
+filesystem path|(^|[^A-Za-z0-9_.:/-])/(etc|var|usr|opt|srv|home|root|mnt|proc|dev|boot|sbin|lib)/
+account or token name|(terraform@pve|root@pam|tofu-snippets|!tofu|cloudflared)
+hypervisor hostname|(^|[^A-Za-z0-9-])pve([^A-Za-z0-9-]|$)
+pod name suffix|[a-z0-9]-[0-9a-f]{9,10}-[a-z0-9]{5}([^a-z0-9]|$)
+kubernetes secret material|(BEGIN [A-Z ]*PRIVATE KEY|eyJ[A-Za-z0-9_-]{20,})
