@@ -205,3 +205,62 @@ against 87Mi of actual idle usage. That gap is intentional — requests should c
 repo-server cloning and rendering manifests, not an idle controller — but it is a gap,
 and it is recorded rather than left for someone to discover as "why is 716Mi reserved for
 something using 87".
+
+## Groups 3-4: the reconcile loop, proved
+
+### A cluster from nothing arrives serving the site
+
+```
+$ make rebuild CONFIRM=yes
+REBUILD COMPLETE in 106s
+...
+site   Synced   Healthy   bd93fb91c4a8b1ae8834c29f589a08d6e3abbf9c
+```
+
+Synced and Healthy about 180s after the node reported Ready, with no operator step. The
+Deployment, Service, Ingress and ConfigMap in `web` were created by ArgoCD, not applied.
+
+### The host rule matches, and the absence of it does not
+
+```
+curl -H 'Host: k8s.buzaga.com.br' http://192.168.0.30/   ->  200, 2648B
+curl                              http://192.168.0.30/   ->  404
+```
+
+The second line is the one worth keeping. A catch-all Ingress would have answered both,
+and the check would have passed whether or not the tunnel was sending the right name.
+The bytes match `k8s/site/content/index.html` exactly.
+
+### A push reaches the cluster with nothing run against it
+
+Committing a marker into `index.html` and pushing, then touching nothing:
+
+```
+ConfigMap   site-content-4f6t4khgtb  ->  site-content-fh5m885fch
+Pod         site-7f6cfc8d9c-n8p5v    ->  site-9777694f5-74nf9
+Revision                                 e270be09a940c1259e2774d070d994b720f47795
+served                                   after 230s
+```
+
+230s is ArgoCD's default poll interval of 180s plus render and rollout. A webhook would
+make it immediate; polling is the right default for a repository nothing else can reach.
+
+The ConfigMap name moving is the mechanism, not a side effect — the Deployment's volume
+reference changed with it, which is what rolled the pods. A hand-written ConfigMap would
+have updated in place and kept serving the old content.
+
+### selfHeal reverts an out-of-band edit
+
+```
+before scale : replicas=1 generation=4
+after  scale : replicas=3 generation=5     <- kubectl scale landed
+8s later     : replicas=1 generation=6     <- ArgoCD undid it
+
+ScalingReplicaSet  Scaled up   replica set site-9777694f5 from 1 to 3
+ScalingReplicaSet  Scaled down replica set site-9777694f5 from 3 to 1
+```
+
+The generation moving twice is the evidence. A first attempt at this test read the value
+after a `sleep 3` and saw `replicas=1`, which proves nothing — it cannot distinguish "the
+edit was reverted" from "the edit never applied". Reading immediately, and checking
+`metadata.generation`, distinguishes them.

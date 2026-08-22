@@ -23,14 +23,14 @@ plumbing because it is the only step that touches the internet.
 - [x] 3.1 Create `k8s/site/` with Deployment, Service, and a kustomize `configMapGenerator` over the HTML content (design D3)
 - [x] 3.2 Copy the site content into the repository, and confirm it is what is served rather than the hypervisor path — `site-delivery` "no content copied from the hypervisor by hand"
 - [x] 3.3 Decide the `Ingress` shape (Open Question 3) and write it
-- [ ] 3.4 Confirm the site answers from inside the cluster — `site-delivery` "The site answers from inside the cluster". **Lands with group 4**: nothing deploys it until the Application exists, and applying it by hand to tick this off would prove the opposite of what the change is about
+- [x] 3.4 Confirm the site answers from inside the cluster — 200 with the host header, 404 without it, bytes identical to the repository
 
 ## 4. Reconciliation, proved
 
-- [ ] 4.1 Add the ArgoCD `Application` pointing at `k8s/site/`, with `selfHeal` and `prune` on (design D7)
-- [ ] 4.2 Commit and push a visible change to the site, and confirm it reaches the cluster with no command run against it — `gitops` "A change to the site reaches the running cluster"
-- [ ] 4.3 Edit a reconciled resource with `kubectl` and confirm it is reverted — `gitops` "An out-of-band edit does not survive"
-- [ ] 4.4 Confirm the ConfigMap name changes with the content, so a push actually rolls the pods rather than leaving stale content served (design D3)
+- [x] 4.1 Add the ArgoCD `Application` pointing at `k8s/site/`, with `selfHeal` and `prune` on (design D7)
+- [x] 4.2 Commit and push a visible change to the site, and confirm it reaches the cluster with no command run against it — `gitops` "A change to the site reaches the running cluster"
+- [x] 4.3 Edit a reconciled resource with `kubectl` and confirm it is reverted — `gitops` "An out-of-band edit does not survive"
+- [x] 4.4 Confirm the ConfigMap name changes with the content, so a push actually rolls the pods rather than leaving stale content served (design D3)
 
 ## 5. The internet
 
