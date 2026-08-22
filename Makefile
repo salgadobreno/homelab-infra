@@ -28,7 +28,10 @@ PVE_IP   ?= 192.168.0.21
 PVE_SSH_PORT ?= 4444
 PVE_SSH_USER ?= buzaga
 TUNNEL_USER  ?= cloudflared
-ORIGIN_URL   ?= http://127.0.0.1:30000/
+# What the tunnel dials. It was the Compose stack on the hypervisor until M4 retired
+# it; it is traefik on the node now. This is the tunnel's own origin, not the public
+# URL — check-tunnel asserts the service still has something to forward to.
+ORIGIN_URL   ?= http://192.168.0.30/
 SITE_HOST    ?= k8s.buzaga.com.br
 SITE_MARKER  ?= served-by: k3s
 APEX_HOSTS   ?= buzaga.com.br www.buzaga.com.br
@@ -279,7 +282,7 @@ check-tunnel: ## Confirm the tunnel holds no readable credential and is not root
 	 echo "$$groups" | grep -qwE 'root|sudo|adm' \
 	  && { echo "FAIL: $(TUNNEL_USER) is in a privileged group ($$groups)"; exit 1; } \
 	  || echo "OK: $(TUNNEL_USER) holds no privileged group ($$groups)"
-	@code=$$(curl -s -o /dev/null -w '%{http_code}' $(ORIGIN_URL)); \
+	@code=$$(curl -s -o /dev/null -m 5 -H 'Host: $(SITE_HOST)' -w '%{http_code}' $(ORIGIN_URL)); \
 	 test "$$code" = "200" \
 	  && echo "OK: the origin still answers ($(ORIGIN_URL) -> $$code)" \
 	  || { echo "FAIL: origin returned $$code"; exit 1; }

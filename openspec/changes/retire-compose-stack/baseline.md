@@ -140,3 +140,26 @@ The apex answering 200 *after* the stack stopped is what proves step 3 actually 
 effect. Had the repoint silently failed, everything would have looked correct until this
 moment and the site would have gone down here — with the teardown blamed for a fault
 introduced two steps earlier.
+
+## A check that outlived what it was checking
+
+`make check` failed immediately after the teardown:
+
+```
+FAIL: origin returned 000
+make: *** [check-tunnel] Error 1
+```
+
+`check-tunnel` asserts that the tunnel's origin still answers, and its origin was
+hardcoded as `http://127.0.0.1:30000/` — the Compose stack, written in M2 when that was
+what the tunnel dialled. M4 moved the origin to traefik and the assertion kept checking
+the old address.
+
+It is now `http://192.168.0.30/` with the site's `Host` header, which is what the tunnel
+actually dials.
+
+Worth recording because the check behaved correctly: it failed, loudly, at the moment its
+subject changed. The alternative — an assertion loose enough to keep passing — would have
+left `make check` green while silently testing nothing. A check that breaks when the
+system changes underneath it is doing its job; the cost is remembering that changing the
+system means changing its checks.
