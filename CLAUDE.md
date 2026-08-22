@@ -118,7 +118,7 @@ or silently "improve" them:
 
 ## Current state
 
-M0 to M3 are complete and archived. **M4 is next** — see the ladder in `openspec/config.yaml`.
+M0 to M3 are complete and archived; **M4 (`retire-compose-stack`) is the active change** — see the ladder in `openspec/config.yaml`.
 The ladder — what every `M<n>` in this repo refers to — is the `## Milestone ladder`
 table in `openspec/config.yaml`. Read it before proposing what comes next; do not infer
 the next change from a gap in the numbering. Archived changes predate a renumbering and
@@ -132,11 +132,14 @@ A single k3s node (`k3s-server-1`, 192.168.0.30) is provisioned entirely from `t
 a Ready node and 190 to a serving site, rising when the 596 MB cloud image is
 re-downloaded. `kubectl` reaches it from the host with TLS verified.
 
-ArgoCD is installed by cloud-init and reconciles `k8s/` from this repository. The static
-site is served by the cluster at `k8s.buzaga.com.br`; `buzaga.com.br` still points at the
-Docker Compose stack on the hypervisor, which also still serves the hit counter. Retiring
-that stack is M4 — until it lands, both copies are live and `make check-public` asserts
-which is which.
+ArgoCD is installed by cloud-init and reconciles `k8s/` from this repository. The cluster
+serves the public site at `buzaga.com.br`, `www.` and `k8s.buzaga.com.br`. **The
+hypervisor serves no HTTP at all** — the Docker Compose stack was retired at M4, along
+with its hit counter and Redis. `make check-public` asserts every hostname is the
+cluster's copy; `make check` asserts the hypervisor has not started serving again.
+
+The live site now depends on the cluster. `make rebuild CONFIRM=yes` takes it down and
+brings it back in about 190 seconds; that is no longer a private consequence.
 
 Every credential is scoped, and the scoping is asserted rather than described: OpenTofu
 provisions as `terraform@pve!tofu` with privilege separation on and a nineteen-privilege

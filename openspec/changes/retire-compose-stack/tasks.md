@@ -39,11 +39,11 @@ rather than discovered at the end.
 
 ## 6. Prove it survives
 
-- [ ] 6.1 Run `make rebuild CONFIRM=yes` and confirm `buzaga.com.br` serves again with no step beyond the rebuild — the site now depends on the cluster, which is a stronger claim than M3's
-- [ ] 6.2 Record the time from rebuild to the public site answering, and update `README.md` if it has moved
+- [x] 6.1 Run `make rebuild CONFIRM=yes` and confirm `buzaga.com.br` serves again with no step beyond the rebuild — the site now depends on the cluster, which is a stronger claim than M3's
+- [x] 6.2 Record the time from rebuild to the public site answering, and update `README.md` if it has moved
 
 ## 7. Close the record
 
-- [ ] 7.1 Update `README.md`, `CLAUDE.md` and `openspec/config.yaml`: the hypervisor serves nothing, and the cluster serves the site
-- [ ] 7.2 Record what became of the hit counter and Redis, so "we retired it" is a decision on the record rather than an absence someone has to reconstruct
-- [ ] 7.3 Record in `LEARNINGS/` anything the cutover taught — an entry only if something was learned the hard way
+- [x] 7.1 Update `README.md`, `CLAUDE.md` and `openspec/config.yaml`: the hypervisor serves nothing, and the cluster serves the site
+- [x] 7.2 Record what became of the hit counter and Redis, so "we retired it" is a decision on the record rather than an absence someone has to reconstruct
+- [x] 7.3 Record in `LEARNINGS/` anything the cutover taught — an entry only if something was learned the hard way

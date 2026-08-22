@@ -28,7 +28,7 @@ industry-standard choice wins over the homelab-clever one.
    │                     └── ArgoCD ──► reconciles k8s/ from this repository   │
    │                                        │                                 │
    │                                        └── the static site, served       │
-   │                                            at k8s.buzaga.com.br          │
+   │                                            at buzaga.com.br              │
    │                                                                          │
    └──────────────────────────────────────────────────────────────────────────┘
 ```
@@ -115,7 +115,7 @@ rather than in shell history, so the same instruments are available to everyone.
 | `make cluster` | k3s and cloud-init state, read from the node |
 | `make rebuild CONFIRM=yes` | timed destroy and recreate |
 
-## Rebuild time: 105 seconds to a node, 190 to a serving site
+## Rebuild time: 105 seconds to a node, 190 to the public site
 
 A full `destroy` → `apply` → node reporting Ready, with no manual steps:
 
@@ -127,7 +127,7 @@ A full `destroy` → `apply` → node reporting Ready, with no manual steps:
 | boot → k3s `Ready` | 47s |
 | **total, node Ready** | **105s** |
 | ArgoCD installed and the site Synced and serving | +85s |
-| **total, site answering** | **190s** |
+| **total, `buzaga.com.br` answering again** | **190s** |
 
 An earlier run of the same command took 433s. Nothing changed between them except
 network throughput on that 596 MB download, which `tofu destroy` removes and `apply`
@@ -136,7 +136,8 @@ nor the hardware controls**, so quote it as a range, or quote the part that does
 move.
 
 The stable figure is **boot to a node reporting `Ready`: 45-47 seconds** across every
-rebuild measured, and **190 seconds from `make rebuild` to the site answering again** —
+rebuild measured, and **190 seconds from `make rebuild` to `buzaga.com.br` answering again** — measured
+across the destroy of a cluster the public site now depends on —
 the extra time is the ArgoCD chart installing and its first reconcile, neither of which
 blocks the node from reporting Ready. That is the one worth citing, because it measures this project's
 work rather than an Ubuntu mirror's throughput.

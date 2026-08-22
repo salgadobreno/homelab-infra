@@ -89,7 +89,7 @@ context: |
   | M1 | "One VM, built by OpenTofu, running k3s. `kubectl get nodes` works." | `bootstrap-k3s-node` | done 2026-08-21 |
   | M2 | "Every credential holds only what its job needs, and I can prove it." | `narrow-privileges` | done 2026-08-21 |
   | M3 | "I pushed to GitHub and ArgoCD served my site. I did not run kubectl." | `serve-site-from-k3s` | done 2026-08-22 |
-  | M4 | "Docker-on-host is gone. The cluster serves buzaga.com.br." | not yet proposed | next |
+  | M4 | "Docker-on-host is gone. The cluster serves buzaga.com.br." | `retire-compose-stack` | in progress |
   | M5 | "The site shows its own guts, and the picture cannot go stale." | not yet proposed | |
   | M6 | "Three nodes. I drained one and the app stayed up." | not yet proposed | |
   | M7 | "I can see what the cluster is doing." — observability, if RAM allows | not yet proposed | |
@@ -188,7 +188,8 @@ context: |
   The actual workload — nginx serving a placeholder site, a hit-counter, and redis — still
   runs as Docker Compose directly on the hypervisor from `/mnt/sda8/Projects/buzaga`,
   serving `buzaga.com.br`. That co-location is the known anti-pattern this project exists
-  to fix; retiring it is M4. The site itself is disposable and may break.
+  to fix; it was retired at M4. The site itself is disposable and may break — but it now
+  depends on the cluster, so `make rebuild` is a public outage of about 190 seconds.
 
   ## Toolchain reality
 

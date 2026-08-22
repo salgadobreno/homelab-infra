@@ -63,6 +63,9 @@ able to give one, and nobody else can assert that on their behalf.
 - [201 · push and pull](argocd/201-push-and-pull.md) — where GitOps sits next to GitHub Actions, and what each model costs
 - [301 · a release cannot contain its own CRD](argocd/301-a-release-cannot-contain-its-own-crd.md) — Helm validates before it orders
 
+### kubernetes
+- [301 · a 404 from the ingress is not a missing site](kubernetes/301-a-404-from-the-ingress-is-not-a-missing-site.md) — host rules encode an assumption about who will call
+
 ### k3s
 - [201 · one binary, five opinions](k3s/201-one-binary-five-opinions.md) — what k3s bundles, and what is Kubernetes proper
 
