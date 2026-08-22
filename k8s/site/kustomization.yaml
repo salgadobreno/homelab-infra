@@ -21,9 +21,3 @@ configMapGenerator:
   - name: site-content
     files:
       - content/index.html
-      - content/cv.html
-      - content/cv2.html
-      - content/cv_fiotec.html
-      - content/cv_howdy.html
-      - content/master_cv_ptbr.html
-      - content/diagram.ascii
