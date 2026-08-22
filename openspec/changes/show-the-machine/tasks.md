@@ -32,11 +32,11 @@ first generated output is inside the boundary rather than retrofitted into it.
 
 ## 5. The page
 
-- [ ] 5.1 Generate the current-state half and commit it; confirm it reaches the public site through ArgoCD with no command run against the cluster
-- [ ] 5.2 Write the "before" half from the record M4 made, labelled as history rather than as a reading (design D5) — `self-description` "The two halves are not presented as equivalent"
+- [x] 5.1 Generate the current-state half and commit it; confirm it reaches the public site through ArgoCD with no command run against the cluster
+- [x] 5.2 Write the "before" half from the record M4 made, labelled as history rather than as a reading (design D5) — `self-description` "The two halves are not presented as equivalent"
 - [x] 5.3 Decide Open Question 3: whether the page names the commit it was generated from — no, and it cannot: see the fixpoint argument in `generate-diagram.sh` and design D3
-- [ ] 5.4 Confirm nothing hand-written describes the system: `diagram.ascii` is already gone (commit `6bfba43`), so the live case is the dead `/api/hits` call recorded in `baseline.md` — `self-description` "A hand-written description cannot be served"
-- [ ] 5.5 Read the finished page as someone who has never seen this repository. The audience test, and the only one here that cannot be automated
+- [x] 5.4 Confirm nothing hand-written describes the system: `diagram.ascii` was already gone (commit `6bfba43`) and the dead `/api/hits` call is removed. Made enforceable rather than confirmed once — `make check-handwritten` fails if served hand-written content names a technology, proven on a fixture — `self-description` "A hand-written description cannot be served"
+- [x] 5.5 Read the finished page as someone who has never seen this repository. The audience test, and the only one here that cannot be automated
 
 ## 6. Prove it survives
 

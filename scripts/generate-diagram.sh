@@ -135,9 +135,10 @@ cat <<HEAD
   </ul>
 
   <h3 class="text-sm text-gray-500 uppercase tracking-wide mb-2">What runs on it</h3>
+  <p class="text-gray-500 text-sm mb-2">Counts are what the cluster has been <em>asked</em> to run, not what happens to be up at this instant. That is deliberate: a number that flickers while a container restarts would make this page impossible to check.</p>
   <table class="mb-6 text-sm w-full">
     <thead class="text-gray-500 text-left">
-      <tr><th class="pr-4 font-normal">namespace</th><th class="pr-4 font-normal">workload</th><th class="pr-4 font-normal">want</th><th class="font-normal">image</th></tr>
+      <tr><th class="pr-4 font-normal">namespace</th><th class="pr-4 font-normal">workload</th><th class="pr-4 font-normal">replicas</th><th class="font-normal">image</th></tr>
     </thead>
     <tbody>
 HEAD
@@ -156,6 +157,7 @@ cat <<MID
   </table>
 
   <h3 class="text-sm text-gray-500 uppercase tracking-wide mb-2">How it got here</h3>
+  <p class="text-gray-500 text-sm mb-2">None of it was deployed by hand. A program inside the cluster watches a Git repository and continuously makes the cluster match it, so the repository is the record of what is running rather than a description of what someone intended.</p>
   <ul class="mb-2 text-sm">
 MID
 
@@ -169,7 +171,15 @@ done <<< "$app"
 
 cat <<MID2
   </ul>
-  <p class="text-sm text-gray-600">Served for $(printf '%s' "$hosts" | html_escape).</p>
+  <p class="text-sm text-gray-600 mb-4">Served for $(printf '%s' "$hosts" | html_escape).</p>
+
+  <p class="text-sm text-gray-500 border border-gray-200 bg-gray-50 p-3">
+    This page is not live. It was written by a command that read the cluster, and
+    then committed like any other file. What stops it going quietly out of date is
+    that the same command runs as a test: if anything above disagreed with the
+    real cluster, the check would fail and say which line. So it can be out of
+    date, but not out of date and passing.
+  </p>
 </section>
 MID2
 

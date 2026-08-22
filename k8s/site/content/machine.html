@@ -27,9 +27,10 @@
   </ul>
 
   <h3 class="text-sm text-gray-500 uppercase tracking-wide mb-2">What runs on it</h3>
+  <p class="text-gray-500 text-sm mb-2">Counts are what the cluster has been <em>asked</em> to run, not what happens to be up at this instant. That is deliberate: a number that flickers while a container restarts would make this page impossible to check.</p>
   <table class="mb-6 text-sm w-full">
     <thead class="text-gray-500 text-left">
-      <tr><th class="pr-4 font-normal">namespace</th><th class="pr-4 font-normal">workload</th><th class="pr-4 font-normal">want</th><th class="font-normal">image</th></tr>
+      <tr><th class="pr-4 font-normal">namespace</th><th class="pr-4 font-normal">workload</th><th class="pr-4 font-normal">replicas</th><th class="font-normal">image</th></tr>
     </thead>
     <tbody>
       <tr><td class="pr-4 text-gray-500">argocd</td><td class="pr-4">argocd-application-controller</td><td class="pr-4">1</td><td class="text-gray-600 break-all">quay.io/argoproj/argocd:v3.5.1</td></tr>
@@ -47,11 +48,20 @@
   </table>
 
   <h3 class="text-sm text-gray-500 uppercase tracking-wide mb-2">How it got here</h3>
+  <p class="text-gray-500 text-sm mb-2">None of it was deployed by hand. A program inside the cluster watches a Git repository and continuously makes the cluster match it, so the repository is the record of what is running rather than a description of what someone intended.</p>
   <ul class="mb-2 text-sm">
     <li><span class="font-semibold">site</span> &middot; Synced &middot; Healthy</li>
     <li class="text-gray-600">reconciled from <span class="break-all">https://github.com/salgadobreno/homelab-infra</span> at <code>k8s/site</code></li>
   </ul>
-  <p class="text-sm text-gray-600">Served for buzaga.com.br, k8s.buzaga.com.br, www.buzaga.com.br.</p>
+  <p class="text-sm text-gray-600 mb-4">Served for buzaga.com.br, k8s.buzaga.com.br, www.buzaga.com.br.</p>
+
+  <p class="text-sm text-gray-500 border border-gray-200 bg-gray-50 p-3">
+    This page is not live. It was written by a command that read the cluster, and
+    then committed like any other file. What stops it going quietly out of date is
+    that the same command runs as a test: if anything above disagreed with the
+    real cluster, the check would fail and say which line. So it can be out of
+    date, but not out of date and passing.
+  </p>
 </section>
 <!-- Hand-written, and deliberately so. Inlined into machine.html by
      scripts/generate-diagram.sh.
@@ -67,8 +77,9 @@
 <section class="mt-8 border-t border-gray-300 pt-6">
   <h2 class="text-xl mb-1 text-gray-600">What this replaced</h2>
   <p class="text-gray-500 text-sm mb-4 italic">
-    From a record, not a reading. The system below no longer exists, so nothing
-    here can be checked against it &mdash; unlike everything above.
+    From a record, not a reading. The system described here no longer
+    exists, so nothing in it can be checked against anything &mdash; unlike every
+    fact above.
   </p>
 
   <div class="border-l-4 border-gray-300 pl-4 text-sm text-gray-600">
@@ -90,7 +101,7 @@
       reproduce it elsewhere. That is not a deployment; it is a pet.
     </p>
     <p>
-      Nothing above this line has that property. Every image named there is pulled
+      The arrangement above does not have that property. Every image named there is pulled
       from somewhere public, and the whole arrangement is rebuilt from an empty
       hypervisor in about three minutes by a single command.
     </p>

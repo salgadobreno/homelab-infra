@@ -460,6 +460,10 @@ diagram: ## Regenerate k8s/site/content/machine.html from the cluster (task 3.3)
 check-diagram: ## Fail if machine.html and the cluster disagree (task 4.1)
 	@./scripts/check-diagram.sh
 
+.PHONY: check-handwritten
+check-handwritten: ## Fail if hand-written served content names a technology (task 5.4)
+	@./scripts/check-handwritten.sh
+
 .PHONY: check-disclosure
 check-disclosure: ## Assert nothing served crosses the disclosure boundary (task 2.2)
 	@./scripts/check-disclosure.sh
