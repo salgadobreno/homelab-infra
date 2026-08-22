@@ -88,7 +88,7 @@ context: |
   | M0 | "`tofu plan` talks to my Proxmox API" | `bootstrap-k3s-node` (task 3.4) | done 2026-08-21 |
   | M1 | "One VM, built by OpenTofu, running k3s. `kubectl get nodes` works." | `bootstrap-k3s-node` | done 2026-08-21 |
   | M2 | "Every credential holds only what its job needs, and I can prove it." | `narrow-privileges` | done 2026-08-21 |
-  | M3 | "I pushed to GitHub and ArgoCD served my site. I did not run kubectl." | `serve-site-from-k3s` | in progress |
+  | M3 | "I pushed to GitHub and ArgoCD served my site. I did not run kubectl." | `serve-site-from-k3s` | done 2026-08-22 |
   | M4 | "Docker-on-host is gone. The cluster serves buzaga.com.br." | not yet proposed | next |
   | M5 | "The site shows its own guts, and the picture cannot go stale." | not yet proposed | |
   | M6 | "Three nodes. I drained one and the app stayed up." | not yet proposed | |

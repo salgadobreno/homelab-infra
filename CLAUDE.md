@@ -118,19 +118,25 @@ or silently "improve" them:
 
 ## Current state
 
-M0 to M2 are complete and archived; **M3 (`serve-site-from-k3s`) is the active change.**
+M0 to M3 are complete and archived. **M4 is next** — see the ladder in `openspec/config.yaml`.
 The ladder — what every `M<n>` in this repo refers to — is the `## Milestone ladder`
 table in `openspec/config.yaml`. Read it before proposing what comes next; do not infer
 the next change from a gap in the numbering. Archived changes predate a renumbering and
 use the original scheme, which that section explains.
 
-The permanent specs — `vm-provisioning`, `k3s-cluster`, `credential-scoping` — live in
-`openspec/specs/`.
+The permanent specs — `vm-provisioning`, `k3s-cluster`, `credential-scoping`, `gitops`,
+`site-delivery` — live in `openspec/specs/`.
 
 A single k3s node (`k3s-server-1`, 192.168.0.30) is provisioned entirely from `tofu/`.
-`make rebuild CONFIRM=yes` destroys and recreates it unattended in about 105 seconds,
-rising to roughly 430 when the 596 MB cloud image is re-downloaded. `kubectl` reaches it
-from the host with TLS verified.
+`make rebuild CONFIRM=yes` destroys and recreates it unattended in about 105 seconds to
+a Ready node and 190 to a serving site, rising when the 596 MB cloud image is
+re-downloaded. `kubectl` reaches it from the host with TLS verified.
+
+ArgoCD is installed by cloud-init and reconciles `k8s/` from this repository. The static
+site is served by the cluster at `k8s.buzaga.com.br`; `buzaga.com.br` still points at the
+Docker Compose stack on the hypervisor, which also still serves the hit counter. Retiring
+that stack is M4 — until it lands, both copies are live and `make check-public` asserts
+which is which.
 
 Every credential is scoped, and the scoping is asserted rather than described: OpenTofu
 provisions as `terraform@pve!tofu` with privilege separation on and a nineteen-privilege
