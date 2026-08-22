@@ -118,7 +118,7 @@ or silently "improve" them:
 
 ## Current state
 
-M0 to M3 are complete and archived; **M4 (`retire-compose-stack`) is the active change** — see the ladder in `openspec/config.yaml`.
+M0 to M4 are complete and archived. **M5 is next** — see the ladder in `openspec/config.yaml`.
 The ladder — what every `M<n>` in this repo refers to — is the `## Milestone ladder`
 table in `openspec/config.yaml`. Read it before proposing what comes next; do not infer
 the next change from a gap in the numbering. Archived changes predate a renumbering and
