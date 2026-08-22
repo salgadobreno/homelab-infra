@@ -29,6 +29,8 @@ PVE_SSH_PORT ?= 4444
 PVE_SSH_USER ?= buzaga
 TUNNEL_USER  ?= cloudflared
 ORIGIN_URL   ?= http://127.0.0.1:30000/
+SITE_HOST    ?= k8s.buzaga.com.br
+SITE_MARKER  ?= served-by: k3s
 SNIPPET_USER ?= tofu-snippets
 SNIPPET_DIR  ?= /var/lib/vz/snippets
 SSH_OPTS := -o ConnectTimeout=8 -o StrictHostKeyChecking=accept-new
@@ -281,6 +283,35 @@ check-tunnel: ## Confirm the tunnel holds no readable credential and is not root
 	  && echo "OK: the origin still answers ($(ORIGIN_URL) -> $$code)" \
 	  || { echo "FAIL: origin returned $$code"; exit 1; }
 
+.PHONY: check-site
+check-site: ## Confirm the cluster is serving the site (task 6.1)
+	@# Reachability first, so "the site is down" and "the cluster is not there" are
+	@# different answers. A rebuilt cluster also has a new CA, which makes a saved
+	@# kubeconfig fail in a way that looks like an outage if it is not named.
+	@ping -c1 -W2 $(NODE_IP) >/dev/null 2>&1 \
+	  || { echo "UNREACHABLE: $(NODE_IP) does not answer — the node is down, not the site"; exit 1; }
+	@KUBECONFIG=$(KUBECONFIG_PATH) kubectl get --raw /readyz >/dev/null 2>&1 \
+	  || { echo "UNREACHABLE: the Kubernetes API rejected us. If the cluster was rebuilt,"; \
+	       echo "             its CA changed — run 'make kubeconfig'."; exit 1; }
+	@echo "OK: the node answers and the API accepts this kubeconfig"
+	@# The host header is what the tunnel sends. Asking without it is a different
+	@# question, and a catch-all Ingress would answer both.
+	@code=$$(curl -s -o /dev/null -m 10 -w '%{http_code}' -H 'Host: $(SITE_HOST)' http://$(NODE_IP)/); \
+	 test "$$code" = "200" \
+	  && echo "OK: traefik serves $(SITE_HOST) (HTTP $$code)" \
+	  || { echo "FAIL: $(SITE_HOST) returned $$code — the cluster is up and the site is not"; exit 1; }
+	@# Identity, not equality. Cloudflare rewrites the page at its edge, so a hash
+	@# comparison against the origin can never pass, and hashing the public response
+	@# breaks whenever that rewriting changes. A marker survives both.
+	@curl -s -m 10 -H 'Host: $(SITE_HOST)' http://$(NODE_IP)/ | grep -q '$(SITE_MARKER)' \
+	  && echo "OK: it is the cluster's copy (marker present)" \
+	  || { echo "FAIL: served a page without the '$(SITE_MARKER)' marker — something else answered"; exit 1; }
+	@KUBECONFIG=$(KUBECONFIG_PATH) kubectl get application -n argocd site \
+	  -o jsonpath='{.status.sync.status}/{.status.health.status}' 2>/dev/null \
+	  | grep -qx 'Synced/Healthy' \
+	  && echo "OK: ArgoCD reports the app Synced and Healthy" \
+	  || { echo "FAIL: ArgoCD does not report Synced/Healthy — the page may be stale"; exit 1; }
+
 .PHONY: check-root-ssh
 check-root-ssh: ## Confirm root SSH is refused and key auth still works (5.1b, 5.2)
 	@! ssh $(SSH_OPTS) -o BatchMode=yes -o ConnectTimeout=5 -p $(PVE_SSH_PORT) \
@@ -392,7 +423,7 @@ tf-state: ## What Terraform currently believes exists
 # ---------------------------------------------------------------- checks ------
 
 .PHONY: check
-check: check-secrets check-privileges check-drift ## Run all safety checks
+check: check-secrets check-privileges check-site check-drift ## Run all safety checks
 
 .PHONY: check-secrets
 check-secrets: ## Confirm no API token or key material is tracked by git (task 8.5)

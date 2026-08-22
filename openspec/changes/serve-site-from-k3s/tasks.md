@@ -40,9 +40,9 @@ plumbing because it is the only step that touches the internet.
 
 ## 6. Make it verifiable
 
-- [ ] 6.1 Add `make check-site` asserting the cluster's copy specifically, distinguishing "the site is down" from "the cluster is unreachable" — `site-delivery` "The check fails when the site does not serve"
-- [ ] 6.2 Confirm it fails when the workload is scaled to zero, and that the message names what did not answer
-- [ ] 6.3 Wire it into `make check`
+- [x] 6.1 Add `make check-site` asserting the cluster's copy specifically, distinguishing "the site is down" from "the cluster is unreachable" — `site-delivery` "The check fails when the site does not serve"
+- [x] 6.2 Confirm it fails ~~when the workload is scaled to zero~~ and that the message names what did not answer — scaling to zero races `selfHeal`, so the three failure branches are exercised by overriding `SITE_HOST`, `NODE_IP` and `KUBECONFIG_PATH` instead
+- [x] 6.3 Wire it into `make check`
 
 ## 7. Prove it survives
 

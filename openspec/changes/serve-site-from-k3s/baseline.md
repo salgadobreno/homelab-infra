@@ -264,3 +264,52 @@ The generation moving twice is the evidence. A first attempt at this test read t
 after a `sleep 3` and saw `replicas=1`, which proves nothing — it cannot distinguish "the
 edit was reverted" from "the edit never applied". Reading immediately, and checking
 `metadata.generation`, distinguishes them.
+
+## Group 6: the check, and what it refuses to conflate
+
+`make check-site`, wired into `make check`:
+
+```
+OK: the node answers and the API accepts this kubeconfig
+OK: traefik serves k8s.buzaga.com.br (HTTP 200)
+OK: it is the cluster's copy (marker present)
+OK: ArgoCD reports the app Synced and Healthy
+```
+
+Three different failures, three different answers — which is the requirement, not a
+nicety, because the baseline found that a rebuilt cluster's new CA looks exactly like an
+outage:
+
+```
+$ make check-site NODE_IP=192.168.0.99
+UNREACHABLE: 192.168.0.99 does not answer — the node is down, not the site
+
+$ make check-site KUBECONFIG_PATH=<stale>
+UNREACHABLE: the Kubernetes API rejected us. If the cluster was rebuilt,
+             its CA changed — run 'make kubeconfig'.
+
+$ make check-site SITE_HOST=nosuchsite.example
+FAIL: nosuchsite.example returned 404 — the cluster is up and the site is not
+```
+
+**It asserts a marker, not a hash.** Cloudflare rewrites the page at its edge — 2878
+bytes public against 2648 at the origin — so equality can never hold end to end, and
+hashing the public response would break whenever that rewriting changed. `served-by: k3s`
+survives both, and distinguishes the cluster's copy from the Compose copy, which a status
+code alone does not.
+
+**The last assertion is not redundant.** A 200 with the marker proves something is being
+served; `Synced/Healthy` proves it is *current*. Without it, an ArgoCD that had stopped
+reconciling would look identical to one working perfectly, for as long as the last-served
+page kept answering.
+
+### Testing the failure had to route around selfHeal
+
+The obvious way to prove the check fails is to scale the Deployment to zero. That does
+not work here: `selfHeal` reverts it within seconds, so the check races the controller
+and the result depends on timing. Overriding `SITE_HOST` and `NODE_IP` exercises the same
+assertions deterministically.
+
+Worth noticing rather than working around — it is the same property task 4.3 demonstrates,
+met from the other direction. Once a cluster self-heals, "break it and see" stops being
+a repeatable test.
