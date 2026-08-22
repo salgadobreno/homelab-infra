@@ -43,6 +43,42 @@ Terraform is told none of the ordering. The VM references the image and the snip
 the dependency graph is inferred; the two upstream resources have no edge between them
 and are built concurrently.
 
+## What this replaces
+
+Recorded before it is switched off, because after that it can only be remembered. This
+is the arrangement the project exists to replace, measured on 2026-08-22 while it was
+still serving `buzaga.com.br`.
+
+```
+Docker Compose on the hypervisor  ·  /mnt/sda8/Projects/buzaga/docker-compose.yml
+   buzaga-nginx        nginx:latest        30000:80, 443:443    up 16 days
+   buzaga-hit-counter  buzaga-hit-counter  built locally        up 16 days
+   buzaga-redis        redis:7-alpine      volume buzaga_redis-data
+```
+
+- **nginx** served `/mnt/sda8/Projects/buzaga/plain_site/` from a bind mount and proxied
+  `/api/` to the hit counter.
+- **The hit counter** was a Node service recording visits. Its final reading:
+  `{"state":"first","total":69,"returning":6}` — two Redis keys, `hits:total` and
+  `hits:returning`.
+- **Redis** held those two keys in a named volume.
+
+Three properties of that setup are the whole argument for what replaced it:
+
+**The content was a bind mount.** `plain_site/` lived on the hypervisor's disk. Nothing
+described it, nothing versioned it, and a rebuilt host would not have had it.
+
+**The image existed only on that machine.** `buzaga-hit-counter` was built locally and
+never pushed: `RepoDigests: []`. There was nowhere to pull it from. Losing the host meant
+rebuilding the image from source or losing the service.
+
+**Bringing it back was a human procedure.** No declaration of what should be running —
+`docker compose up -d` in the right directory, by someone who remembered.
+
+The cluster version answers each of those: content in Git, stock images pinned by tag,
+and a reconciler that restores the whole thing from an empty node in 190 seconds without
+being asked.
+
 ## Quick start
 
 Requires an ssh-agent: cloud-init snippets upload over SSH, because Proxmox exposes no

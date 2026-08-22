@@ -1,0 +1,89 @@
+# Baseline
+
+Measured 2026-08-22, before anything was moved or stopped.
+
+## What is serving
+
+```
+buzaga.com.br        HTTP 200  2878B  marker absent   -> Compose
+www.buzaga.com.br    HTTP 200         marker absent   -> Compose
+k8s.buzaga.com.br    HTTP 200  2902B  marker present  -> the cluster
+127.0.0.1:30000      HTTP 200  2648B                  -> Compose, at the origin
+```
+
+The three sizes differ for two separate reasons, and both matter when reading a check:
+Cloudflare's edge adds its email-obfuscation script (2648 → 2878), and the cluster's copy
+additionally carries the `served-by: k3s` marker (2878 → 2902).
+
+`cf-cache-status: DYNAMIC` on the apex — nothing is cached at the edge, so a broken
+origin will show immediately rather than being masked by a stale copy. The verification
+steps in group 3 and group 4 depend on that being true.
+
+## The stack being retired
+
+```
+buzaga-nginx        nginx:latest        30000:80, 443:443   started 2026-08-06
+buzaga-hit-counter  buzaga-hit-counter  local build         started 2026-08-06
+buzaga-redis        redis:7-alpine      buzaga_redis-data   started 2026-08-06
+```
+
+Final hit counter reading:
+
+```
+$ curl -s http://127.0.0.1:30000/api/hits
+{"state":"first","total":69,"returning":6}
+
+$ docker exec buzaga-redis redis-cli --scan
+hits:total
+hits:returning
+```
+
+69 at the cutover, against 65 when this project's second milestone began. Two keys, and
+that is the entire persistent state of the thing being retired.
+
+## Why the hit counter could not simply have been moved
+
+```
+$ docker image inspect buzaga-hit-counter --format '{{.RepoDigests}}'
+[]
+```
+
+Empty. The image was built on this host and never pushed anywhere, so there is nothing
+for a cluster to pull. Porting it meant building and hosting an image first — which is
+exactly the registry work the ladder decided not to schedule for a component that is
+going away.
+
+That empty list is also the clearest single statement of what was wrong with the old
+arrangement: the running service existed in one place, with no way to reproduce it
+elsewhere.
+
+## Port bindings that disappear with it
+
+```
+0.0.0.0:30000 -> 80    serving
+0.0.0.0:443   -> 443   accepts a connection and serves nothing
+```
+
+`:443` is published by the container but nothing inside listens on it — `nginx.conf` only
+declares `listen 80`. It is already vestigial, which answers half of design Open
+Question 2.
+
+## The thing that would undo this
+
+```
+$ systemctl list-unit-files | grep -i buzaga
+(nothing)
+```
+
+`../buzaga-website.service` exists on disk and runs `docker compose up -d` on boot. It is
+not installed and not enabled, so it is inert — by accident rather than by decision.
+Task 4.5 asserts it stays that way.
+
+## How to re-measure
+
+```bash
+make check-public                                 # which copy each hostname serves
+curl -s http://127.0.0.1:30000/api/hits           # the counter, while it exists
+docker compose -f ../docker-compose.yml ps        # the stack
+systemctl list-unit-files | grep -i buzaga        # the unit that would bring it back
+```

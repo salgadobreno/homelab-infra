@@ -21,8 +21,9 @@
 
 - Porting the hit counter or Redis. Retired, per the ladder — a registry and a
   persistence story are real work for a component that is going away.
-- Deleting the Compose definition, its content, or the Redis volume. Stopping a service
-  and destroying its data are separate decisions and only the first is reversible.
+- Deleting the Compose definition or its content from disk. The Redis volume *is* being
+  destroyed — the operator authorised it once its two values were recorded — but the
+  files stay.
 - Removing `k8s.buzaga.com.br`. Two names reaching one place costs nothing, and every
   check in this repository already uses it.
 
@@ -55,8 +56,14 @@ and leaves everything on disk. `restart: unless-stopped` only applies to contain
 exist, so removing them is what makes the stop survive a reboot — `docker compose stop`
 would not.
 
-The Redis volume stays. It holds a number this change has already written down, and
-`down -v` is a one-word difference away from destroying data to no benefit.
+**Amended 2026-08-22: the operator authorised `down -v`.** The volume holds exactly two
+keys, `hits:total` and `hits:returning`, whose values are now recorded in `README.md` and
+in this change's baseline. Once the number is written down, keeping the volume preserves
+nothing that is not already preserved better.
+
+So task 4.1 uses `down -v`. The ordering constraint it was protecting is unchanged and
+matters more than the flag: **this runs after the repoint, not before.** With the apex
+still pointing at Compose, any form of `down` takes the public site offline.
 
 ### D3: The uninstalled unit file is named, not deleted
 
@@ -91,7 +98,7 @@ names disagreeing about what the site is, which is worse than either state.
 | Repoint fails silently and the outage is blamed on the teardown | Step 6 verifies after the stop, and step 4 verifies before it — the pair localises the fault |
 | The site is down while the operator is asleep | Every step is reversible, and the last one is a single `docker compose up -d` |
 | Someone later enables the stray unit and both origins serve | Asserted not-installed as part of the check |
-| Redis data destroyed by a reflexive `down -v` | The volume is out of scope and the tasks say `down` without `-v`, explicitly |
+| `down` runs before the repoint and takes the site offline | The tasks put it in group 4, after group 3 has verified the apex is served by the cluster |
 | The hit counter's number is lost | Recorded in `README.md` before anything stops — that is task 1 |
 
 ## Open Questions

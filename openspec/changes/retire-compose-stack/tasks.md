@@ -6,8 +6,8 @@ rather than discovered at the end.
 
 ## 1. Record what is about to be destroyed
 
-- [ ] 1.1 Record the Compose arrangement in `README.md` — the three containers, what each did, the ports, and the hit counter's final number — as the evergreen "before" that M5 will show
-- [ ] 1.2 Capture the hit counter's last reading and the site's response size, so the record is a measurement rather than a description
+- [x] 1.1 Record the Compose arrangement in `README.md` — the three containers, what each did, the ports, and the hit counter's final number — as the evergreen "before" that M5 will show
+- [x] 1.2 Capture the hit counter's last reading and the site's response size, so the record is a measurement rather than a description
 - [ ] 1.3 Answer design Open Question 1: what the tunnel currently names as the origin for `buzaga.com.br` — operator, from the dashboard
 
 ## 2. Confirm the destination before moving anything
@@ -25,7 +25,7 @@ rather than discovered at the end.
 
 ## 4. Stop the old origin
 
-- [ ] 4.1 `docker compose down` — containers and network removed, the named volume and every file left alone (design D2). **Not** `down -v`
+- [ ] 4.1 `docker compose down -v` — containers, network and the Redis volume removed; files on disk left alone (design D2, amended: the operator authorised `-v` once the counter's value was recorded). **Only after 3.1-3.4**: with the apex still pointing at Compose, any `down` takes the public site offline
 - [ ] 4.2 Confirm nothing listens on the hypervisor's `:30000` or `:443` any more
 - [ ] 4.3 Confirm the apex is unaffected by the stop — this is what proves 3.1 actually took effect rather than the old origin having served it all along
 - [ ] 4.4 Confirm the containers do not return after a reboot, or assert the equivalent: they are removed, not merely stopped — `site-delivery` "The hypervisor no longer serves the site"
