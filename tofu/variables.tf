@@ -199,6 +199,18 @@ variable "argocd_chart_version" {
   }
 }
 
+variable "gitops_repo_url" {
+  description = "Repository ArgoCD reconciles from. Public, so no credential is needed — a private repository would need a deploy key, with the same rules as every other credential here."
+  type        = string
+  default     = "https://github.com/salgadobreno/homelab-infra"
+}
+
+variable "gitops_repo_revision" {
+  description = "Branch, tag or commit ArgoCD tracks. A branch means the cluster follows it; a tag or SHA pins it."
+  type        = string
+  default     = "main"
+}
+
 variable "k3s_disable" {
   description = <<-EOT
     k3s bundled components to disable at install time, e.g. ["servicelb", "traefik"].

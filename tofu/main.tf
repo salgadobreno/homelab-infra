@@ -97,6 +97,8 @@ resource "proxmox_virtual_environment_file" "cloud_init" {
       # that) while the manifest stays a real YAML file rather than an escaped blob.
       argocd_manifest = templatefile("${path.module}/cloud-init/argocd.yaml.tftpl", {
         argocd_chart_version = var.argocd_chart_version
+        repo_url             = var.gitops_repo_url
+        repo_revision        = var.gitops_repo_revision
       })
 
       # Precomputed here rather than looped inside the template, so the template
