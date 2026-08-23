@@ -47,4 +47,4 @@ first generated output is inside the boundary rather than retrofitted into it.
 ## 7. Close the record
 
 - [x] 7.1 Update `README.md`, `CLAUDE.md` and `openspec/config.yaml`
-- [ ] 7.2 Record in `LEARNINGS/` anything the rung taught, if it was earned
+- [x] 7.2 Record in `LEARNINGS/` anything the rung taught, if it was earned — four candidates put to the operator 2026-08-23 (the revision fixpoint, selfHeal outrunning the check, `make -n` running `$(MAKE)` a second time, unchecked prose contradicting itself). **None claimed.** The conditional in this task is doing its job: an entry is earned by friction the operator wants to keep, not by a milestone ending
