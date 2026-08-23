@@ -450,7 +450,11 @@ tf-state: ## What Terraform currently believes exists
 # ---------------------------------------------------------------- checks ------
 
 .PHONY: check
-check: check-secrets check-privileges check-site check-drift ## Run all safety checks
+check: check-secrets check-disclosure check-handwritten check-privileges check-site check-diagram check-drift ## Run all safety checks
+# The three added at M5 sit where their cost is. check-disclosure and
+# check-handwritten are local greps and run early, so a boundary violation fails
+# before anything talks to the cluster. check-diagram needs the cluster and runs
+# after check-site, which distinguishes an unreachable node from a broken one.
 
 .PHONY: diagram
 diagram: ## Regenerate k8s/site/content/machine.html from the cluster (task 3.3)

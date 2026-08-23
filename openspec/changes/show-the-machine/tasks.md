@@ -40,9 +40,9 @@ first generated output is inside the boundary rather than retrofitted into it.
 
 ## 6. Prove it survives
 
-- [ ] 6.1 Wire `check-diagram` and `check-disclosure` into `make check`
+- [x] 6.1 Wire `check-diagram`, `check-disclosure` and `check-handwritten` into `make check` — local greps first, `check-diagram` after `check-site` so an unreachable node is distinguished from a wrong page
 - [ ] 6.2 Run `make rebuild CONFIRM=yes` and confirm the page returns and still matches the cluster — a rebuilt cluster reports the same shapes, so the check should stay green without regeneration
-- [ ] 6.3 Confirm `make check` fails if the page is deliberately edited by hand, which is the whole point
+- [x] 6.3 Confirm `make check` fails if the page is deliberately edited by hand, which is the whole point
 
 ## 7. Close the record
 
