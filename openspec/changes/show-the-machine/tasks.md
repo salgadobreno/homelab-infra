@@ -41,10 +41,10 @@ first generated output is inside the boundary rather than retrofitted into it.
 ## 6. Prove it survives
 
 - [x] 6.1 Wire `check-diagram`, `check-disclosure` and `check-handwritten` into `make check` — local greps first, `check-diagram` after `check-site` so an unreachable node is distinguished from a wrong page
-- [ ] 6.2 Run `make rebuild CONFIRM=yes` and confirm the page returns and still matches the cluster — a rebuilt cluster reports the same shapes, so the check should stay green without regeneration. **Operator-run: `rebuild` requires an ssh-agent, and this host has no TTY in agent sessions.** Then `make verify-rebuild`, which refreshes the kubeconfig, waits for `Synced/Healthy`, and runs `check-diagram` *without* regenerating. Pre-rebuild page hash `178960e84fa143c8ec49d81bfdf38246`
+- [x] 6.2 Run `make rebuild CONFIRM=yes` and confirm the page returns and still matches the cluster — a rebuilt cluster reports the same shapes, so the check should stay green without regeneration. **Operator-run: `rebuild` requires an ssh-agent, and this host has no TTY in agent sessions.** Then `make verify-rebuild`, which refreshes the kubeconfig, waits for `Synced/Healthy`, and runs `check-diagram` *without* regenerating. Pre-rebuild page hash `178960e84fa143c8ec49d81bfdf38246`; operator ran it 2026-08-23, and the same hash still matched the rebuilt cluster with no regeneration
 - [x] 6.3 Confirm `make check` fails if the page is deliberately edited by hand, which is the whole point
 
 ## 7. Close the record
 
-- [ ] 7.1 Update `README.md`, `CLAUDE.md` and `openspec/config.yaml`
+- [x] 7.1 Update `README.md`, `CLAUDE.md` and `openspec/config.yaml`
 - [ ] 7.2 Record in `LEARNINGS/` anything the rung taught, if it was earned

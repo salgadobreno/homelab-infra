@@ -33,6 +33,14 @@ industry-standard choice wins over the homelab-clever one.
    └──────────────────────────────────────────────────────────────────────────┘
 ```
 
+**That picture is hand-drawn, and nothing checks it.** It is accurate as of M5, and it is
+accurate the way `diagram.ascii` was accurate right up until it was not. The site's own
+description at [buzaga.com.br/machine.html](https://buzaga.com.br/machine.html) is the one
+that cannot drift: it is generated from the cluster by `make diagram`, and `make check`
+fails if it and the cluster disagree. When the two disagree, believe that one. Bringing
+this diagram under the same check is unscheduled work, listed under *Deliberately
+deferred*.
+
 Nothing is deployed by hand. ArgoCD is installed by cloud-init as a k3s `HelmChart`, so
 a cluster built from nothing arrives already reconciling; the site is a Deployment,
 Service, Ingress and a kustomize-generated ConfigMap in `k8s/site/`. Editing a page and
@@ -42,6 +50,39 @@ reference follows it, and the pods roll.
 Terraform is told none of the ordering. The VM references the image and the snippet, so
 the dependency graph is inferred; the two upstream resources have no edge between them
 and are built concurrently.
+
+## The site describes itself, and the description is checked
+
+`buzaga.com.br/machine.html` lists the node, everything running on it, and how it got
+there. None of it was typed: `scripts/generate-diagram.sh` reads the cluster and writes
+the file, which is then committed and deployed like any other page.
+
+```bash
+make diagram          # regenerate from the cluster
+make check-diagram    # fail if the committed page and the cluster disagree
+make check-disclosure # fail if anything served crosses the disclosure boundary
+make check-handwritten# fail if hand-written served content names a technology
+```
+
+All three run inside `make check`. The property they buy is narrow and worth stating
+exactly: **the page can be out of date, but it cannot be out of date and passing.**
+
+Three things fell out of building it that were not obvious going in:
+
+- **The page cannot name the commit it was generated from.** Publishing the synced
+  revision means every push changes what the page should say, and the fix — regenerate
+  and commit — is itself a new commit that changes it again. There is no fixpoint.
+- **ArgoCD self-heal makes managed drift invisible to the check.** Scaling the site was
+  reverted in ~310 ms, faster than the generator can read the cluster. The drift check's
+  real subject is everything ArgoCD does *not* revert: kubelet version, node capacity,
+  image tags, ingress hosts.
+- **Determinism is the whole cost.** Ages, ready counts, row order and generated name
+  suffixes all had to be suppressed deliberately, or the check fails at random and gets
+  ignored — which is worse than not having it.
+
+A rebuild is the sharpest test of that last point: the node is destroyed and recreated,
+and the committed page still matches byte-for-byte, because everything it reports is a
+shape rather than an instance. `make verify-rebuild` asserts exactly that.
 
 ## What this replaces
 
@@ -195,6 +236,17 @@ than merely untidy to commit.
 everything above the OS is reconciled by GitOps. Bootstrap is about fifteen lines of
 `runcmd`. If that grows past what fits on a screen, that is the signal to reconsider —
 not a reason to add Ansible pre-emptively.
+
+**The README's own diagram is unchecked.** The site's description is generated and
+verified; the ASCII picture at the top of this file is drawn by hand and asserted by
+nobody. It names the hypervisor and the address plan, which the disclosure boundary keeps
+off the public page, so it cannot simply be replaced by the generated one. Bringing it
+under a check means deciding what a repository-internal description is allowed to say
+that a public one is not — worth doing, and not this milestone.
+
+**The Cloudflare tunnel token is still the one that was disclosed.** Rotating it is a
+write to `/etc/cloudflared/token` and a restart. Deferred at M2 by explicit decision, not
+forgotten.
 
 **One node.** Multi-node and embedded etcd arrive at M6, at which point the
 datastore stops being sqlite and the fsync argument behind putting disks on the NVMe

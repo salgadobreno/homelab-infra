@@ -90,8 +90,8 @@ context: |
   | M2 | "Every credential holds only what its job needs, and I can prove it." | `narrow-privileges` | done 2026-08-21 |
   | M3 | "I pushed to GitHub and ArgoCD served my site. I did not run kubectl." | `serve-site-from-k3s` | done 2026-08-22 |
   | M4 | "Docker-on-host is gone. The cluster serves buzaga.com.br." | `retire-compose-stack` | done 2026-08-22 |
-  | M5 | "The site shows its own guts, and the picture cannot go stale." | not yet proposed | next |
-  | M6 | "Three nodes. I drained one and the app stayed up." | not yet proposed | |
+  | M5 | "The site shows its own guts, and the picture cannot go stale." | `show-the-machine` | done 2026-08-23 |
+  | M6 | "Three nodes. I drained one and the app stayed up." | not yet proposed | next |
   | M7 | "I can see what the cluster is doing." — observability, if RAM allows | not yet proposed | |
 
   **The rebuild demo is not a rung.** `make rebuild CONFIRM=yes` destroying and recreating
@@ -130,12 +130,15 @@ context: |
   temporary and the README is what a reader arrives at; and the site itself, where it
   becomes the "before" half of what M5 shows.
 
-  ### What M5 is, and why it is a rung rather than a page
+  ### What M5 was, and why it was a rung rather than a page
+
+  Delivered by `show-the-machine`, archived 2026-08-23. Live at
+  `buzaga.com.br/machine.html`. What follows is the note as written before it was
+  built, with the outcome recorded at the end.
 
   The public site renders the infrastructure it is running on, in a low-fi register —
-  text and ASCII, no dashboard chrome. Nodes, workloads, what ArgoCD last synced and from
-  which revision, the path a request took to arrive. A visitor sees the machine that
-  served them.
+  text and ASCII, no dashboard chrome. Nodes, workloads, and what ArgoCD reports. A
+  visitor sees the machine that served them.
 
   It shows **both halves**: what runs now, and the Compose-on-the-hypervisor arrangement
   it replaced. The delta is the point — a diagram of the current setup alone does not say
@@ -168,6 +171,28 @@ context: |
     guts is an information-disclosure surface. Decided 2026-08-22: shapes, versions,
     counts and sync state are published; addresses, storage paths and account names are
     not.
+
+  **How it turned out.** Three things were learned building it that this note did not
+  anticipate:
+
+  - *The revision could not be published.* This note asked for "what ArgoCD last synced and
+    from which revision". The revision is the commit containing the page that reports it,
+    so publishing it makes the drift check red after every push, and regenerating to fix
+    that is itself a new commit. There is no fixpoint. Sync status and health are shown;
+    the revision is withheld. The sentence above has been corrected accordingly.
+  - *Self-heal makes managed drift unobservable.* ArgoCD reverted a scaled Deployment in
+    ~310 ms, faster than the generator can read the cluster, so the drift check cannot see
+    changes to anything the `site` Application manages. Its real subject is what ArgoCD
+    does not revert.
+  - *The disclosure boundary needed to be a check before it could be a decision.* It is
+    `scripts/disclosure-rules`, matched by shape rather than by known value, and fired
+    from a `PostToolUse` hook so a forbidden value is refused at the write.
+
+  Two hand-written descriptions in this repository are still unchecked and now known to be
+  so: the ASCII diagram at the top of `README.md`, and — until this milestone caught it —
+  a line in `CLAUDE.md` claiming the Compose stack was still running, sixteen lines below
+  another saying it had been retired. The second is the whole argument for this rung,
+  found in the file that instructs the agent.
 
   Later this content moves into a `projects` section of the operator's personal site, so
   it should not assume it owns the whole page.

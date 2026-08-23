@@ -118,7 +118,7 @@ or silently "improve" them:
 
 ## Current state
 
-M0 to M4 are complete and archived. **M5 is next** — see the ladder in `openspec/config.yaml`.
+M0 to M5 are complete and archived. **M6 is next** — see the ladder in `openspec/config.yaml`.
 The ladder — what every `M<n>` in this repo refers to — is the `## Milestone ladder`
 table in `openspec/config.yaml`. Read it before proposing what comes next; do not infer
 the next change from a gap in the numbering. Archived changes predate a renumbering and
@@ -158,11 +158,25 @@ Do not `kubectl apply` anything under `k8s/`. It is deployed by being pushed. Ap
 it by hand produces the right result for the wrong reason and hides whether
 reconciliation actually works.
 
+The site describes itself at `buzaga.com.br/machine.html`, generated from the cluster by
+`scripts/generate-diagram.sh`. **Do not edit `k8s/site/content/machine.html`** — it is
+output. `make diagram` regenerates it and `make check` fails when it and the cluster
+disagree, so a hand edit is caught rather than served.
+
+Three checks were added with it, all inside `make check`: `check-diagram` (the page agrees
+with the cluster), `check-disclosure` (nothing served crosses the boundary in
+`scripts/disclosure-rules`), and `check-handwritten` (hand-written served content names no
+technology). A `PostToolUse` hook in `.claude/settings.json` runs the disclosure check on
+writes under `k8s/site/`, so a forbidden value is refused at the write rather than after
+the commit.
+
+`make check` now also fails when the *world* moves, not only when the repository does.
+That is deliberate — see design D2 of `show-the-machine` — but it means a red suite no
+longer implies someone changed a file.
+
 Do not reintroduce a `root@pam` API token. `scripts/create-bootstrap-token.sh` creates
 one deliberately, for the single purpose of creating the scoped user on a fresh host,
 and its own output tells you to delete it afterwards.
-
-The live workload still runs as Docker Compose on the hypervisor and is untouched.
 
 `../homelab1/` is a superseded earlier attempt with no commits and no tracked files. Do
 not develop there.
