@@ -441,6 +441,24 @@ rebuild: ## [destructive] Timed destroy + apply + readiness (tasks 9.1-9.3)
 	 echo && echo "REBUILD COMPLETE in $$(( $$(date +%s) - start ))s" && \
 	 echo "(record this number in the README — task 9.3)"
 
+.PHONY: verify-rebuild
+# kubeconfig is a prerequisite rather than a $(MAKE) line in the recipe: make
+# executes recipe lines containing $(MAKE) even under -n, which is how a dry run
+# once destroyed this cluster. Prerequisites are not executed under -n.
+verify-rebuild: kubeconfig ## After a rebuild: prove the page still matches without regenerating (task 6.2)
+	@echo
+	@echo "=== waiting for ArgoCD to finish reconciling ==="
+	@# check-diagram compares against the app's sync and health, so running it
+	@# while the app is still Progressing fails for a reason that has nothing to
+	@# do with the property being tested.
+	@until [ "$$(KUBECONFIG=$(KUBECONFIG_PATH) kubectl get application site -n argocd \
+	    -o jsonpath='{.status.sync.status}{.status.health.status}' 2>/dev/null)" = "SyncedHealthy" ]; do \
+	  printf '.'; sleep 5; done; echo " Synced/Healthy"
+	@echo
+	@echo "=== the page must already agree — do NOT run 'make diagram' first ==="
+	@./scripts/check-diagram.sh && \
+	  echo && echo "PASS: a rebuilt cluster reports the same shapes; the committed page needed no regeneration."
+
 .PHONY: tf-state
 tf-state: ## What Terraform currently believes exists
 	@python3 -c "import json;d=json.load(open('$(TF_DIR)/terraform.tfstate'));\
