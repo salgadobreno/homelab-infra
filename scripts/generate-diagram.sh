@@ -185,11 +185,11 @@ cat <<MID2
   <p class="text-sm text-gray-600 mb-4">Served for $(printf '%s' "$hosts" | html_escape).</p>
 
   <p class="text-sm text-gray-500 border border-gray-200 bg-gray-50 p-3">
-    This page is not live. It was written by a command that read the cluster, and
-    then committed like any other file. What stops it going quietly out of date is
-    that the same command runs as a test: if anything above disagreed with the
-    real cluster, the check would fail and say which line. So it can be out of
-    date, but not out of date and passing.
+    This snapshot is not live &mdash; it is a reading, taken by a command and then
+    committed like any other file. What stops it going quietly out of date is that
+    the same command runs as a test: if anything in this section disagreed with the
+    real cluster, the check would fail and name the line. So it can be out of date,
+    but not out of date and passing.
   </p>
 </section>
 MID2

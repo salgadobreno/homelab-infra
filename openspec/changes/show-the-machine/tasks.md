@@ -60,4 +60,4 @@ in `design/home-infra-project-architecture.jpg`, with the cluster snapshot below
 - [x] 8.3 Delete `content/machine.html` and the second page with it; the site is one page again
 - [x] 8.4 Remove `check-handwritten` — operator decision 2026-08-25, no longer a requirement. The static diagram names technologies deliberately, and the check forbade exactly that
 - [x] 8.5 Confirm determinism, the disclosure boundary, the drift check and the `served-by` marker survive the restructure
-- [ ] 8.6 Confirm the single page reaches the public site and read it cold
+- [x] 8.6 Confirm the single page reaches the public site and read it cold. Live on all three hostnames; `/machine.html` now 404s as intended. **The public bytes are not the committed bytes**: Cloudflare Scrape Shield rewrites the email address into an obfuscation script at the edge. The origin serves exactly what is committed, verified with a Host header against the node, so the drift check is unaffected — but "the live page is byte-identical" only holds at the origin, and that is now written down in `check-diagram.sh`

@@ -7,6 +7,13 @@
 #
 # It is also the first check here that fails because the world moved rather than
 # because the repository did. See design D2.
+#
+# This compares the committed file against the cluster. It deliberately does not
+# fetch the public URL: Cloudflare's Scrape Shield rewrites the HTML at the edge,
+# obfuscating the email address into a script tag, so the bytes a visitor receives
+# are not the bytes the origin sends. The origin serves exactly what is committed;
+# anything past the tunnel is Cloudflare's copy, not the cluster's. Comparing
+# against the public URL would fail for a reason that has nothing to do with drift.
 set -uo pipefail
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
