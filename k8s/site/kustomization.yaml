@@ -21,8 +21,11 @@ configMapGenerator:
   - name: site-content
     files:
       - content/index.html
-      # Binary: kustomize base64s it into binaryData and nginx serves it from the
-      # mounted volume. The whole ConfigMap must stay under etcd's 1 MiB object
-      # limit, and base64 costs a third on top of the file size — check-configmap-size
-      # asserts it rather than leaving it to be discovered at apply time.
-      - content/asa-norte.jpg
+      # No binary assets here. kustomize will base64 a binary file into binaryData
+      # and nginx will serve it, but ArgoCD's client-side apply writes the whole
+      # object into the last-applied-configuration annotation, which is capped at
+      # 256 KiB. Past that the ConfigMap is rejected while the Deployment applies
+      # anyway, so the new pod waits on a ConfigMap that never appears and the old
+      # pod keeps serving — a wedged deploy that looks like a healthy site.
+      # asa-norte.jpg (223 KB, 309 KB encoded) hit exactly this. It is still in
+      # content/ but unserved; see check-configmap-size for the ceiling.

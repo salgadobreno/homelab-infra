@@ -505,16 +505,24 @@ check-diagram: ## Fail if the page and the cluster disagree (task 4.1)
 	@./scripts/check-diagram.sh
 
 .PHONY: check-configmap-size
-check-configmap-size: ## Fail if the site ConfigMap approaches etcd's 1 MiB object limit
-	@# Binary assets are base64'd into the ConfigMap, costing a third on top of the
-	@# file size. Past the limit the apply fails at ArgoCD with an etcd error that
-	@# says nothing about which file caused it, so it is asserted here instead.
+check-configmap-size: ## Fail if the site ConfigMap exceeds the limit that actually binds
+	@# The binding limit is NOT etcd's 1 MiB object size. ArgoCD syncs with
+	@# client-side apply, which writes the whole object into the
+	@# kubectl.kubernetes.io/last-applied-configuration annotation, and annotations
+	@# are capped at 256 KiB. The API server rejects the ConfigMap, the Deployment
+	@# is applied anyway, and the new pod sits in ContainerCreating forever with
+	@# "configmap not found" while the old pod keeps serving — so the site looks
+	@# fine and nothing is deploying.
+	@#
+	@# This check first asserted the 1 MiB limit and passed at 30% while the deploy
+	@# was already wedged. Setting ServerSideApply=true on the Application removes
+	@# the annotation and restores 1 MiB as the real ceiling; until then, 256 KiB.
 	@kubectl kustomize k8s/site 2>/dev/null | python3 -c "import sys,yaml;\
 	ds=[d for d in yaml.safe_load_all(sys.stdin) if d and d.get('kind')=='ConfigMap'];\
 	t=sum(len(v) for d in ds for v in list((d.get('data') or {}).values())+list((d.get('binaryData') or {}).values()));\
-	lim=1048576;\
-	print(f'{\"FAIL\" if t>lim*0.8 else \"OK\"}: site ConfigMap {t} bytes, {t/lim:.0%} of the 1 MiB limit');\
-	sys.exit(1 if t>lim*0.8 else 0)"
+	lim=262144;\
+	print(f'{\"FAIL\" if t>lim else \"OK\"}: site ConfigMap {t} bytes, {t/lim:.0%} of the 256 KiB last-applied-annotation limit');\
+	sys.exit(1 if t>lim else 0)"
 
 .PHONY: check-disclosure
 check-disclosure: ## Assert nothing served crosses the disclosure boundary (task 2.2)
