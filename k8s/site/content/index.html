@@ -34,7 +34,11 @@
 <p class="mb-3">
   Read along for more information on this project.
 </p>
-<p class="mb-8 text-sm">Reach out: breno@buzaga.com.br</p>
+<p class="mb-8 text-sm">
+  The whole thing is on GitHub:
+  <a class="underline" href="https://github.com/salgadobreno/homelab-infra">salgadobreno/homelab-infra</a>
+  &mdash; including the command that generates the snapshot below.
+</p>
 <!-- Hand-drawn, transcribed from the operator's sketch at
      design/home-infra-project-architecture.jpg.
 
@@ -45,10 +49,6 @@
      directly below it. A reader comparing the two can see for themselves whether
      the drawing still matches the machine. -->
 <h2 class="text-xl mb-1">How this was built</h2>
-<p class="text-gray-500 text-sm mb-4">
-  The shape of the project. It changes when a decision changes, not when a pod
-  restarts &mdash; the part that moves is in the snapshot below.
-</p>
 
 <div class="overflow-x-auto mb-8">
 <pre class="text-xs leading-tight inline-block">
@@ -114,6 +114,17 @@
   </ul>
   <p class="text-sm text-gray-600">Served for buzaga.com.br, k8s.buzaga.com.br, www.buzaga.com.br.</p>
 </section>
+<!-- Hand-written. Says nothing about the system, so nothing here can go stale.
+     Emitted after the snapshot: it is the last thing on the page, not part of
+     the introduction. -->
+<footer class="mt-10 border-t border-gray-300 pt-6 text-sm">
+  <p class="mb-2">Reach out:</p>
+  <ul class="space-y-1">
+    <li><a class="underline" href="mailto:breno@buzaga.com.br">breno@buzaga.com.br</a></li>
+    <li><a class="underline" href="https://www.linkedin.com/in/breno-salgado-a579ab149/">LinkedIn</a></li>
+    <li><a class="underline" href="https://github.com/salgadobreno/">GitHub</a></li>
+  </ul>
+</footer>
 <!-- served-by: k3s -->
 </div>
 </div>

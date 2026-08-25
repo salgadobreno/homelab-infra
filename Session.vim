@@ -10,12 +10,12 @@ if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
 endif
 let s:shortmess_save = &shortmess
 set shortmess+=aoO
-badd +113 term:///mnt/sda8/Projects/buzaga/homelab-infra//3322116:/bin/bash
+badd +103 term:///mnt/sda8/Projects/buzaga/homelab-infra//3322116:/bin/bash
 badd +181 term:///mnt/sda8/Projects/buzaga/homelab-infra//3326349:/bin/bash
 badd +17 LEARNINGS.md
-badd +485 Makefile
-badd +3289 term:///mnt/sda8/Projects/buzaga/homelab-infra//3347696:/bin/bash
-badd +30 tofu/main.tf
+badd +470 Makefile
+badd +3753 term:///mnt/sda8/Projects/buzaga/homelab-infra//3347696:/bin/bash
+badd +1 tofu/main.tf
 badd +72 openspec/changes/bootstrap-k3s-node/tasks.md
 badd +1 openspec/changes/bootstrap-k3s-node/proposal.md
 badd +31 openspec/changes/bootstrap-k3s-node/design.md
@@ -50,10 +50,13 @@ badd +40 /mnt/sda8/Projects/buzaga/homelab-infra/openspec/changes/archive/2026-0
 badd +56 openspec/specs/infrastructure/site-delivery/spec.md
 badd +45 /mnt/sda8/Projects/buzaga/homelab-infra/openspec/changes/archive/2026-08-25-show-the-machine/specs/infrastructure/self-description/spec.md
 badd +13 k8s/site/content/machine.html
-badd +99 /mnt/sda8/Projects/buzaga/homelab-infra/k8s/site/content/index.html
-badd +4 /mnt/sda8/Projects/buzaga/homelab-infra/k8s/site/parts/intro.html
+badd +11 /mnt/sda8/Projects/buzaga/homelab-infra/k8s/site/content/index.html
+badd +6 /mnt/sda8/Projects/buzaga/homelab-infra/k8s/site/parts/intro.html
+badd +65 term:///mnt/sda8/Projects/buzaga/homelab-infra//718677:/bin/bash
+badd +19 /mnt/sda8/Projects/buzaga/homelab-infra/k8s/site/parts/architecture.html
 argglobal
 %argdel
+tabnew +setlocal\ bufhidden=wipe
 tabnew +setlocal\ bufhidden=wipe
 tabnew +setlocal\ bufhidden=wipe
 tabnew +setlocal\ bufhidden=wipe
@@ -64,10 +67,7 @@ let s:save_splitright = &splitright
 set splitbelow splitright
 wincmd _ | wincmd |
 vsplit
-wincmd _ | wincmd |
-vsplit
-2wincmd h
-wincmd w
+1wincmd h
 wincmd w
 let &splitbelow = s:save_splitbelow
 let &splitright = s:save_splitright
@@ -78,22 +78,8 @@ set winminheight=0
 set winheight=1
 set winminwidth=0
 set winwidth=1
-exe 'vert 1resize ' . ((&columns * 45 + 104) / 209)
-exe 'vert 2resize ' . ((&columns * 81 + 104) / 209)
-exe 'vert 3resize ' . ((&columns * 81 + 104) / 209)
-argglobal
-enew
-file neo-tree\ filesystem\ \[1]
-balt /mnt/sda8/Projects/buzaga/homelab-infra/k8s/site/parts/intro.html
-setlocal foldmethod=expr
-setlocal foldexpr=v:lua.require'astroui.folding'.foldexpr()
-setlocal foldmarker={{{,}}}
-setlocal foldignore=#
-setlocal foldlevel=99
-setlocal foldminlines=1
-setlocal foldnestmax=20
-setlocal foldenable
-wincmd w
+exe 'vert 1resize ' . ((&columns * 67 + 67) / 135)
+exe 'vert 2resize ' . ((&columns * 67 + 67) / 135)
 argglobal
 setlocal foldmethod=expr
 setlocal foldexpr=v:lua.require'astroui.folding'.foldexpr()
@@ -103,12 +89,12 @@ setlocal foldlevel=99
 setlocal foldminlines=1
 setlocal foldnestmax=20
 setlocal foldenable
-let s:l = 4 - ((3 * winheight(0) + 24) / 48)
+let s:l = 1 - ((0 * winheight(0) + 14) / 28)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 4
-normal! 016|
+keepjumps 1
+normal! 061|
 wincmd w
 argglobal
 if bufexists(fnamemodify("term:///mnt/sda8/Projects/buzaga/homelab-infra//3322116:/bin/bash", ":p")) | buffer term:///mnt/sda8/Projects/buzaga/homelab-infra//3322116:/bin/bash | else | edit term:///mnt/sda8/Projects/buzaga/homelab-infra//3322116:/bin/bash | endif
@@ -123,125 +109,18 @@ setlocal foldlevel=99
 setlocal foldminlines=1
 setlocal foldnestmax=20
 setlocal foldenable
-let s:l = 113 - ((46 * winheight(0) + 24) / 49)
+let s:l = 103 - ((16 * winheight(0) + 14) / 29)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 113
-normal! 02|
+keepjumps 103
+normal! 023|
 wincmd w
 2wincmd w
-exe 'vert 1resize ' . ((&columns * 45 + 104) / 209)
-exe 'vert 2resize ' . ((&columns * 81 + 104) / 209)
-exe 'vert 3resize ' . ((&columns * 81 + 104) / 209)
-tabnext
-edit Makefile
-argglobal
-setlocal foldmethod=expr
-setlocal foldexpr=v:lua.require'astroui.folding'.foldexpr()
-setlocal foldmarker={{{,}}}
-setlocal foldignore=#
-setlocal foldlevel=99
-setlocal foldminlines=1
-setlocal foldnestmax=20
-setlocal foldenable
-166
-sil! normal! zo
-let s:l = 485 - ((37 * winheight(0) + 24) / 48)
-if s:l < 1 | let s:l = 1 | endif
-keepjumps exe s:l
-normal! zt
-keepjumps 485
-normal! 015|
+exe 'vert 1resize ' . ((&columns * 67 + 67) / 135)
+exe 'vert 2resize ' . ((&columns * 67 + 67) / 135)
 tabnext
 edit /mnt/sda8/Projects/buzaga/homelab-infra/k8s/site/content/index.html
-let s:save_splitbelow = &splitbelow
-let s:save_splitright = &splitright
-set splitbelow splitright
-wincmd _ | wincmd |
-vsplit
-wincmd _ | wincmd |
-vsplit
-2wincmd h
-wincmd w
-wincmd w
-let &splitbelow = s:save_splitbelow
-let &splitright = s:save_splitright
-wincmd t
-set winminheight=0
-set winheight=1
-set winminwidth=0
-set winwidth=1
-exe 'vert 1resize ' . ((&columns * 30 + 104) / 209)
-exe 'vert 2resize ' . ((&columns * 88 + 104) / 209)
-exe 'vert 3resize ' . ((&columns * 89 + 104) / 209)
-argglobal
-enew
-file neo-tree\ filesystem\ \[2]
-balt openspec/config.yaml
-setlocal foldmethod=expr
-setlocal foldexpr=v:lua.require'astroui.folding'.foldexpr()
-setlocal foldmarker={{{,}}}
-setlocal foldignore=#
-setlocal foldlevel=99
-setlocal foldminlines=1
-setlocal foldnestmax=20
-setlocal foldenable
-wincmd w
-argglobal
-balt openspec/config.yaml
-setlocal foldmethod=expr
-setlocal foldexpr=v:lua.require'astroui.folding'.foldexpr()
-setlocal foldmarker={{{,}}}
-setlocal foldignore=#
-setlocal foldlevel=99
-setlocal foldminlines=1
-setlocal foldnestmax=20
-setlocal foldenable
-2
-sil! normal! zo
-13
-sil! normal! zo
-14
-sil! normal! zo
-15
-sil! normal! zo
-16
-sil! normal! zo
-65
-sil! normal! zo
-let s:l = 100 - ((36 * winheight(0) + 24) / 48)
-if s:l < 1 | let s:l = 1 | endif
-keepjumps exe s:l
-normal! zt
-keepjumps 100
-normal! 03|
-wincmd w
-argglobal
-if bufexists(fnamemodify("tofu/main.tf", ":p")) | buffer tofu/main.tf | else | edit tofu/main.tf | endif
-if &buftype ==# 'terminal'
-  silent file tofu/main.tf
-endif
-balt /mnt/sda8/Projects/buzaga/homelab-infra/k8s/site/content/index.html
-setlocal foldmethod=expr
-setlocal foldexpr=v:lua.require'astroui.folding'.foldexpr()
-setlocal foldmarker={{{,}}}
-setlocal foldignore=#
-setlocal foldlevel=99
-setlocal foldminlines=1
-setlocal foldnestmax=20
-setlocal foldenable
-let s:l = 1 - ((0 * winheight(0) + 24) / 48)
-if s:l < 1 | let s:l = 1 | endif
-keepjumps exe s:l
-normal! zt
-keepjumps 1
-normal! 0
-wincmd w
-exe 'vert 1resize ' . ((&columns * 30 + 104) / 209)
-exe 'vert 2resize ' . ((&columns * 88 + 104) / 209)
-exe 'vert 3resize ' . ((&columns * 89 + 104) / 209)
-tabnext
 let s:save_splitbelow = &splitbelow
 let s:save_splitright = &splitright
 set splitbelow splitright
@@ -256,12 +135,12 @@ set winminheight=0
 set winheight=1
 set winminwidth=0
 set winwidth=1
-exe 'vert 1resize ' . ((&columns * 30 + 104) / 209)
-exe 'vert 2resize ' . ((&columns * 178 + 104) / 209)
+exe 'vert 1resize ' . ((&columns * 30 + 67) / 135)
+exe 'vert 2resize ' . ((&columns * 104 + 67) / 135)
 argglobal
 enew
-file neo-tree\ filesystem\ \[3]
-balt term:///mnt/sda8/Projects/buzaga/homelab-infra//3347696:/bin/bash
+file neo-tree\ filesystem\ \[7]
+balt Makefile
 setlocal foldmethod=expr
 setlocal foldexpr=v:lua.require'astroui.folding'.foldexpr()
 setlocal foldmarker={{{,}}}
@@ -271,6 +150,48 @@ setlocal foldminlines=1
 setlocal foldnestmax=20
 setlocal foldenable
 wincmd w
+argglobal
+balt /mnt/sda8/Projects/buzaga/homelab-infra/k8s/site/parts/intro.html
+setlocal foldmethod=expr
+setlocal foldexpr=v:lua.require'astroui.folding'.foldexpr()
+setlocal foldmarker={{{,}}}
+setlocal foldignore=#
+setlocal foldlevel=99
+setlocal foldminlines=1
+setlocal foldnestmax=20
+setlocal foldenable
+2
+sil! normal! zo
+3
+sil! normal! zo
+let s:l = 11 - ((10 * winheight(0) + 15) / 30)
+if s:l < 1 | let s:l = 1 | endif
+keepjumps exe s:l
+normal! zt
+keepjumps 11
+normal! 06|
+wincmd w
+exe 'vert 1resize ' . ((&columns * 30 + 67) / 135)
+exe 'vert 2resize ' . ((&columns * 104 + 67) / 135)
+tabnext
+edit LEARNINGS/argocd/101-basics.md
+argglobal
+balt tofu/main.tf
+setlocal foldmethod=expr
+setlocal foldexpr=v:lua.require'astroui.folding'.foldexpr()
+setlocal foldmarker={{{,}}}
+setlocal foldignore=#
+setlocal foldlevel=99
+setlocal foldminlines=1
+setlocal foldnestmax=20
+setlocal foldenable
+let s:l = 121 - ((27 * winheight(0) + 15) / 30)
+if s:l < 1 | let s:l = 1 | endif
+keepjumps exe s:l
+normal! zt
+keepjumps 121
+normal! 0
+tabnext
 argglobal
 if bufexists(fnamemodify("term:///mnt/sda8/Projects/buzaga/homelab-infra//3347696:/bin/bash", ":p")) | buffer term:///mnt/sda8/Projects/buzaga/homelab-infra//3347696:/bin/bash | else | edit term:///mnt/sda8/Projects/buzaga/homelab-infra//3347696:/bin/bash | endif
 if &buftype ==# 'terminal'
@@ -285,15 +206,33 @@ setlocal foldlevel=99
 setlocal foldminlines=1
 setlocal foldnestmax=20
 setlocal foldenable
-let s:l = 3289 - ((48 * winheight(0) + 24) / 49)
+let s:l = 3768 - ((22 * winheight(0) + 15) / 31)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 3289
-normal! 0
-wincmd w
-exe 'vert 1resize ' . ((&columns * 30 + 104) / 209)
-exe 'vert 2resize ' . ((&columns * 178 + 104) / 209)
+keepjumps 3768
+normal! 071|
+tabnext
+argglobal
+if bufexists(fnamemodify("term:///mnt/sda8/Projects/buzaga/homelab-infra//718677:/bin/bash", ":p")) | buffer term:///mnt/sda8/Projects/buzaga/homelab-infra//718677:/bin/bash | else | edit term:///mnt/sda8/Projects/buzaga/homelab-infra//718677:/bin/bash | endif
+if &buftype ==# 'terminal'
+  silent file term:///mnt/sda8/Projects/buzaga/homelab-infra//718677:/bin/bash
+endif
+balt term:///mnt/sda8/Projects/buzaga/homelab-infra//3347696:/bin/bash
+setlocal foldmethod=expr
+setlocal foldexpr=v:lua.require'astroui.folding'.foldexpr()
+setlocal foldmarker={{{,}}}
+setlocal foldignore=#
+setlocal foldlevel=99
+setlocal foldminlines=1
+setlocal foldnestmax=20
+setlocal foldenable
+let s:l = 57 - ((20 * winheight(0) + 14) / 29)
+if s:l < 1 | let s:l = 1 | endif
+keepjumps exe s:l
+normal! zt
+keepjumps 57
+normal! 071|
 tabnext 1
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0 && getbufvar(s:wipebuf, '&buftype') isnot# 'terminal'
   silent exe 'bwipe ' . s:wipebuf

@@ -41,7 +41,7 @@ parts="$repo_root/k8s/site/parts"
 
 command -v kubectl >/dev/null || { echo "FAIL: kubectl not on PATH" >&2; exit 1; }
 command -v jq >/dev/null      || { echo "FAIL: jq not on PATH" >&2; exit 1; }
-for f in intro architecture; do
+for f in intro architecture footer; do
     [ -r "$parts/$f.html" ] || { echo "FAIL: cannot read k8s/site/parts/$f.html" >&2; exit 1; }
 done
 
@@ -184,6 +184,8 @@ cat <<MID2
   <p class="text-sm text-gray-600">Served for $(printf '%s' "$hosts" | html_escape).</p>
 </section>
 MID2
+
+cat "$parts/footer.html"
 
 cat <<TAIL
 <!-- served-by: k3s -->
