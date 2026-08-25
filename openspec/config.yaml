@@ -132,17 +132,19 @@ context: |
 
   ### What M5 was, and why it was a rung rather than a page
 
-  Delivered by `show-the-machine`, archived 2026-08-23. Live at
-  `buzaga.com.br/machine.html`. What follows is the note as written before it was
-  built, with the outcome recorded at the end.
+  Delivered by `show-the-machine`, archived 2026-08-25. Live at `buzaga.com.br`, which
+  is a single page: intro, a hand-drawn architecture diagram, then the generated cluster
+  snapshot. What follows is the note as written before it was built, with the outcome
+  recorded at the end.
 
   The public site renders the infrastructure it is running on, in a low-fi register —
   text and ASCII, no dashboard chrome. Nodes, workloads, and what ArgoCD reports. A
   visitor sees the machine that served them.
 
-  It shows **both halves**: what runs now, and the Compose-on-the-hypervisor arrangement
-  it replaced. The delta is the point — a diagram of the current setup alone does not say
-  what was learned, and the old shape is the thing an interviewer recognises.
+  ~~It shows **both halves**: what runs now, and the Compose-on-the-hypervisor
+  arrangement it replaced.~~ Built, then removed 2026-08-25 by operator decision when the
+  site was simplified to one page. The record of the old stack survives where it was
+  measured, in `openspec/changes/archive/2026-08-22-retire-compose-stack/baseline.md`.
 
   It is the project's demo. Everything before it is legible only by reading this
   repository; this rung is the one that shows the work to someone who will not.
@@ -217,11 +219,10 @@ context: |
   and rebuilt unattended in ~105 seconds. ArgoCD runs in it, installed by cloud-init as a
   k3s HelmChart, so a rebuilt cluster arrives already reconciling.
 
-  The actual workload — nginx serving a placeholder site, a hit-counter, and redis — still
-  runs as Docker Compose directly on the hypervisor from `/mnt/sda8/Projects/buzaga`,
-  serving `buzaga.com.br`. That co-location is the known anti-pattern this project exists
-  to fix; it was retired at M4. The site itself is disposable and may break — but it now
-  depends on the cluster, so `make rebuild` is a public outage of about 190 seconds.
+  The cluster serves `buzaga.com.br` and the hypervisor serves no HTTP. The Docker
+  Compose stack that ran nginx, a hit-counter and redis directly on the hypervisor — the
+  co-location this project exists to fix — was destroyed at M4. The site now depends on
+  the cluster, so `make rebuild` is a public outage of about 190 seconds.
 
   ## Toolchain reality
 
