@@ -66,7 +66,7 @@ make check-disclosure # fail if anything served crosses the disclosure boundary
 ```
 
 Both run inside `make check`. The property they buy is narrow and worth stating
-exactly: **the page can be out of date, but it cannot be out of date and passing.**
+exactly: **the snapshot can be out of date, but it cannot be out of date and passing.**
 
 Three things fell out of building it that were not obvious going in:
 

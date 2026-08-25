@@ -63,17 +63,3 @@ command rather than by review.
 
 Written down before it is built, because "what is safe to show" decided after the fact is
 decided by whatever happens to already be on the page.
-
-### Requirement: The description shows what was replaced
-
-The system SHALL present both the current arrangement and the one it replaced, and SHALL
-distinguish which of the two is generated from live state.
-
-#### Scenario: The two halves are not presented as equivalent
-
-- **WHEN** a reader views the description
-- **THEN** the current arrangement SHALL be identifiable as read from the cluster
-- **AND** the previous arrangement SHALL be identifiable as recorded history
-
-The old stack cannot be queried; it no longer exists. Presenting a remembered thing and a
-measured thing in the same register is the habit this rung exists to break.

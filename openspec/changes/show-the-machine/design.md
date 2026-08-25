@@ -123,15 +123,18 @@ an absolute path, or the known account names — and fails on a match.
 
 That check is the requirement. "Be careful what you print" is not enforceable.
 
-### D5: Both halves, in different registers
+### D5: ~~Both halves, in different registers~~ — withdrawn 2026-08-25
 
-What runs now is generated. What it replaced is not — the Compose stack is gone and
-cannot be queried, so its description is content written once, from the record made in M4
-before it was destroyed.
+The page originally carried a second, hand-written half describing the Compose stack it
+replaced, labelled as recorded history rather than as a reading.
 
-The two are labelled differently on the page. Presenting a remembered thing and a measured
-thing in the same register is precisely the habit that made `diagram.ascii` credible for
-as long as it was.
+Withdrawn by operator decision along with the drift-guarantee note, in the same pass that
+reduced the site to one page. The record of the old stack is not lost — it is in
+`openspec/changes/archive/2026-08-22-retire-compose-stack/baseline.md`, which is where it
+was written and where it is checkable against nothing, honestly.
+
+The requirement it backed, *The description shows what was replaced*, is removed from the
+spec delta rather than left unmet.
 
 ## Risks
 

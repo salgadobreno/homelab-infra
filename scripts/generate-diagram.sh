@@ -41,7 +41,7 @@ parts="$repo_root/k8s/site/parts"
 
 command -v kubectl >/dev/null || { echo "FAIL: kubectl not on PATH" >&2; exit 1; }
 command -v jq >/dev/null      || { echo "FAIL: jq not on PATH" >&2; exit 1; }
-for f in intro architecture replaced; do
+for f in intro architecture; do
     [ -r "$parts/$f.html" ] || { echo "FAIL: cannot read k8s/site/parts/$f.html" >&2; exit 1; }
 done
 
@@ -182,19 +182,9 @@ done <<< "$app"
 
 cat <<MID2
   </ul>
-  <p class="text-sm text-gray-600 mb-4">Served for $(printf '%s' "$hosts" | html_escape).</p>
-
-  <p class="text-sm text-gray-500 border border-gray-200 bg-gray-50 p-3">
-    This snapshot is not live &mdash; it is a reading, taken by a command and then
-    committed like any other file. What stops it going quietly out of date is that
-    the same command runs as a test: if anything in this section disagreed with the
-    real cluster, the check would fail and name the line. So it can be out of date,
-    but not out of date and passing.
-  </p>
+  <p class="text-sm text-gray-600">Served for $(printf '%s' "$hosts" | html_escape).</p>
 </section>
 MID2
-
-cat "$parts/replaced.html"
 
 cat <<TAIL
 <!-- served-by: k3s -->

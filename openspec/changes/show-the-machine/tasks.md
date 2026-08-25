@@ -33,7 +33,7 @@ first generated output is inside the boundary rather than retrofitted into it.
 ## 5. The page
 
 - [x] 5.1 Generate the current-state half and commit it; confirm it reaches the public site through ArgoCD with no command run against the cluster
-- [x] 5.2 Write the "before" half from the record M4 made, labelled as history rather than as a reading (design D5) — `self-description` "The two halves are not presented as equivalent"
+- [x] 5.2 ~~Write the "before" half from the record M4 made, labelled as history~~ — built, then **removed 2026-08-25** by operator decision with the rest of the simplification. Design D5 and the requirement it backed are withdrawn, not left unmet
 - [x] 5.3 Decide Open Question 3: whether the page names the commit it was generated from — no, and it cannot: see the fixpoint argument in `generate-diagram.sh` and design D3
 - [x] 5.4 Confirm nothing hand-written describes the system: `diagram.ascii` was already gone (commit `6bfba43`) and the dead `/api/hits` call is removed. Made enforceable rather than confirmed once — `make check-handwritten` fails if served hand-written content names a technology, proven on a fixture — `self-description` "A hand-written description cannot be served"
 - [x] 5.5 Read the finished page as someone who has never seen this repository. The audience test, and the only one here that cannot be automated
@@ -61,3 +61,4 @@ in `design/home-infra-project-architecture.jpg`, with the cluster snapshot below
 - [x] 8.4 Remove `check-handwritten` — operator decision 2026-08-25, no longer a requirement. The static diagram names technologies deliberately, and the check forbade exactly that
 - [x] 8.5 Confirm determinism, the disclosure boundary, the drift check and the `served-by` marker survive the restructure
 - [x] 8.6 Confirm the single page reaches the public site and read it cold. Live on all three hostnames; `/machine.html` now 404s as intended. **The public bytes are not the committed bytes**: Cloudflare Scrape Shield rewrites the email address into an obfuscation script at the edge. The origin serves exactly what is committed, verified with a Host header against the node, so the drift check is unaffected — but "the live page is byte-identical" only holds at the origin, and that is now written down in `check-diagram.sh`
+- [x] 8.7 Remove the drift-guarantee note and the "What this replaced" section — operator decision 2026-08-25. Requirement *The description shows what was replaced* withdrawn from the spec delta; D5 marked withdrawn with the record's surviving location named
