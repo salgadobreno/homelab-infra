@@ -14,14 +14,22 @@
 <div class="flex justify-center py-16">
 <div class="max-w-3xl w-full mx-4">
 <div class="border-2 border-dashed border-gray-400 p-8 bg-white">
-<!-- Hand-written. Says nothing about the system, so nothing here can go stale. -->
 <h1 class="text-2xl mb-4">Welcome to Asa Norte, Brasília!</h1>
-<!-- Asa Norte photo -->
+<img src="/asa-norte.jpg" alt="Asa Norte, Brasília"
+     width="1000" height="666" loading="lazy"
+     class="w-full h-auto mb-4 border border-gray-300">
+
+<!-- The map is a third-party iframe: it loads from Google and Google sees every
+     visitor who reaches this page. Deferred until scrolled to, and given a fixed
+     aspect box so it cannot shift the layout as it loads. -->
+<iframe src="https://www.google.com/maps?q=Asa+Norte,+Bras%C3%ADlia,+DF&amp;output=embed"
+        title="Map of Asa Norte, Brasília"
+        loading="lazy" referrerpolicy="no-referrer-when-downgrade"
+        class="w-full h-64 mb-4 border border-gray-300"></iframe>
 <p class="mb-3">Your request was just served my home server!</p>
 <!-- Server photo -->
 <p class="mb-3">
-  Read along 
-  This website is being served from a linux computer running Proxmox VE(Virtual Environment), Kubernetes(k3s) provisioned with OpenTofu(Terraform) and ArgoCD for Gitops(it deploys itself).
+  Read along for more information on this project.
 </p>
 <p class="mb-8 text-sm">Reach out: breno@buzaga.com.br</p>
 <!-- Hand-drawn, transcribed from the operator's sketch at

@@ -92,7 +92,14 @@ targets=("$@")
 files=() rc=0
 for t in "${targets[@]}"; do
     if [ -d "$t" ]; then
-        while IFS= read -r f; do files+=("$f"); done < <(find "$t" -type f | sort)
+        # Binary files are skipped: grep reports "Binary file matches" rather than a
+        # line number, which would be reported as a violation with nothing useful in
+        # it. An image cannot leak an address as text, and one that embedded a path
+        # in its metadata would not be caught by a line-oriented grep anyway.
+        while IFS= read -r f; do
+            grep -qI . "$f" 2>/dev/null || continue
+            files+=("$f")
+        done < <(find "$t" -type f | sort)
     elif [ -f "$t" ]; then
         files+=("$t")
     fi

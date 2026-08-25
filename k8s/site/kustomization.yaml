@@ -21,3 +21,8 @@ configMapGenerator:
   - name: site-content
     files:
       - content/index.html
+      # Binary: kustomize base64s it into binaryData and nginx serves it from the
+      # mounted volume. The whole ConfigMap must stay under etcd's 1 MiB object
+      # limit, and base64 costs a third on top of the file size — check-configmap-size
+      # asserts it rather than leaving it to be discovered at apply time.
+      - content/asa-norte.jpg
