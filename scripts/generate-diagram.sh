@@ -143,8 +143,7 @@ cat <<SNAPSHOT
     <li>$(printf '%s' "$node_os" | html_escape) &middot; $(printf '%s' "$node_runtime" | html_escape)</li>
   </ul>
 
-  <h3 class="text-sm text-gray-500 uppercase tracking-wide mb-2">What runs on it</h3>
-  <p class="text-gray-500 text-sm mb-2">Counts are what the cluster has been <em>asked</em> to run, not what happens to be up at this instant. That is deliberate: a number that flickers while a container restarts would make this page impossible to check.</p>
+  <h3 class="text-sm text-gray-500 uppercase tracking-wide mb-2">Cluster snapshot</h3>
   <div class="overflow-x-auto mb-6">
   <table class="text-sm w-full">
     <thead class="text-gray-500 text-left">
@@ -168,7 +167,7 @@ cat <<MID
   </div>
 
   <h3 class="text-sm text-gray-500 uppercase tracking-wide mb-2">How it got here</h3>
-  <p class="text-gray-500 text-sm mb-2">None of it was deployed by hand. A program inside the cluster watches a Git repository and continuously makes the cluster match it, so the repository is the record of what is running rather than a description of what someone intended.</p>
+  <p class="text-gray-500 text-sm mb-2">ArgoCD running on the cluster watches the Git repository and continuously makes the cluster match it, so the repository is the record of what is running rather than a description of what someone intended.</p>
   <ul class="mb-2 text-sm">
 MID
 
