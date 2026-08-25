@@ -48,7 +48,7 @@ sudo scripts/create-snippet-user.sh                            # owns the snippe
 eval "$(ssh-agent)" && ssh-add ~/.ssh/id_ed25519
 make plan                                 # read it before applying
 make apply
-make kubeconfig && export KUBECONFIG=$PWD/kubeconfig
+make kubeconfig && eval "$(make kubeconfig-env)"
 make nodes
 ```
 
@@ -62,6 +62,7 @@ rather than in shell history, so the same instruments are available to everyone.
 | `make check-privileges` | thirty assertions across the token, SSH, and the tunnel |
 | `make cluster` | k3s and cloud-init state, read from the node |
 | `make rebuild CONFIRM=yes` | timed destroy and recreate |
+| `eval "$(make kubeconfig-env)"` | put the cluster on this shell's `KUBECONFIG` |
 
 ## Destroying and recreating the cluster
 

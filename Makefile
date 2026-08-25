@@ -130,8 +130,25 @@ kubeconfig: ## Fetch the node's kubeconfig, rewritten to reach it off-node (task
 	@grep -q 'server: https://$(NODE_IP):6443' $(KUBECONFIG_PATH).tmp \
 	  || { rm -f $(KUBECONFIG_PATH).tmp; echo "FAIL: server address not rewritten"; exit 1; }
 	@mv $(KUBECONFIG_PATH).tmp $(KUBECONFIG_PATH) && chmod 600 $(KUBECONFIG_PATH)
-	@echo "wrote $(KUBECONFIG_PATH) -> https://$(NODE_IP):6443"
-	@echo "use with:  export KUBECONFIG=$(KUBECONFIG_PATH)"
+	@echo "wrote $(KUBECONFIG_PATH) -> https://$(NODE_IP):6443" >&2
+	@echo "use with:  eval \"\$$(make kubeconfig-env)\"" >&2
+
+# A make target cannot export into the shell that called it — make is a child
+# process. The eval dodge is the only way, and it is the same one ssh-agent uses:
+# print the export line to stdout and let the parent shell evaluate it.
+#
+# Everything this target prints is eval'd, so it prints exactly one line and no
+# diagnostics. Anything else here would be executed by the caller's shell.
+.PHONY: kubeconfig-env
+kubeconfig-env: ## Print the export line; use as: eval "$(make kubeconfig-env)"
+	@# One recipe line, deliberately: each line is its own shell, so an `exit` in the
+	@# first would end that shell and make would run the next one anyway — emitting the
+	@# error AND the export, and the caller would eval a path that does not exist.
+	@if test -r $(KUBECONFIG_PATH); then \
+	  echo "export KUBECONFIG=$(KUBECONFIG_PATH)"; \
+	 else \
+	  echo "echo 'no kubeconfig at $(KUBECONFIG_PATH) — run: make kubeconfig' >&2; false"; \
+	 fi
 
 .PHONY: argocd
 argocd: ## Port-forward the ArgoCD UI to localhost:8080 (task 2.5)
