@@ -48,3 +48,16 @@ first generated output is inside the boundary rather than retrofitted into it.
 
 - [x] 7.1 Update `README.md`, `CLAUDE.md` and `openspec/config.yaml`
 - [x] 7.2 Record in `LEARNINGS/` anything the rung taught, if it was earned — four candidates put to the operator 2026-08-23 (the revision fixpoint, selfHeal outrunning the check, `make -n` running `$(MAKE)` a second time, unchecked prose contradicting itself). **None claimed.** The conditional in this task is doing its job: an entry is earned by friction the operator wants to keep, not by a milestone ending
+
+## 8. Iteration: one page, architecture above the snapshot
+
+Operator direction 2026-08-25, after living with the result: radically simplify the site
+to a single page — a static architecture diagram, transcribed from the operator's sketch
+in `design/home-infra-project-architecture.jpg`, with the cluster snapshot below it.
+
+- [x] 8.1 Split the hand-written content into `k8s/site/parts/` (`intro`, `architecture`, `replaced`) and compose `content/index.html` from the parts plus the cluster reading, so the served page is entirely generated output
+- [x] 8.2 Draw the architecture from the sketch: Claude Code and OpenSpec driving OpenTofu and Proxmox, which build k3s, in which ArgoCD reconciles nginx from GitHub, served through the tunnel
+- [x] 8.3 Delete `content/machine.html` and the second page with it; the site is one page again
+- [x] 8.4 Remove `check-handwritten` — operator decision 2026-08-25, no longer a requirement. The static diagram names technologies deliberately, and the check forbade exactly that
+- [x] 8.5 Confirm determinism, the disclosure boundary, the drift check and the `served-by` marker survive the restructure
+- [ ] 8.6 Confirm the single page reaches the public site and read it cold

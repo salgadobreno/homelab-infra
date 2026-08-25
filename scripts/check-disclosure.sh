@@ -13,8 +13,8 @@ set -uo pipefail
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 rules_file="$repo_root/scripts/disclosure-rules"
 # Everything that reaches a visitor: the served directory, plus the hand-written
-# half that is inlined into the generated page.
-default_targets=("$repo_root/k8s/site/content" "$repo_root/k8s/site/replaced.html")
+# parts that are inlined into the generated page.
+default_targets=("$repo_root/k8s/site/content" "$repo_root/k8s/site/parts")
 
 [ -r "$rules_file" ] || { echo "FAIL: cannot read $rules_file" >&2; exit 1; }
 

@@ -35,9 +35,9 @@ industry-standard choice wins over the homelab-clever one.
 
 **That picture is hand-drawn, and nothing checks it.** It is accurate as of M5, and it is
 accurate the way `diagram.ascii` was accurate right up until it was not. The site's own
-description at [buzaga.com.br/machine.html](https://buzaga.com.br/machine.html) is the one
-that cannot drift: it is generated from the cluster by `make diagram`, and `make check`
-fails if it and the cluster disagree. When the two disagree, believe that one. Bringing
+**cluster snapshot** on [buzaga.com.br](https://buzaga.com.br) is the one that cannot
+drift: it is generated from the cluster by `make diagram`, and `make check` fails if it
+and the cluster disagree. When the two disagree, believe that one. Bringing
 this diagram under the same check is unscheduled work, listed under *Deliberately
 deferred*.
 
@@ -53,18 +53,19 @@ and are built concurrently.
 
 ## The site describes itself, and the description is checked
 
-`buzaga.com.br/machine.html` lists the node, everything running on it, and how it got
-there. None of it was typed: `scripts/generate-diagram.sh` reads the cluster and writes
-the file, which is then committed and deployed like any other page.
+The site is a single page. The top half is the architecture — hand-drawn, and it changes
+when a decision changes. Below it is a **cluster snapshot**: the node, everything running
+on it, and how it got there, none of which was typed. `scripts/generate-diagram.sh`
+composes the page from `k8s/site/parts/` and a reading of the cluster, and the result is
+committed and deployed like any other page.
 
 ```bash
 make diagram          # regenerate from the cluster
 make check-diagram    # fail if the committed page and the cluster disagree
 make check-disclosure # fail if anything served crosses the disclosure boundary
-make check-handwritten# fail if hand-written served content names a technology
 ```
 
-All three run inside `make check`. The property they buy is narrow and worth stating
+Both run inside `make check`. The property they buy is narrow and worth stating
 exactly: **the page can be out of date, but it cannot be out of date and passing.**
 
 Three things fell out of building it that were not obvious going in:

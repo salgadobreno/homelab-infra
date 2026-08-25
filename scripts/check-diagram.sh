@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Fail if the committed machine.html disagrees with the cluster.
+# Fail if the committed page disagrees with the cluster.
 #
 # This is the check that makes static content safe. The page can be wrong — it
 # is a file, and files go stale — but it cannot be wrong and green, because the
@@ -10,7 +10,7 @@
 set -uo pipefail
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-committed="$repo_root/k8s/site/content/machine.html"
+committed="$repo_root/k8s/site/content/index.html"
 
 [ -f "$committed" ] || {
     echo "FAIL: ${committed#$repo_root/} does not exist — run 'make diagram'" >&2

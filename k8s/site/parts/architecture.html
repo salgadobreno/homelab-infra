@@ -1,0 +1,38 @@
+<!-- Hand-drawn, transcribed from the operator's sketch at
+     design/home-infra-project-architecture.jpg.
+
+     This is the only part of the page that is not read from the cluster, and it is
+     the part that can go stale. It is kept to the shape of the project — which
+     tools, in what order — rather than to versions, counts or state, because shape
+     changes when a decision changes and everything that moves is in the snapshot
+     directly below it. A reader comparing the two can see for themselves whether
+     the drawing still matches the machine. -->
+<h2 class="text-xl mb-1">How this is built</h2>
+<p class="text-gray-500 text-sm mb-4">
+  The shape of the project. It changes when a decision changes, not when a pod
+  restarts &mdash; the part that moves is in the snapshot below.
+</p>
+
+<div class="overflow-x-auto mb-8">
+<pre class="text-xs leading-tight inline-block">
+        ┌───────────────────────────────────────────┐
+        │  Claude Code  ──  OpenSpec (spec-driven)  │
+        │  learning loop  ·  operator console       │
+        └─────────────────────┬─────────────────────┘
+                              │  plans, then provisions
+                              ▼
+        ┌───────────────────────────────────────────┐
+        │  OpenTofu  ─────────▶  Proxmox VE         │
+        └─────────────────────┬─────────────────────┘
+                              │  one VM, bootstrapped by cloud-init
+                              ▼
+        ┌───────────────────────────────────────────┐         ┌──────────┐
+        │  k3s                                      │  pull   │          │
+        │                                           │◀────────│  GitHub  │
+        │     ArgoCD  ──reconciles──▶  nginx        │         │          │
+        └─────────────────────┬─────────────────────┘         └──────────┘
+                              │  Cloudflare tunnel
+                              ▼
+                       buzaga.com.br
+</pre>
+</div>

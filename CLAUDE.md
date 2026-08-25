@@ -158,15 +158,15 @@ Do not `kubectl apply` anything under `k8s/`. It is deployed by being pushed. Ap
 it by hand produces the right result for the wrong reason and hides whether
 reconciliation actually works.
 
-The site describes itself at `buzaga.com.br/machine.html`, generated from the cluster by
-`scripts/generate-diagram.sh`. **Do not edit `k8s/site/content/machine.html`** — it is
-output. `make diagram` regenerates it and `make check` fails when it and the cluster
-disagree, so a hand edit is caught rather than served.
+The site is one page, composed by `scripts/generate-diagram.sh` from the hand-written
+parts in `k8s/site/parts/` and a reading of the cluster. **Do not edit
+`k8s/site/content/index.html`** — it is output; edit `k8s/site/parts/` and run
+`make diagram`. `make check` fails when the page and the cluster disagree, so a hand edit
+is caught rather than served.
 
-Three checks were added with it, all inside `make check`: `check-diagram` (the page agrees
-with the cluster), `check-disclosure` (nothing served crosses the boundary in
-`scripts/disclosure-rules`), and `check-handwritten` (hand-written served content names no
-technology). A `PostToolUse` hook in `.claude/settings.json` runs the disclosure check on
+Two checks were added with it, both inside `make check`: `check-diagram` (the page agrees
+with the cluster) and `check-disclosure` (nothing served crosses the boundary in
+`scripts/disclosure-rules`). A `PostToolUse` hook in `.claude/settings.json` runs the disclosure check on
 writes under `k8s/site/`, so a forbidden value is refused at the write rather than after
 the commit.
 

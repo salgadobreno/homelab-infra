@@ -21,4 +21,3 @@ configMapGenerator:
   - name: site-content
     files:
       - content/index.html
-      - content/machine.html

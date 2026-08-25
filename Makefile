@@ -468,23 +468,19 @@ tf-state: ## What Terraform currently believes exists
 # ---------------------------------------------------------------- checks ------
 
 .PHONY: check
-check: check-secrets check-disclosure check-handwritten check-privileges check-site check-diagram check-drift ## Run all safety checks
-# The three added at M5 sit where their cost is. check-disclosure and
-# check-handwritten are local greps and run early, so a boundary violation fails
-# before anything talks to the cluster. check-diagram needs the cluster and runs
-# after check-site, which distinguishes an unreachable node from a broken one.
+check: check-secrets check-disclosure check-privileges check-site check-diagram check-drift ## Run all safety checks
+# The two added at M5 sit where their cost is. check-disclosure is a local grep and
+# runs early, so a boundary violation fails before anything talks to the cluster.
+# check-diagram needs the cluster and runs after check-site, which distinguishes an
+# unreachable node from a broken one.
 
 .PHONY: diagram
-diagram: ## Regenerate k8s/site/content/machine.html from the cluster (task 3.3)
+diagram: ## Regenerate the page from parts/ and the cluster (task 3.3)
 	@./scripts/generate-diagram.sh
 
 .PHONY: check-diagram
-check-diagram: ## Fail if machine.html and the cluster disagree (task 4.1)
+check-diagram: ## Fail if the page and the cluster disagree (task 4.1)
 	@./scripts/check-diagram.sh
-
-.PHONY: check-handwritten
-check-handwritten: ## Fail if hand-written served content names a technology (task 5.4)
-	@./scripts/check-handwritten.sh
 
 .PHONY: check-disclosure
 check-disclosure: ## Assert nothing served crosses the disclosure boundary (task 2.2)
