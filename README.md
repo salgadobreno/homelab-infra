@@ -77,6 +77,27 @@ A full `destroy` → `apply` → node reporting Ready, with no manual steps:
 | ArgoCD installed and the site Synced and serving | +85s |
 | **total, `buzaga.com.br` answering again** | **190s** |
 
+## Learning record
+
+`LEARNINGS/` holds notes by subject, prefixed by depth: `101` basics, `201` how it works,
+`301` a sharp edge hit in practice.
+
+An entry is earned by friction — something broke, or a default surprised us — and is never
+appended because a task ended. The agent produces code faster than it can be absorbed, so
+the record has to track understanding rather than activity, or it becomes a changelog
+nobody learns from. `[worked]` is the operator's marker to claim: reading an explanation
+is not the same as being able to give one.
+
+## Operator console
+
+Every routine command lives in the `Makefile`. `make` lists them.
+
+The agent and the operator run the same instruments. A command that exists only in a chat
+log is invisible — it cannot be reproduced, reviewed, or re-run six months later. So when
+a check is needed and no target exists, the target gets added rather than the command
+being run ad hoc, and every assertion the agent makes can be repeated by hand with
+identical output.
+
 ## Layout
 
 ```
