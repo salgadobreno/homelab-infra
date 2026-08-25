@@ -68,3 +68,6 @@ make it look like everything else is what produced the failure.
 A file that says "this is the exception, and here is why" is more honest than a
 configuration that hides it — and the error message above is now in the manifest itself,
 because the next person to try consolidating those two files will hit exactly it.
+
+See also `../helm/101-basics.md` for why Helm resolves the whole release before
+applying any of it.

@@ -61,7 +61,12 @@ able to give one, and nobody else can assert that on their behalf.
 ### argocd
 - [101 · basics](argocd/101-basics.md) — pull instead of push, and what Git being the record actually buys
 - [201 · push and pull](argocd/201-push-and-pull.md) — where GitOps sits next to GitHub Actions, and what each model costs
+- [201 · where the deploy gate goes](argocd/201-where-the-deploy-gate-goes.md) — CI cannot block a deploy it does not perform
 - [301 · a release cannot contain its own CRD](argocd/301-a-release-cannot-contain-its-own-crd.md) — Helm validates before it orders
+- [301 · client-side apply caps an object at 256 KiB](argocd/301-client-side-apply-caps-an-object-at-256-kib.md) — a healthy site and a dead pipeline
+
+### helm
+- [101 · basics](helm/101-basics.md) — charts, releases, values, and what the release state buys
 
 ### kubernetes
 - [301 · a 404 from the ingress is not a missing site](kubernetes/301-a-404-from-the-ingress-is-not-a-missing-site.md) — host rules encode an assumption about who will call
