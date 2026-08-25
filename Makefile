@@ -13,6 +13,7 @@ TF_DIR   := tofu
 # breaks the moment a change is archived.
 CHANGE   ?= $(shell ls -1 openspec/changes 2>/dev/null | grep -v '^archive$$' | head -1)
 KUBECONFIG_PATH := $(CURDIR)/kubeconfig
+LINES ?= 15
 
 # Read the node address from Terraform, so the address plan has exactly one home.
 # Falls back to the D7 value before the output exists.
@@ -73,6 +74,10 @@ status: ## One-screen overview: host, VMs, cluster, drift
 pve: ## Proxmox version, load, and memory
 	@pveversion 2>/dev/null || cat /etc/pve/.version 2>/dev/null || echo "(pveversion needs root)"
 	@uptime; free -h
+
+.PHONY: pve-logs
+pve-logs: ## Hypervisor services, recent Proxmox tasks with the user that ran them, and journal errors
+	@./scripts/pve-logs.sh $(LINES)
 
 .PHONY: storage
 storage: ## Datastores and their content types (via API token, no root)
