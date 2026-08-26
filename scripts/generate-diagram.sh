@@ -184,8 +184,21 @@ MID
     [ -n "${aname:-}" ] || continue
     printf '    <li><span class="font-semibold">%s</span> &middot; %s &middot; %s</li>\n' \
       "$(printf '%s' "$aname" | html_escape)" "$async" "$ahealth"
-    printf '    <li class="text-gray-600">reconciled from <span class="break-all">%s</span> at <code>%s</code></li>\n' \
-      "$(printf '%s' "$arepo" | html_escape)" "$(printf '%s' "$apath" | html_escape)"
+    # Link the repository and the reconciled path when the source is an https
+    # Git URL; anything else (ssh, a local path) is printed as plain text.
+    repo_txt=$(printf '%s' "$arepo" | html_escape)
+    path_txt=$(printf '%s' "$apath" | html_escape)
+    case "$arepo" in
+      https://*)
+        repo_href=${repo_txt%.git}
+        printf '    <li class="text-gray-600">reconciled from <a class="underline break-all" href="%s">%s</a> at <a class="underline" href="%s/tree/main/%s"><code>%s</code></a></li>\n' \
+          "$repo_href" "$repo_txt" "$repo_href" "$path_txt" "$path_txt"
+        ;;
+      *)
+        printf '    <li class="text-gray-600">reconciled from <span class="break-all">%s</span> at <code>%s</code></li>\n' \
+          "$repo_txt" "$path_txt"
+        ;;
+    esac
   done <<<"$app"
 
   cat <<MID2
