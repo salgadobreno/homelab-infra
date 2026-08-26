@@ -39,16 +39,25 @@ out="${1:-$repo_root/k8s/site/content/index.html}"
 # the snapshot between them is read from the cluster.
 parts="$repo_root/k8s/site/parts"
 
-command -v kubectl >/dev/null || { echo "FAIL: kubectl not on PATH" >&2; exit 1; }
-command -v jq >/dev/null      || { echo "FAIL: jq not on PATH" >&2; exit 1; }
+command -v kubectl >/dev/null || {
+  echo "FAIL: kubectl not on PATH" >&2
+  exit 1
+}
+command -v jq >/dev/null || {
+  echo "FAIL: jq not on PATH" >&2
+  exit 1
+}
 for f in intro architecture footer; do
-    [ -r "$parts/$f.html" ] || { echo "FAIL: cannot read k8s/site/parts/$f.html" >&2; exit 1; }
+  [ -r "$parts/$f.html" ] || {
+    echo "FAIL: cannot read k8s/site/parts/$f.html" >&2
+    exit 1
+  }
 done
 
 kubectl get --raw /readyz >/dev/null 2>&1 || {
-    echo "FAIL: cannot reach the cluster with $KUBECONFIG" >&2
-    echo "      run 'make kubeconfig' if the node was rebuilt" >&2
-    exit 1
+  echo "FAIL: cannot reach the cluster with $KUBECONFIG" >&2
+  echo "      run 'make kubeconfig' if the node was rebuilt" >&2
+  exit 1
 }
 
 # --- the node ----------------------------------------------------------------
@@ -109,7 +118,7 @@ hosts="$(kubectl get ingress -A -o json | jq -r '
 html_escape() { sed -e 's/&/\&amp;/g' -e 's/</\&lt;/g' -e 's/>/\&gt;/g'; }
 
 {
-cat <<HEAD
+  cat <<HEAD
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -128,13 +137,13 @@ cat <<HEAD
 <div class="border-2 border-dashed border-gray-400 p-8 bg-white">
 HEAD
 
-cat "$parts/intro.html"
-cat "$parts/architecture.html"
+  cat "$parts/intro.html"
+  cat "$parts/architecture.html"
 
-cat <<SNAPSHOT
+  cat <<SNAPSHOT
 <section class="border-t border-gray-300 pt-6">
   <h2 class="text-xl mb-1">Cluster snapshot</h2>
-  <p class="text-gray-500 text-sm mb-4">Read from the cluster by a command, then committed. No part of this section was written by hand.</p>
+  <p class="text-gray-500 text-sm mb-4">Generated from querying the cluster</p>
 
   <h3 class="text-sm text-gray-500 uppercase tracking-wide mb-2">The machine</h3>
   <ul class="mb-6 text-sm">
@@ -152,16 +161,16 @@ cat <<SNAPSHOT
     <tbody>
 SNAPSHOT
 
-while IFS=$'\t' read -r ns name kind want image; do
+  while IFS=$'\t' read -r ns name kind want image; do
     [ -n "${ns:-}" ] || continue
     printf '      <tr><td class="pr-4 text-gray-500">%s</td><td class="pr-4">%s</td><td class="pr-4">%s</td><td class="text-gray-600 break-all">%s</td></tr>\n' \
-        "$(printf '%s' "$ns" | html_escape)" \
-        "$(printf '%s' "$name" | html_escape)" \
-        "$want" \
-        "$(printf '%s' "$image" | html_escape)"
-done <<< "$workloads"
+      "$(printf '%s' "$ns" | html_escape)" \
+      "$(printf '%s' "$name" | html_escape)" \
+      "$want" \
+      "$(printf '%s' "$image" | html_escape)"
+  done <<<"$workloads"
 
-cat <<MID
+  cat <<MID
     </tbody>
   </table>
   </div>
@@ -171,23 +180,23 @@ cat <<MID
   <ul class="mb-2 text-sm">
 MID
 
-while IFS=$'\t' read -r aname async ahealth arepo apath; do
+  while IFS=$'\t' read -r aname async ahealth arepo apath; do
     [ -n "${aname:-}" ] || continue
     printf '    <li><span class="font-semibold">%s</span> &middot; %s &middot; %s</li>\n' \
-        "$(printf '%s' "$aname" | html_escape)" "$async" "$ahealth"
+      "$(printf '%s' "$aname" | html_escape)" "$async" "$ahealth"
     printf '    <li class="text-gray-600">reconciled from <span class="break-all">%s</span> at <code>%s</code></li>\n' \
-        "$(printf '%s' "$arepo" | html_escape)" "$(printf '%s' "$apath" | html_escape)"
-done <<< "$app"
+      "$(printf '%s' "$arepo" | html_escape)" "$(printf '%s' "$apath" | html_escape)"
+  done <<<"$app"
 
-cat <<MID2
+  cat <<MID2
   </ul>
   <p class="text-sm text-gray-600">Served for $(printf '%s' "$hosts" | html_escape).</p>
 </section>
 MID2
 
-cat "$parts/footer.html"
+  cat "$parts/footer.html"
 
-cat <<TAIL
+  cat <<TAIL
 <!-- served-by: k3s -->
 </div>
 </div>
@@ -195,7 +204,7 @@ cat <<TAIL
 </body>
 </html>
 TAIL
-} > "$out.tmp"
+} >"$out.tmp"
 
 mv "$out.tmp" "$out"
 echo "wrote ${out#$repo_root/}"

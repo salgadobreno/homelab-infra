@@ -14,45 +14,24 @@
 <div class="flex justify-center py-16">
 <div class="max-w-3xl w-full mx-4">
 <div class="border-2 border-dashed border-gray-400 p-8 bg-white">
-<h1 class="text-2xl mb-4">Welcome to Asa Norte, Brasília!</h1>
-<!-- Asa Norte photo — backed out 2026-08-25, not abandoned.
-     k8s/site/content/asa-norte.jpg is 223 KB, 309 KB once base64'd into the
-     ConfigMap, and ArgoCD's client-side apply caps an object at 256 KiB. Serving
-     it needs one of: ServerSideApply=true on the Application, a smaller file, or
-     a real asset store. Until then the reference is removed rather than left
-     404'ing on the page. -->
-
-<!-- The map is a third-party iframe: it loads from Google and Google sees every
-     visitor who reaches this page. Deferred until scrolled to, and given a fixed
-     aspect box so it cannot shift the layout as it loads. -->
+<h1 class="text-2xl mb-4">You are now in the North Wing of Brasília!</h1>
 <iframe src="https://www.google.com/maps?q=Asa+Norte,+Bras%C3%ADlia,+DF&amp;output=embed"
         title="Map of Asa Norte, Brasília"
         loading="lazy" referrerpolicy="no-referrer-when-downgrade"
         class="w-full h-64 mb-4 border border-gray-300"></iframe>
-<p class="mb-3">Your request was just served my home server!</p>
+<p class="mb-3">Your request was just served by my home server!</p>
 <!-- Server photo -->
 <p class="mb-3">
-  Read along for more information on this project.
-</p>
-<p class="mb-8 text-sm">
-  Check it out on GitHub:
+  Check this project out on GitHub:
   <a class="underline" href="https://github.com/salgadobreno/homelab-infra">salgadobreno/homelab-infra</a>
+  Read along for more details on this project.
 </p>
-<!-- Hand-drawn, transcribed from the operator's sketch at
-     design/home-infra-project-architecture.jpg.
-
-     This is the only part of the page that is not read from the cluster, and it is
-     the part that can go stale. It is kept to the shape of the project — which
-     tools, in what order — rather than to versions, counts or state, because shape
-     changes when a decision changes and everything that moves is in the snapshot
-     directly below it. A reader comparing the two can see for themselves whether
-     the drawing still matches the machine. -->
 <h2 class="text-xl mb-1">How this was built</h2>
 
 <div class="overflow-x-auto mb-8">
 <pre class="text-xs leading-tight inline-block">
         ┌───────────────────────────────────────────┐
-        │  Claude Code  ──  OpenSpec (spec-driven)  │
+        │  Claude Code  ──  OpenSpec                │
         │  learning loop  ·  operator console       │
         └─────────────────────┬─────────────────────┘
                               │  plans, then provisions
@@ -74,7 +53,7 @@
 </div>
 <section class="border-t border-gray-300 pt-6">
   <h2 class="text-xl mb-1">Cluster snapshot</h2>
-  <p class="text-gray-500 text-sm mb-4">Generated from querying the cluster.</p>
+  <p class="text-gray-500 text-sm mb-4">Generated from querying the cluster</p>
 
   <h3 class="text-sm text-gray-500 uppercase tracking-wide mb-2">The machine</h3>
   <ul class="mb-6 text-sm">

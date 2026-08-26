@@ -32,3 +32,4 @@ id_ecdsa
 # Saved plan files may embed sensitive values
 tfplan
 *.tfplan
+Session.vim
