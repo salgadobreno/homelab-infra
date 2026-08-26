@@ -176,7 +176,7 @@ SNAPSHOT
   </div>
 
   <h3 class="text-sm text-gray-500 uppercase tracking-wide mb-2">How it got here</h3>
-  <p class="text-gray-500 text-sm mb-2">ArgoCD running on the cluster watches the Git repository and continuously makes the cluster match it, so the repository is the record of what is running rather than a description of what someone intended.</p>
+  <p class="text-gray-500 text-sm mb-2">ArgoCD running on the cluster watches the Git repository and continuously makes the cluster match it.</p>
   <ul class="mb-2 text-sm">
 MID
 
