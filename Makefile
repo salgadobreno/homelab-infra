@@ -7,6 +7,11 @@
 # Targets marked [root] need a real terminal: this host has no passwordless sudo
 # and agent sessions have no TTY, so the operator runs those.
 
+# Local, untracked overrides. The tunnel's SSH hostname lives here rather than in
+# this file: renaming it to something unguessable buys nothing if the new name is
+# committed to a public repository. See SECURITY.md and local.mk.example.
+-include local.mk
+
 TOFU     := tofu
 TF_DIR   := tofu
 # The active change, discovered rather than hardcoded — a pinned name silently
@@ -36,6 +41,7 @@ ORIGIN_URL   ?= http://192.168.0.30/
 SITE_HOST    ?= k8s.buzaga.com.br
 SITE_MARKER  ?= served-by: k3s
 APEX_HOSTS   ?= buzaga.com.br www.buzaga.com.br
+SSH_HOSTNAME ?=
 SNIPPET_USER ?= tofu-snippets
 SNIPPET_DIR  ?= /var/lib/vz/snippets
 SSH_OPTS := -o ConnectTimeout=8 -o StrictHostKeyChecking=accept-new
@@ -230,6 +236,9 @@ check-privileges: ## Assert every property narrow-privileges established (task 7
 	@echo
 	@echo "=== the tunnel ==="
 	@$(MAKE) --no-print-directory check-tunnel
+	@echo
+	@echo "=== the tunnel's SSH path ==="
+	@$(MAKE) --no-print-directory check-tunnel-ssh
 
 .PHONY: check-privileges-regression
 check-privileges-regression: ## Show the privilege check failing on a widened role (task 7.2)
@@ -308,6 +317,86 @@ check-tunnel: ## Confirm the tunnel holds no readable credential and is not root
 	 test "$$code" = "200" \
 	  && echo "OK: the origin still answers ($(ORIGIN_URL) -> $$code)" \
 	  || { echo "FAIL: origin returned $$code"; exit 1; }
+
+.PHONY: check-tunnel-ssh
+check-tunnel-ssh: ## Confirm the tunnel path is gated by Access and sshd is off the wildcard
+	@# The regression this exists to catch: the tunnel hostname answering an
+	@# unauthenticated request with the SSH banner, which is what it did before the
+	@# Access policy — and the banner published the exact OpenSSH build with it.
+	@if [ -z "$(SSH_HOSTNAME)" ]; then \
+	   echo "SKIP: SSH_HOSTNAME is unset — copy local.mk.example to local.mk"; \
+	 else \
+	   body=$$(curl -sS -m 10 https://$(SSH_HOSTNAME) 2>/dev/null | head -c 64); \
+	   case "$$body" in \
+	     *SSH-2.0-*) echo "FAIL: https://$(SSH_HOSTNAME) serves the SSH banner to anyone"; exit 1;; \
+	     *) echo "OK: the hostname does not serve an SSH banner";; \
+	   esac; \
+	   code=$$(curl -sS -o /dev/null -m 10 -w '%{http_code}' https://$(SSH_HOSTNAME) 2>/dev/null); \
+	   case "$$code" in \
+	     301|302|401|403) echo "OK: Access challenges an unauthenticated request ($$code)";; \
+	     *) echo "FAIL: expected an Access challenge, got $$code"; exit 1;; \
+	   esac; \
+	 fi
+	@# A wildcard listener answers the LAN and whatever the router forwards. The tunnel
+	@# reaches sshd as 127.0.0.1 and needs none of it.
+	@ss -tln | grep -qE '(0\.0\.0\.0|\[::\]):$(PVE_SSH_PORT)' \
+	  && { echo "FAIL: sshd still listens on the wildcard — run 'make harden-sshd-listen'"; exit 1; } \
+	  || echo "OK: no wildcard listener on port $(PVE_SSH_PORT)"
+	@# Reuse the prune script's own accounting rather than restating the keep-list here:
+	@# the fingerprints live in local.mk and have exactly one home. Assert "nothing to
+	@# remove" rather than a count, so adding a device does not fail the suite.
+	@./scripts/prune-authorized-keys.sh | grep -qE ', 0 to remove$$' \
+	  && echo "OK: authorized_keys holds exactly the four device keys" \
+	  || { echo "FAIL: authorized_keys does not match the keep-list — run 'make prune-keys'"; exit 1; }
+
+.PHONY: harden-sshd-listen
+harden-sshd-listen: ## NEEDS ROOT, run in a real terminal: bind sshd to loopback and LAN, narrow AllowUsers
+	@echo "This edits /etc/ssh/sshd_config and reloads sshd, so it needs root."
+	@echo "It backs the file up, validates with 'sshd -t', restores on failure, and"
+	@echo "reloads rather than restarts, so established sessions survive."
+	@echo
+	@echo "    sudo ./scripts/harden-sshd-listen.sh"
+	@echo
+	@echo "Run it from a LAN session, not through the tunnel: $(PVE_IP) is the rescue"
+	@echo "path it configures, and the Proxmox console is the backstop behind that."
+
+.PHONY: prune-keys
+prune-keys: ## Reduce authorized_keys to the four device keys (dry run by default)
+	@echo "Dry run — nothing is written:"
+	@echo
+	@./scripts/prune-authorized-keys.sh
+	@echo
+	@echo "Apply with:  APPLY=yes ./scripts/prune-authorized-keys.sh"
+
+.PHONY: unattended-upgrades
+unattended-upgrades: ## NEEDS ROOT, run in a real terminal: apply Debian security updates automatically
+	@echo "This installs a package and writes to /etc/apt, so it needs root."
+	@echo
+	@echo "    sudo DRY_RUN=yes ./scripts/setup-unattended-upgrades.sh   # show first"
+	@echo "    sudo ./scripts/setup-unattended-upgrades.sh"
+	@echo
+	@echo "Debian security origin only. Proxmox, Docker and cloudflared are excluded, and"
+	@echo "nothing reboots — a reboot here stops every VM. See SECURITY.md."
+
+.PHONY: check-updates
+check-updates: ## Confirm security updates apply automatically, and only from Debian security
+	@dpkg -s unattended-upgrades >/dev/null 2>&1 \
+	  && echo "OK: unattended-upgrades is installed" \
+	  || { echo "FAIL: not installed — run 'make unattended-upgrades'"; exit 1; }
+	@test "$$(apt-config shell x APT::Periodic::Unattended-Upgrade | sed "s/.*='\(.*\)'/\1/")" = "1" \
+	  && echo "OK: the daily timer actually upgrades" \
+	  || { echo "FAIL: APT::Periodic::Unattended-Upgrade is not 1"; exit 1; }
+	@# The point of the exercise: openssh-server patches land in the Debian security origin.
+	@apt-config dump 2>/dev/null | grep -q 'Origins-Pattern.*label=Debian-Security' \
+	  && echo "OK: Debian-Security is an allowed origin" \
+	  || { echo "FAIL: Debian-Security is not allowed — nothing security-critical upgrades"; exit 1; }
+	@# A hypervisor must not upgrade its own virtualisation stack unattended.
+	@apt-config dump 2>/dev/null | grep -E 'Origins-Pattern' | grep -qiE 'Proxmox|Docker|cloudflared' \
+	  && { echo "FAIL: a third-party origin is allowed to upgrade unattended"; exit 1; } \
+	  || echo "OK: Proxmox, Docker and cloudflared are excluded"
+	@test "$$(apt-config shell x Unattended-Upgrade::Automatic-Reboot | sed "s/.*='\(.*\)'/\1/")" != "true" \
+	  && echo "OK: it will not reboot the hypervisor" \
+	  || { echo "FAIL: Automatic-Reboot is true — this would stop every VM"; exit 1; }
 
 .PHONY: check-public
 check-public: ## Confirm every public hostname is served by the cluster
@@ -490,7 +579,7 @@ tf-state: ## What Terraform currently believes exists
 # ---------------------------------------------------------------- checks ------
 
 .PHONY: check
-check: check-secrets check-disclosure check-configmap-size check-privileges check-site check-diagram check-drift ## Run all safety checks
+check: check-secrets check-disclosure check-configmap-size check-privileges check-updates check-site check-diagram check-drift ## Run all safety checks
 # The two added at M5 sit where their cost is. check-disclosure is a local grep and
 # runs early, so a boundary violation fails before anything talks to the cluster.
 # check-diagram needs the cluster and runs after check-site, which distinguishes an

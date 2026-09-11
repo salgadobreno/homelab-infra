@@ -33,3 +33,6 @@ id_ecdsa
 tfplan
 *.tfplan
 Session.vim
+
+# Untracked operator values (tunnel hostname) — see local.mk.example
+local.mk

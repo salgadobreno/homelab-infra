@@ -1,0 +1,24 @@
+# Untracked operator values. Copy to local.mk, which .gitignore covers:
+#
+#     cp local.mk.example local.mk
+#
+# Two things live here rather than in tracked files, because this repository is public.
+#
+# The tunnel's SSH hostname. A hostname renamed to be unguessable stops being
+# unguessable the moment it lands in a tracked file. The LAN address and SSH port in
+# the Makefile are RFC1918 and stay there; an internet-reachable name is not.
+#
+# check-tunnel-ssh skips with a notice when this is unset.
+SSH_HOSTNAME ?= ssh.example.com
+
+# The public keys allowed in ~/.ssh/authorized_keys, by SHA256 fingerprint, space
+# separated. Get one with:  ssh-keygen -lf ~/.ssh/id_ed25519.pub
+#
+# These are not secret — a fingerprint is a hash of a public key, and GitHub publishes
+# its users' public keys outright — but an inventory of exactly which devices hold
+# access to the hypervisor is a shape worth not publishing.
+#
+# scripts/prune-authorized-keys.sh treats this as an allow-list and removes every key
+# not named here, so add a device before installing its key, not after. The script
+# refuses to run on an empty or malformed list rather than emptying the file.
+SSH_KEEP_FINGERPRINTS ?= SHA256:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA SHA256:BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB

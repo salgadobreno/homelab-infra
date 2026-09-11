@@ -99,6 +99,22 @@ explanation that requires having followed the work is not a fundamental.
 behalf. Ask which queued topics are worth expanding rather than deciding alone, and add
 new entries to the index in `LEARNINGS/README.md`.
 
+## Security posture
+
+`SECURITY.md` records what gates administrative access and which weaknesses are known and
+accepted. Read it before changing anything about SSH or the tunnel. Three things in it are
+easy to undo by accident:
+
+- The tunnel's SSH hostname and the authorised-key fingerprints live in `local.mk`
+  (gitignored), never in a tracked file. This repository is public; committing the
+  hostname voids the reason it was renamed.
+- `fail2ban` is deliberately absent, and was considered rather than overlooked. Tunnel
+  connections arrive as `127.0.0.1` (it would ignore them by default, or sever the tunnel
+  if made to act on them), and on the LAN key-only auth leaves it nothing to stop. The
+  rate limiting lives in `sshd_config` and at the Cloudflare edge. See `SECURITY.md`.
+- `/etc/ssh/sshd_config` has no `Include` line, so `sshd_config.d/` drop-ins are silently
+  ignored. Edit the main file, as `scripts/harden-sshd*.sh` do.
+
 ## Known shortcuts
 
 Recorded deliberately, with a milestone to fix each — do not mistake them for oversights
