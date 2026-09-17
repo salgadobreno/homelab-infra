@@ -61,7 +61,7 @@ attacks that cannot succeed. Against that near-zero benefit stands a real cost â
 address is the only non-tunnel path in, so a ban triggered by a stale agent or a wrong
 key locks the operator out of the rescue path, leaving the Proxmox console.
 
-**The throttles that matter are already in `sshd_config`:** `MaxAuthTries 3` caps attempts
+**The throttles that matter are already in `sshd_config`:** `MaxAuthTries 6` caps attempts
 per connection, `LoginGraceTime 30` caps how long an unauthenticated connection may
 linger, and the default `MaxStartups 10:30:100` sheds new unauthenticated connections
 past ten concurrent.
@@ -115,8 +115,12 @@ Applied by `scripts/harden-sshd.sh` and `scripts/harden-sshd-listen.sh`; asserte
 - `ListenAddress` limited to loopback, the LAN address, and `::1` â€” the wildcard listener
   is gone, so nothing answers a router forward that may still exist
 - `AllowUsers` limited to the operator and the snippet-upload account
-- `X11Forwarding`, `AllowAgentForwarding` and `PermitTunnel` off; `MaxAuthTries 3`,
-  `LoginGraceTime 30`
+- `X11Forwarding`, `AllowAgentForwarding` and `PermitTunnel` off; `LoginGraceTime 30`
+- `MaxAuthTries` stays at the default **6**, deliberately. Lowering it caps guesses per
+  connection, which is a password-auth control; with `PasswordAuthentication no` there is
+  nothing to guess. It was briefly set to 3, which locked out LAN clients invoked as
+  plain `ssh host`: they offer every key in `~/.ssh` in order, and sshd disconnected
+  before reaching the authorised one. Near-zero benefit, real cost to the rescue path.
 
 Left enabled on purpose: `AllowTcpForwarding`, because `ssh -L` to the Proxmox UI needs
 it, and the `ClientAlive` pair, whose generous tolerance is what keeps a session alive

@@ -138,8 +138,13 @@ out = set_directive(out, 'X11Forwarding', 'no')
 out = set_directive(out, 'AllowAgentForwarding', 'no')
 out = set_directive(out, 'PermitTunnel', 'no')
 
-# Down from the defaults of 6 and 120.
-out = set_directive(out, 'MaxAuthTries', '3')
+# LoginGraceTime down from the default 120: an unauthenticated connection has no reason
+# to linger. MaxAuthTries stays at the default 6 deliberately — it caps guesses per
+# connection, which matters for password auth, and PasswordAuthentication is off, so
+# there is nothing to guess. Lowering it to 3 bought nothing and broke LAN logins from
+# clients that offer several keys before the authorised one, which is every client
+# invoked as plain `ssh host` rather than with an explicit IdentityFile.
+out = set_directive(out, 'MaxAuthTries', '6')
 out = set_directive(out, 'LoginGraceTime', '30')
 
 # Every tunnel connection arrives as 127.0.0.1, so the source address attributes
