@@ -34,5 +34,8 @@ tfplan
 *.tfplan
 Session.vim
 
-# Untracked operator values (tunnel hostname) — see local.mk.example
-local.mk
+# Untracked operator values (tunnel hostname, key fingerprints) — see local.mk.example
+# Glob, not the bare name: a local.mk.bak-<stamp> left by an edit carries the same
+# values and would otherwise be committable.
+local.mk*
+!local.mk.example

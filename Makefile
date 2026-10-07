@@ -346,7 +346,7 @@ check-tunnel-ssh: ## Confirm the tunnel path is gated by Access and sshd is off 
 	@# the fingerprints live in local.mk and have exactly one home. Assert "nothing to
 	@# remove" rather than a count, so adding a device does not fail the suite.
 	@./scripts/prune-authorized-keys.sh | grep -qE ', 0 to remove$$' \
-	  && echo "OK: authorized_keys holds exactly the four device keys" \
+	  && echo "OK: authorized_keys holds only keys named in the allow-list" \
 	  || { echo "FAIL: authorized_keys does not match the keep-list — run 'make prune-keys'"; exit 1; }
 
 .PHONY: harden-sshd-listen

@@ -69,6 +69,7 @@ KEPT="$TMP/kept"
 
 kept=0
 dropped=0
+KEPT_FPS=" "
 echo "--- $KEYS ---"
 n=0
 while IFS= read -r line; do
@@ -96,6 +97,7 @@ while IFS= read -r line; do
   if [ "$keep" = yes ]; then
     echo "  KEEP  #$n  $comment"
     printf '%s\n' "$line" >> "$KEPT"
+    KEPT_FPS="$KEPT_FPS $fp"
     kept=$((kept + 1))
   else
     echo "  DROP  #$n  $comment"
@@ -115,10 +117,10 @@ fi
 # A key in the keep-list that is not present means this ran against the wrong account,
 # or a device was already removed. Worth saying before writing.
 for k in "${KEEP[@]}"; do
-  grep -qF "$k" <(while IFS= read -r l; do
-      printf '%s\n' "$l" > "$TMP/c.pub"
-      ssh-keygen -lf "$TMP/c.pub" 2>/dev/null | awk '{print $2}'
-    done < "$KEPT") || echo "WARNING: keep-list fingerprint not found in the file: $k"
+  case "$KEPT_FPS " in
+    *" $k "*) ;;
+    *) echo "WARNING: keep-list names a key that is not in $KEYS: $k" ;;
+  esac
 done
 
 if [ "${APPLY:-}" != "yes" ]; then
