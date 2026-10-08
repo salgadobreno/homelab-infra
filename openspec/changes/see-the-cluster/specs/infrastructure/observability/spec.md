@@ -53,13 +53,15 @@ M1; this one makes it visible.
 
 ### Requirement: Telemetry volume stays inside a stated budget
 
-The system SHALL keep the number of active metric series under a budget written in the
-repository, and SHALL drop series outside it at the source rather than at the store.
+The system SHALL keep the number of metric series the backend bills for under a budget
+written in the repository, counting both how many series exist and how often each is
+sent, and SHALL drop series outside it at the source rather than at the store.
 
 #### Scenario: The series count is within budget
 
-- **WHEN** the operator reads the active series count from the telemetry backend
-- **THEN** it SHALL be below the budget recorded in the repository
+- **WHEN** the operator reads the active series count and the data points per minute
+  from the telemetry backend
+- **THEN** both SHALL be below the budget recorded in the repository
 
 ### Requirement: Arrival is checked, not assumed
 

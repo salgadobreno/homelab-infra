@@ -35,8 +35,8 @@ Explicitly **not** in this change:
   ArgoCD, and a local store dies with every rebuild. A later rung, if RAM allows.
 - An agent on the hypervisor. `make check` asserts the hypervisor serves no HTTP, and an
   exporter port would break that for data the Proxmox API already gives.
-- Traces. Nothing here emits spans. The agent accepts OTLP so the first workload that
-  does has somewhere to send.
+- Traces, and the OTLP receiver. Nothing here emits spans or OTLP yet, and an idle
+  receiver costs memory. Adding it is one collector when the first workload needs it.
 - Alerting, SLOs, dashboards as code. The next rung: observability as code.
 - Hypervisor journal logs, tunnel metrics.
 - Metrics on the public site. If that ever happens, M5's disclosure boundary applies.

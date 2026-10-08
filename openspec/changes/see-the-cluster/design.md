@@ -4,7 +4,7 @@
 
 | Constraint | Detail |
 |---|---|
-| Node | `k3s-server-1`, 4 vCPU, 6 GiB, local-lvm. ArgoCD and the site already in it |
+| Node | `k3s-server-1`, 4 vCPU, 6 GiB, local-lvm. ArgoCD and the site already in it; 1,969 MiB used (2026-10-08) |
 | Host RAM | 13 GiB total; the ~10 GiB all-VMs ceiling in `config.yaml` still binds, and M7 (three nodes) has to fit under it after this |
 | Lifetime | the cluster is disposable; `make rebuild` destroys everything not in Git |
 | Network | outbound only, through the Cloudflare tunnel; nothing inbound |
@@ -48,9 +48,33 @@ shape most employers run: an agent in the cluster, a managed backend.
 and no third party holding the data. Both are real. They are a later rung, when a second
 disk or more RAM makes them affordable, not something v0 should spend its budget on.
 
-*Limits accepted* (free tier, to be confirmed at signup and recorded in task 3): about
-10k active metric series, 50 GB logs, 14-day retention. Retention is the one that shapes
-the demo: a rebuild older than 14 days is gone.
+*Limits accepted.* From grafana.com/pricing, read 2026-10-08; task 3.1 confirms them on
+the stack itself:
+
+| Free tier | Limit | Retention |
+|---|---|---|
+| Metrics | 10k series / month | 14 days |
+| Logs | 50 GB ingested / month | 14 days |
+| Traces | 50 GB ingested / month | 14 days |
+| Kubernetes Monitoring | 2,232 host hours, 37,944 container hours / month | |
+| Users | 3 | |
+
+Three things in that table are not what they look like:
+
+- **The metrics cap is on billable series, not active series.** Grafana bills
+  `max(active series, DPM)`, with 1 data point per minute included per series. A 60 s
+  scrape keeps the two equal; a 15 s scrape, the Prometheus default, makes every series
+  cost four. A user hit this the week of writing: ~7,900 active series billed as ~26,000
+  and warned off the free tier. The scrape interval is therefore part of the budget, not a
+  tuning knob (D6).
+- **Host hours are three hosts.** 2,232 h is 3 × 744 h, a month of three nodes running
+  continuously. M7's three nodes fill it exactly; a fourth node, or a node counted twice
+  across a rebuild, goes over. Whether the hypervisor, scraped through its API, counts as a
+  host is to be read off the usage page after task 9.
+- **Container hours are about 51 containers**, running all month. The cluster has 13 pods
+  today; this change adds about six.
+
+Retention is the one that shapes the demo: a rebuild older than 14 days is gone.
 
 ### D2: Grafana Alloy through the `k8s-monitoring` Helm chart
 
@@ -58,6 +82,29 @@ Alloy is Grafana's distribution of the OpenTelemetry Collector. One agent covers
 Prometheus-style scraping, log shipping, and an OTLP receiver. The `grafana/k8s-monitoring`
 chart bundles it with kube-state-metrics and node-exporter, preconfigured for the hosted
 stack's Kubernetes views.
+
+What the chart is, at the pinned version (**4.5.2**, 2026-09-11; 4.5.3 was a day old when
+this was written):
+
+- **Nothing is on by default.** Features (`clusterMetrics`, `hostMetrics`,
+  `podLogsViaLoki`, ...), the telemetry services (`kube-state-metrics`, `node-exporter`)
+  and the Alloy instances (`collectors`) are each declared in values. This repo's
+  `values.yaml` is therefore the complete list of what runs.
+- **Alloy instances are run by an operator.** The chart installs the Alloy Operator
+  (subchart `alloy-operator` 0.7.1) and its `Alloy` CRD, then declares each collector as
+  an `Alloy` resource the operator turns into a Deployment or DaemonSet. ArgoCD sees the
+  `Alloy` resources, not the pods' owners directly. The CRD arrives in the same sync as the
+  resources that use it, the ordering problem the bootstrap Application already hit
+  (`argocd-app-site.yaml.tftpl`); a sync wave or ArgoCD's retry settles it, and task 9.2
+  watches for it.
+- **Two collectors, not four**: `alloy-metrics` (singleton preset: one node, nothing to
+  cluster) and `alloy-logs` (DaemonSet, reads pod logs from the node). The OTLP receiver
+  is a third collector and is **not deployed in v0**: nothing emits OTLP yet, and an idle
+  receiver is memory the node does not have to spare. Adding it is one `collectors` entry
+  when the first workload needs it.
+- **Each feature has a default metric allow-list** (`metricsTuning.useDefaultAllowList`,
+  on by default), matched to the hosted Kubernetes views. The series budget (D6) starts
+  from these rather than from hand-written drop rules.
 
 *Alternative considered:* the upstream OpenTelemetry Collector plus a separate
 node-exporter and kube-state-metrics, wired by hand. Same result, more YAML, and the
@@ -132,17 +179,49 @@ written once at boot. Acceptable at the rate tokens rotate here.
 
 ### D6: Budgets, stated before spending
 
-**Memory.** The agent stack gets at most **1 GiB of limits** on the node: Alloy (metrics,
-logs), kube-state-metrics, node-exporter, pve-exporter. Each component has requests and
-limits set in values. Task 2 measures the node before anything is added; task 9 measures
-after, and the difference is recorded against this number. If the stack does not fit,
-the first cut is log collection, not metrics.
+**Memory.** Measured 2026-10-08 with `kubectl top`: the node uses **1,969 MiB of 6 GiB
+(33%)**. Pods account for ~630 MiB of it (ArgoCD ~300, traefik 121, metrics-server 78,
+coredns 70, the site 10); the rest is k3s and the OS. About 4 GiB is free.
 
-**Series.** Budget **5,000 active series**, half the free tier, leaving room for two more
-nodes at M7. Drop rules sit in the agent, not the backend: cAdvisor and kubelet metrics
-are kept only for the families the stock Kubernetes views use, and histogram buckets are
-dropped where only averages are shown. The budget lives in `values.yaml` as a comment
-next to the rules, and task 9 reads the real count back.
+The agent stack gets at most **1 GiB of limits**, set per component:
+
+| Component | Request | Limit | Source of the figure |
+|---|---|---|---|
+| `alloy-metrics` | 128 Mi | 384 Mi | chart's `small` preset is 128/512 Mi; trimmed, see below |
+| `alloy-logs` | 64 Mi | 192 Mi | log volume here is one nginx pod and the system pods |
+| Alloy Operator | 64 Mi | 128 Mi | chart's own resource example |
+| kube-state-metrics | 32 Mi | 64 Mi | chart's own resource example |
+| node-exporter | 30 Mi | 64 Mi | chart's example is 30/50 Mi; rounded up |
+| pve-exporter | 64 Mi | 128 Mi | estimate; Python process, a handful of VMs |
+| **Total** | **382 Mi** | **960 Mi** | |
+
+The sizing for Alloy comes from Grafana's resource guidance: about 11 GiB per million
+active series, so ~11 KiB per series, so ~55 MiB for the 5,000-series budget below, on top
+of the process's own baseline. Logs cost ~120 MiB per MiB/s ingested, and this cluster
+logs a small fraction of that. `384 Mi` leaves the metrics collector several times its
+expected working set; the `small` preset's 512 Mi is sized for clusters up to ~50 nodes.
+
+Expected after the change: ~2.4-2.6 GiB used of 6 GiB, still under half. Task 2.1
+records the baseline, task 10.1 the real figure. If the stack does not fit, the first cut
+is log collection, not metrics.
+
+**Series.** Budget **5,000 billable series**: half the free tier, leaving room for two more
+nodes at M7. Billable, not active (D1), so the budget holds three rules:
+
+- **The scrape interval stays at 60 s.** The chart's default (`global.scrapeInterval`),
+  and 1 DPM per series, so billable equals active. Shortening it, globally or for one job,
+  multiplies that job's cost and is a budget change, decided as one.
+- **The default allow-lists stay on** for cluster metrics, kubelet, cAdvisor and
+  kube-state-metrics. They are the families the hosted Kubernetes views use. Host metrics
+  use the Linux-node integration's allow-list (`useIntegrationAllowList`).
+- **Additions are named.** Anything beyond the allow-lists goes in
+  `metricsTuning.includeMetrics` with a comment saying which view needs it. ArgoCD and
+  pve-exporter are scraped with explicit include lists, not wholesale.
+
+The budget lives in `values.yaml` as a comment next to these settings. Task 10.2 reads
+both numbers back from the backend: active series, and DPM from
+`grafanacloud_instance_samples_per_second × 60` in the `grafanacloud-usage` data source.
+If DPM exceeds the active count, an interval somewhere is shorter than 60 s.
 
 ### D7: Arrival is a check against the backend
 
@@ -157,9 +236,9 @@ accepted; the failure message says which it was.
 
 ## Risks / Trade-offs
 
-- [The series budget is blown by a default nobody read] → drop rules written before the
-  first sync; task 9 reads the real count back; the free tier stops ingesting rather than
-  billing.
+- [The series budget is blown by a default nobody read, or by a short scrape interval] →
+  allow-lists on and the 60 s interval kept (D6); task 10.2 reads back both active
+  series and DPM, since the free tier caps the higher of the two.
 - [The agent stack starves the site on a 6 GiB node] → limits on every component, a
   measured baseline first, and logs as the first thing cut.
 - [A third party holds addresses and logs] → private account, operator-only. Nothing from

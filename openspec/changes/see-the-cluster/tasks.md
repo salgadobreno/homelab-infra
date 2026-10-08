@@ -10,12 +10,12 @@ the agent depends on it, so the cost of this rung is a number and not an impress
 
 ## 2. Baseline
 
-- [ ] 2.1 Add `make top` (node and pod memory/CPU from the cluster) if no target already gives it, and record the node's used memory and the per-pod figures before anything is added
+- [ ] 2.1 Add `make top` (node and pod memory/CPU from the cluster) if no target already gives it, and record the node's used memory and the per-pod figures before anything is added. A first reading is in design D6 (1,969 MiB, 2026-10-08); re-measure on the day work starts
 - [ ] 2.2 Confirm `make check` is green, so a later failure is attributable to this change
 
 ## 3. Backend and credentials (operator steps)
 
-- [ ] 3.1 Create the Grafana Cloud stack. Record the free tier's real limits (series, logs, retention) in design D1, replacing the "to be confirmed" figures
+- [ ] 3.1 Create the Grafana Cloud stack. Confirm the free-tier table in design D1 against the stack's own usage page, and correct D1 where it differs
 - [ ] 3.2 Create an access policy with `metrics:write` and `logs:write` only, and a token on it for the agent. Create a second policy with `metrics:read` only for the check; store its token in `.grafana-read-token`, mode 600, and add that file to `.gitignore`
 - [ ] 3.3 Write `scripts/create-exporter-user.sh` on the pattern of `create-terraform-user.sh`: a dedicated Proxmox user with `PVEAuditor` on `/` and a privilege-separated token; output goes to `tofu/observability.auto.tfvars`, mode 600. Operator runs it as root
 - [ ] 3.4 Confirm both files are ignored with `git check-ignore`, not by reading `.gitignore`
@@ -40,8 +40,8 @@ the agent depends on it, so the cost of this rung is a number and not an impress
 
 ## 7. The agent (design D2, D6)
 
-- [ ] 7.1 `k8s/observability/values.yaml` for `grafana/k8s-monitoring`, chart version pinned: cluster metrics, node metrics, kube-state-metrics, pod logs, ArgoCD scrape, OTLP receiver on. Destinations read the Secrets from 5.2. Requests and limits on every component, summing to at most 1 GiB
-- [ ] 7.2 Series drop rules in the same file, with the 5,000-series budget written next to them
+- [ ] 7.1 `k8s/observability/values.yaml` for `grafana/k8s-monitoring`, chart pinned at 4.5.2 (design D2): `clusterMetrics`, `hostMetrics`, `podLogsViaLoki`; `kube-state-metrics` and `node-exporter` deployed; collectors `alloy-metrics` (singleton) and `alloy-logs` (DaemonSet), no OTLP receiver. Destinations read the Secrets from 5.2. Requests and limits per the table in design D6, summing to at most 1 GiB
+- [ ] 7.2 Series budget in the same file, written next to the settings that hold it (design D6): 60 s scrape interval, default allow-lists on, Linux-node integration allow-list for host metrics, explicit include lists for ArgoCD and pve-exporter
 - [ ] 7.3 `k8s/observability/pve-exporter.yaml`: Deployment and Service for `prometheus-pve-exporter`, pinned image, token from the Secret, scrape target the hypervisor's API; scraped by the agent
 - [ ] 7.4 `k8s/apps/observability.yaml`: multi-source Application (chart from Grafana's repo, values from this repo), plus the exporter manifests
 
@@ -61,8 +61,8 @@ the agent depends on it, so the cost of this rung is a number and not an impress
 
 ## 10. Prove the budgets and the checks
 
-- [ ] 10.1 `make top` again; record the agent stack's real memory against the 1 GiB budget in design D6
-- [ ] 10.2 Read the active series count from the backend; record it against the 5,000 budget — `observability` "The series count is within budget"
+- [ ] 10.1 `make top` again; record each component's real memory against its row in the design D6 table, and the node total against the ~2.4-2.6 GiB expected
+- [ ] 10.2 Read active series and DPM (`grafanacloud_instance_samples_per_second × 60`) from the `grafanacloud-usage` data source; record both against the 5,000 budget. DPM above active series means a scrape interval under 60 s somewhere. Also read host and container hours, and note whether the hypervisor counts as a host (design D1) — `observability` "The series count is within budget"
 - [ ] 10.3 Scale the agent to zero, wait past 5 minutes, watch `check-observability` fail and name the node; ArgoCD selfHeal will race this, so suspend the Application's auto-sync for the test and restore it after — `observability` "Silence fails the check"
 
 ## 11. The demo
