@@ -60,3 +60,31 @@ sshd is still key-only, so the path has one gate instead of two.
 Consequence for this change: `make check` stops at `check-privileges`, so the checks after
 it never run. Until Access is back, run `make -k check` and read past that one failure.
 Task 2.2 is satisfied on that basis: every other check is green.
+
+## Spike: Grafana's own onboarding, 2026-10-08
+
+The operator ran Grafana Cloud's Kubernetes onboarding command by hand, before the
+GitOps install exists. Operator decision: keep it a day as a measurement, then remove it
+(tasks 2.3-2.5). It is not the deliverable: it is installed by `helm`, not ArgoCD, and is
+gone on the next rebuild.
+
+| | |
+|---|---|
+| Releases (ns `monitoring`) | `grafana-cloud` (k8s-monitoring 4.5.3), `grafana-cloud-alloy-daemon` (alloy chart 1.13.0, Alloy v1.20.0) |
+| Pipeline config | Fleet Management: Alloy pulls its configuration from Grafana Cloud, not from values in Git |
+| Collector | one `alloy-daemon` DaemonSet, presets `large, root, host-storage, host-network, host-cgroup, clustered, service-discovery, filesystem-log-reader, daemonset` |
+| Privileges | privileged, root, `hostPID`, `hostNetwork`; hostPath `/var/log`, `/var/lib/docker/containers`, `/var/lib/alloy`, `/sys/fs/cgroup` |
+| Also deployed | alloy-operator, kube-state-metrics, node-exporter, Beyla k8s cache (eBPF auto-instrumentation on) |
+| Alloy resources | request 1 Gi / 500m, limit 2 Gi / 2 CPU (`large` preset) |
+| Cluster name | `default` |
+
+Memory a few minutes after install: node **2,633 Mi (44%)**, up 645 Mi from the
+baseline. Alloy 511 Mi, operator 40, kube-state-metrics 16, node-exporter 8, Beyla
+cache 7.
+
+What it differs from the design on, and why it is not kept: config outside Git (D2,
+observability as code), privileges and Beyla (not needed for v0's scope), the `large`
+preset's 1 Gi request alone exceeding the 960 Mi budget (D6).
+
+What it is good for: the series, DPM and memory of Grafana's default, measured on this
+node. Recorded here after a day (task 2.4).

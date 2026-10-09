@@ -13,9 +13,13 @@ the agent depends on it, so the cost of this rung is a number and not an impress
 - [x] 2.1 Add `make top` (node and pod memory/CPU from the cluster) if no target already gives it, and record the node's used memory and the per-pod figures before anything is added. A first reading is in design D6 (1,969 MiB, 2026-10-08); re-measure on the day work starts
 - [x] 2.2 Confirm `make check` is green, so a later failure is attributable to this change. **Green except `check-tunnel-ssh`, red on purpose** (Access off by operator decision 2026-10-08, restoring it is backlog). Use `make -k check` until then. See `baseline.md`
 
+- [ ] 2.3 Spike, operator decision 2026-10-08: Grafana Cloud's own Kubernetes onboarding (`helm`, k8s-monitoring 4.5.3 + Fleet Management, ns `monitoring`) runs for a day as a measurement, not as the deliverable. What it installed is recorded in `baseline.md`
+- [ ] 2.4 After a day: read the spike's active series, DPM, and host/container hours from the `grafanacloud-usage` data source, and Alloy's memory from `make top`; record them in `baseline.md` and revise the budgets in design D6 if the numbers say so
+- [ ] 2.5 Remove the spike: `helm uninstall grafana-cloud-alloy-daemon` and `grafana-cloud` in `monitoring`, then the namespace; confirm `make top` is back near the baseline and `check-diagram` green. Revoke the Fleet Management token in Grafana Cloud if it is not reused. Must be done before 9.1, or the GitOps install collides with it
+
 ## 3. Backend and credentials (operator steps)
 
-- [ ] 3.1 Create the Grafana Cloud stack. Confirm the free-tier table in design D1 against the stack's own usage page, and correct D1 where it differs
+- [x] 3.1 Create the Grafana Cloud stack. Confirm the free-tier table in design D1 against the stack's own usage page, and correct D1 where it differs
 - [ ] 3.2 Create an access policy with `metrics:write` and `logs:write` only, and a token on it for the agent. Create a second policy with `metrics:read` only for the check; store its token in `.grafana-read-token`, mode 600, and add that file to `.gitignore`
 - [ ] 3.3 Write `scripts/create-exporter-user.sh` on the pattern of `create-terraform-user.sh`: a dedicated Proxmox user with `PVEAuditor` on `/` and a privilege-separated token; output goes to `tofu/observability.auto.tfvars`, mode 600. Runs against the API, not as root: the operator runs it with a bootstrap admin token (`make exporter-user` prints how), then deletes that token. **Script written 2026-10-08; not yet run**
 - [ ] 3.4 Confirm both files are ignored with `git check-ignore`, not by reading `.gitignore`
