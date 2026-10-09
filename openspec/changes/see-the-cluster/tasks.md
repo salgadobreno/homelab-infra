@@ -11,7 +11,7 @@ the agent depends on it, so the cost of this rung is a number and not an impress
 ## 2. Baseline
 
 - [x] 2.1 Add `make top` (node and pod memory/CPU from the cluster) if no target already gives it, and record the node's used memory and the per-pod figures before anything is added. A first reading is in design D6 (1,969 MiB, 2026-10-08); re-measure on the day work starts
-- [ ] 2.2 Confirm `make check` is green, so a later failure is attributable to this change. **Not green 2026-10-08**: `check-tunnel-ssh` fails, the tunnel's SSH hostname has no Access challenge. Outside this repo; operator fixes the Access policy, then rerun. See `baseline.md`
+- [x] 2.2 Confirm `make check` is green, so a later failure is attributable to this change. **Green except `check-tunnel-ssh`, red on purpose** (Access off by operator decision 2026-10-08, restoring it is backlog). Use `make -k check` until then. See `baseline.md`
 
 ## 3. Backend and credentials (operator steps)
 

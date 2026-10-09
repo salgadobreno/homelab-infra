@@ -51,3 +51,12 @@ The `check-tunnel-ssh` failure is not caused by this change and is not fixed by 
 a regression in the Cloudflare Access configuration, which lives outside this repository.
 It is recorded here because a red suite at the start of a change has to be explained,
 or every later failure inherits the doubt.
+
+**Known and accepted, operator decision 2026-10-08.** The operator turned Access off: it
+was slow, and sometimes unresponsive from mobile networks. Restoring it is on the
+backlog, not in this change. The check stays red on purpose rather than being weakened.
+sshd is still key-only, so the path has one gate instead of two.
+
+Consequence for this change: `make check` stops at `check-privileges`, so the checks after
+it never run. Until Access is back, run `make -k check` and read past that one failure.
+Task 2.2 is satisfied on that basis: every other check is green.
