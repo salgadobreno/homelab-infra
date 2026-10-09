@@ -119,6 +119,17 @@ pods: ## All pods in all namespaces
 	@KUBECONFIG=$(KUBECONFIG_PATH) kubectl get pods -A 2>/dev/null \
 	  || $(MAKE) --no-print-directory node-exec CMD='sudo k3s kubectl get pods -A'
 
+.PHONY: top
+top: ## Node and pod memory/CPU, heaviest first, with the pod total (see-the-cluster 2.1)
+# Working-set memory from metrics-server, the figure the D6 budget is written against.
+# Node minus pod total is what k3s and the OS hold.
+	@KUBECONFIG=$(KUBECONFIG_PATH) kubectl top nodes
+	@echo
+	@KUBECONFIG=$(KUBECONFIG_PATH) kubectl top pods -A --sort-by=memory
+	@echo
+	@KUBECONFIG=$(KUBECONFIG_PATH) kubectl top pods -A --no-headers \
+	  | awk '{ sub(/Mi$$/, "", $$4); t += $$4 } END { printf "pods total: %d Mi\n", t }'
+
 .PHONY: cluster
 cluster: ## k3s service state and node readiness, straight from the node
 	@$(MAKE) --no-print-directory node-exec \

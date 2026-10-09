@@ -1,0 +1,53 @@
+# Baseline
+
+The node before anything in this change is added, so the agent stack's cost is a
+difference between two readings rather than an impression. Task 10.1 takes the second.
+
+## Memory and CPU
+
+`make top`, 2026-10-08 21:28 -03:00. Working-set memory from metrics-server.
+
+| | CPU | Memory |
+|---|---|---|
+| Node `k3s-server-1` (6 GiB) | 79m (1%) | **1,988 Mi (33%)** |
+| All pods | | 648 Mi |
+| k3s and the OS (node minus pods) | | ~1,340 Mi |
+
+| Namespace | Pod | CPU | Memory |
+|---|---|---|---|
+| argocd | argocd-application-controller-0 | 4m | 227 Mi |
+| kube-system | traefik | 1m | 121 Mi |
+| kube-system | metrics-server | 4m | 78 Mi |
+| kube-system | coredns | 2m | 70 Mi |
+| kube-system | local-path-provisioner | 1m | 46 Mi |
+| argocd | argocd-repo-server | 1m | 38 Mi |
+| argocd | argocd-redis | 2m | 29 Mi |
+| argocd | argocd-server | 1m | 27 Mi |
+| web | site | 1m | 10 Mi |
+| kube-system | svclb-traefik | 0m | 2 Mi |
+
+An earlier reading the same day, used in design D6, was 1,969 Mi. The ~20 Mi spread is
+the ArgoCD application controller, the noisiest pod here. Treat the node figure as
+±25 Mi.
+
+Ten pods. Design D1's container-hours headroom is counted from this.
+
+## The check suite
+
+`make check`, same session. **Not green**, so task 2.2 is open.
+
+| Check | Result |
+|---|---|
+| `check-secrets` | OK |
+| `check-disclosure` | OK |
+| `check-configmap-size` | OK |
+| `check-privileges` | **FAIL** in `check-tunnel-ssh`: the tunnel's SSH hostname answers an unauthenticated request with HTTP 200 and the SSH banner. No Access challenge. Everything else inside `check-privileges` passed |
+| `check-updates` | OK (run on its own, since `make check` stopped above) |
+| `check-site` | OK |
+| `check-diagram` | OK, once the shell's `KUBECONFIG` is unset. It failed first because the operator's shell exports a path from before the repository moved, and `generate-diagram.sh` lets the environment win. Not a repository fault |
+| `check-drift` | OK, no drift |
+
+The `check-tunnel-ssh` failure is not caused by this change and is not fixed by it. It is
+a regression in the Cloudflare Access configuration, which lives outside this repository.
+It is recorded here because a red suite at the start of a change has to be explained,
+or every later failure inherits the doubt.
