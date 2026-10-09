@@ -497,6 +497,15 @@ snippet-user: ## NEEDS ROOT, run in a real terminal: create the unprivileged sni
 	@echo
 	@echo "    sudo ./scripts/create-snippet-user.sh"
 
+.PHONY: exporter-user
+exporter-user: ## NEEDS AN ADMIN TOKEN: create the read-only pve-exporter identity (see-the-cluster 3.3)
+	@echo "This creates a Proxmox user and token, which the scoped provisioning token cannot do."
+	@echo "Make a bootstrap admin token (scripts/create-bootstrap-token.sh), then run:"
+	@echo
+	@echo "    PVE_ADMIN_TOKEN='root@pam!<id>=<secret>' ./scripts/create-exporter-user.sh"
+	@echo
+	@echo "and delete the bootstrap token afterwards."
+
 .PHONY: check-snippet-user
 check-snippet-user: ## Confirm the snippet account is unprivileged and its directory survives a destroy (4.2)
 	@ssh $(SSH_OPTS) -p $(PVE_SSH_PORT) -o BatchMode=yes $(SNIPPET_USER)@$(PVE_IP) \
