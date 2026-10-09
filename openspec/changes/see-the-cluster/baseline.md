@@ -47,8 +47,8 @@ Ten pods. Design D1's container-hours headroom is counted from this.
 | `check-diagram` | OK, once the shell's `KUBECONFIG` is unset. It failed first because the operator's shell exports a path from before the repository moved, and `generate-diagram.sh` lets the environment win. Not a repository fault |
 | `check-drift` | OK, no drift |
 
-The `check-tunnel-ssh` failure is not caused by this change and is not fixed by it. It is
-a regression in the Cloudflare Access configuration, which lives outside this repository.
+The `check-tunnel-ssh` failure is not caused by this change and is not fixed by it. It comes
+from the Cloudflare Access configuration, which lives outside this repository.
 It is recorded here because a red suite at the start of a change has to be explained,
 or every later failure inherits the doubt.
 
