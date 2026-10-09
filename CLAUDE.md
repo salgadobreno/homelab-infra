@@ -134,10 +134,11 @@ or silently "improve" them:
 
 ## Current state
 
-M0 to M5 are complete and archived. **M6 is next** — see the ladder in `openspec/config.yaml`.
+M0 to M5 are complete and archived. **M6 (observability, `see-the-cluster`) is in progress**;
+multi-node is M7 — see the ladder in `openspec/config.yaml`.
 The ladder — what every `M<n>` in this repo refers to — is the `## Milestone ladder`
 table in `openspec/config.yaml`. Read it before proposing what comes next; do not infer
-the next change from a gap in the numbering. Archived changes predate a renumbering and
+the next change from a gap in the numbering. Archived changes predate the renumberings and
 use the original scheme, which that section explains.
 
 The permanent specs — `vm-provisioning`, `k3s-cluster`, `credential-scoping`, `gitops`,
