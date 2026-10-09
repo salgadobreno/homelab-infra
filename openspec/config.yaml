@@ -91,8 +91,8 @@ context: |
   | M3 | "I pushed to GitHub and ArgoCD served my site. I did not run kubectl." | `serve-site-from-k3s` | done 2026-08-22 |
   | M4 | "Docker-on-host is gone. The cluster serves buzaga.com.br." | `retire-compose-stack` | done 2026-08-22 |
   | M5 | "The site shows its own guts, and the picture cannot go stale." | `show-the-machine` | done 2026-08-23 |
-  | M6 | "Three nodes. I drained one and the app stayed up." | not yet proposed | next |
-  | M7 | "I can see what the cluster is doing." — observability, if RAM allows | not yet proposed | |
+  | M6 | "I can see what the cluster is doing, and a rebuild is a gap, not an erasure." | `see-the-cluster` | in progress |
+  | M7 | "Three nodes. I drained one and the app stayed up." | not yet proposed | next |
 
   **The rebuild demo is not a rung.** `make rebuild CONFIRM=yes` destroying and recreating
   the node in ~105 seconds was the original ladder's M4 and the intended centrepiece. It
@@ -201,16 +201,22 @@ context: |
 
   ### Numbering history — read this before trusting an old document
 
-  The ladder was reordered once. `narrow-privileges` was pulled forward from rung 6 to
-  rung 2, because `CLAUDE.md` carried three recorded shortcuts "with a milestone to fix
-  each" and that list drove the choice. The original rungs 2 and 3 (serve the site, then
-  add ArgoCD) merged into one M3, since installing a reconciler without anything to
+  The ladder has been reordered twice. First, `narrow-privileges` was pulled forward from
+  rung 6 to rung 2, because `CLAUDE.md` carried three recorded shortcuts "with a milestone
+  to fix each" and that list drove the choice. The original rungs 2 and 3 (serve the site,
+  then add ArgoCD) merged into one M3, since installing a reconciler without anything to
   reconcile is a layer rather than a slice.
+
+  Second, operator decision 2026-10-08: observability was pulled forward from M7 to M6,
+  ahead of multi-node, which moved from M6 to M7. Three nodes on 13 GiB is a memory bet,
+  and it should be sized from measurements rather than guesses — so the rung that produces
+  the measurements comes first.
 
   Archived changes under `openspec/changes/archive/` use the **original** numbering and
   are left untouched as historical record. In those documents M6 means secrets — that work
-  is M2 here. M7 means observability in both schemes, and M5 means multi-node in the old
-  scheme but is the self-describing site here. Everywhere outside the archive, this table
+  is M2 here. M7 means observability, which is M6 here, and M5 means multi-node, which is
+  M7 here; M5 here is the self-describing site. Anything written before 2026-10-08 outside
+  the archive that says "M6" means multi-node. Everywhere outside the archive, this table
   is authoritative.
 
   ## Current state

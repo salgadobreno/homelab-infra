@@ -5,7 +5,7 @@ the agent depends on it, so the cost of this rung is a number and not an impress
 
 ## 1. The ladder
 
-- [ ] 1.1 Reorder the milestone ladder in `openspec/config.yaml`: M6 = `see-the-cluster` ("I can see what the cluster is doing."), M7 = three nodes. Add a line to the numbering history: pulled forward 2026-10-08, operator decision, so multi-node is sized from measurements
+- [x] 1.1 Reorder the milestone ladder in `openspec/config.yaml`: M6 = `see-the-cluster` ("I can see what the cluster is doing."), M7 = three nodes. Add a line to the numbering history: pulled forward 2026-10-08, operator decision, so multi-node is sized from measurements
 - [ ] 1.2 Update `CLAUDE.md` "M6 is next" and anything else that names the old order
 
 ## 2. Baseline
