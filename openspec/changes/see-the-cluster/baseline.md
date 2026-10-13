@@ -178,5 +178,6 @@ again before 10.1 compares against it. `check-diagram` green.
 Left: the empty `monitoring` namespace and the `alloys.collectors.grafana.com` CRD (Helm
 never deletes CRDs). The namespace does not collide: the GitOps install uses
 `observability`. The CRD might: if the chart ships it as a template rather than under
-`crds/`, an existing CRD not owned by the release is refused. Delete both before 9.1, or
-let 9.2's rebuild remove them.
+`crds/`, an existing CRD not owned by the release is refused. Both deleted by hand the
+same day (`kubectl delete`), and the operator revoked the Fleet Management token. Nothing
+of the spike is left in the cluster.
