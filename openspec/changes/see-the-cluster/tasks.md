@@ -15,7 +15,7 @@ the agent depends on it, so the cost of this rung is a number and not an impress
 
 - [ ] 2.3 Spike, operator decision 2026-10-08: Grafana Cloud's own Kubernetes onboarding (`helm`, k8s-monitoring 4.5.3 + Fleet Management, ns `monitoring`) runs for a day as a measurement, not as the deliverable. What it installed is recorded in `baseline.md`
 - [x] 2.4 After a day: read the spike's active series, DPM, and host/container hours from the `grafanacloud-usage` data source, and Alloy's memory from `make top`; record them in `baseline.md` and revise the budgets in design D6 if the numbers say so. **Read 2026-10-13 from Alloy's own metrics (no read token yet, host/container hours left to 10.2): ~1,550 series and DPM, Alloy 537 Mi under a 2 Gi limit with a 105 Mi live heap, no logs sent. D6 holds. See `baseline.md`**
-- [ ] 2.5 Remove the spike: `helm uninstall grafana-cloud-alloy-daemon` and `grafana-cloud` in `monitoring`, then the namespace; confirm `make top` is back near the baseline and `check-diagram` green. Revoke the Fleet Management token in Grafana Cloud if it is not reused. Must be done before 9.1, or the GitOps install collides with it
+- [ ] 2.5 Remove the spike: `helm uninstall grafana-cloud-alloy-daemon` and `grafana-cloud` in `monitoring`, then the namespace; confirm `make top` is back near the baseline and `check-diagram` green. Revoke the Fleet Management token in Grafana Cloud if it is not reused. Must be done before 9.1, or the GitOps install collides with it. **Releases removed 2026-10-13 (`grafana-cloud` alone; see `baseline.md`), pods back to baseline, `check-diagram` green. Open: empty `monitoring` namespace, `alloys.collectors.grafana.com` CRD, the Fleet Management token**
 
 ## 3. Backend and credentials (operator steps)
 

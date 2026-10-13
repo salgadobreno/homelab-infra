@@ -157,3 +157,26 @@ metrics only, so it says nothing about the `alloy-logs` row in D6.
   limit puts `GOMEMLIMIT` near 345 Mi and the collector collects sooner. Task 10.1 checks
   it under the real limit.
 - Logs: unmeasured. The `alloy-logs` row stays an estimate until 10.1.
+
+### Removed (task 2.5), 2026-10-13
+
+`helm uninstall grafana-cloud -n monitoring`. That one release is enough: the
+`alloy-daemon` release is rendered by the Alloy Operator from an `Alloy` resource that
+`grafana-cloud` owns, and the resource's finalizer uninstalls it. Uninstalling
+`grafana-cloud-alloy-daemon` directly does not stick: the operator recreates it at once.
+
+| | Baseline | After removal |
+|---|---|---|
+| Node `k3s-server-1` | 1,988 Mi | 2,234 Mi (37%) |
+| All pods | 648 Mi | 644 Mi |
+
+The pods are back to the baseline. The node is ~250 Mi above it, outside any pod: page
+cache, most likely from Alloy's WAL, which sits in a hostPath (`/var/lib/alloy`) the
+uninstall does not clean. It is the node's disk and goes with the next rebuild. `make top`
+again before 10.1 compares against it. `check-diagram` green.
+
+Left: the empty `monitoring` namespace and the `alloys.collectors.grafana.com` CRD (Helm
+never deletes CRDs). The namespace does not collide: the GitOps install uses
+`observability`. The CRD might: if the chart ships it as a template rather than under
+`crds/`, an existing CRD not owned by the release is refused. Delete both before 9.1, or
+let 9.2's rebuild remove them.
