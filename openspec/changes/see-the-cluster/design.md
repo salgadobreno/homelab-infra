@@ -200,6 +200,9 @@ active series, so ~11 KiB per series, so ~55 MiB for the 5,000-series budget bel
 of the process's own baseline. Logs cost ~120 MiB per MiB/s ingested, and this cluster
 logs a small fraction of that. `384 Mi` leaves the metrics collector several times its
 expected working set; the `small` preset's 512 Mi is sized for clusters up to ~50 nodes.
+The spike (`baseline.md`, task 2.4) bears this out: five days on Grafana's own onboarding,
+Alloy's live heap was 105 Mi with Beyla inside it; its 537 Mi working set was the `large`
+preset's 2 Gi limit used lazily.
 
 Expected after the change: ~2.4-2.6 GiB used of 6 GiB, still under half. Task 2.1
 records the baseline, task 10.1 the real figure. If the stack does not fit, the first cut
@@ -222,6 +225,10 @@ The budget lives in `values.yaml` as a comment next to these settings. Task 10.2
 both numbers back from the backend: active series, and DPM from
 `grafanacloud_instance_samples_per_second × 60` in the `grafanacloud-usage` data source.
 If DPM exceeds the active count, an interval somewhere is shorter than 60 s.
+
+The spike measured ~1,450 series and the same DPM on one node with Grafana's defaults,
+out of 46,784 scraped a minute: the allow-lists keep 3%, and without them the kubelet
+alone is ~41,000. The budget holds.
 
 ### D7: Arrival is a check against the backend
 

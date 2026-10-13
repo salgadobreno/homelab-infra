@@ -88,3 +88,72 @@ preset's 1 Gi request alone exceeding the 960 Mi budget (D6).
 
 What it is good for: the series, DPM and memory of Grafana's default, measured on this
 node. Recorded here after a day (task 2.4).
+
+### After the day (task 2.4), 2026-10-13
+
+Read on day five, not day one: the spike ran 112.5 h with no restarts (Alloy up since
+2026-10-08 21:14, read 2026-10-13 16:26 -03:00). Memory from `make top`. Series and DPM
+from Alloy's own `/metrics` (hostPort 12345 on the node), not from the `grafanacloud-usage`
+data source: that needs the read token from task 3.2, which does not exist yet. Alloy's
+figures are what it sends, so they bound what is billed. Task 10.2 reads the backend.
+
+**Memory.**
+
+| | Day 0 | Day 5 |
+|---|---|---|
+| Node `k3s-server-1` | 2,633 Mi (44%) | **2,833 Mi (47%)** |
+| All pods | | 1,257 Mi |
+| `alloy-daemon` (alloy container) | 511 Mi | 537 Mi (+6 config-reloader) |
+| alloy-operator | 40 | 40 |
+| kube-state-metrics | 16 | 18 |
+| node-exporter | 8 | 10 |
+| Beyla k8s cache | 7 | 8 |
+
+Namespace `monitoring`: ~620 Mi. Node: +845 Mi over the baseline's 1,988.
+
+Inside Alloy: live Go heap 105 Mi (133 in use), Go runtime total 430 Mi, RSS 451 Mi. The
+gap is the runtime keeping freed memory: the `large` preset's 2 Gi limit sets
+`GOMEMLIMIT` to 1,843 Mi, so the collector has no reason to give memory back. The working
+set adds the WAL's page cache on top. Beyla's eBPF instrumentation runs in the same
+process, so the 105 Mi includes it.
+
+**Series and DPM.**
+
+| Remote write | Active series | Samples/min |
+|---|---|---|
+| `grafana_cloud_metrics` (the Kubernetes pipeline) | **1,454** | **1,453** |
+| `default`, Fleet's `ihub_kubernetes_survey` | 49 | 49 |
+| `default`, Fleet's `ihub_kubernetes_survey_k8s_monitoring` | 49 | 49 |
+
+At most ~1,550 active series and ~1,550 DPM (the two survey pipelines may write the same
+49 series). DPM equals active series: every job scrapes at 60 s. No failed samples.
+
+Where the 1,453 come from, scraped versus kept by the default allow-lists:
+
+| Source | Scraped/min | Sent/min |
+|---|---|---|
+| kubelet | 41,064 | 200 |
+| cAdvisor | 2,879 | 252 |
+| kube-state-metrics | 1,613 | 808 |
+| node-exporter | 1,089 | 189 |
+| kubelet resources | 139 | 4 |
+| **Total** | **46,784** | **1,453** |
+
+The allow-lists keep 3% of what is scraped. Without them the kubelet alone is ~41,000
+series: eight times the 5,000 budget, four times the free tier.
+
+**Logs.** None. The Fleet configuration has no `loki.write` component: the spike sent
+metrics only, so it says nothing about the `alloy-logs` row in D6.
+
+**Host and container hours.** Not read: they exist only in the backend. Task 10.2.
+
+**What it changes in D6.**
+
+- Series: the budget holds. One node on Grafana's defaults is ~1,500. Three nodes at M7
+  stay under 5,000 if the per-node part (node-exporter, kubelet, cAdvisor, ~640 here) is
+  what grows. No change.
+- Memory: the 384 Mi limit for `alloy-metrics` stands. The spike's 537 Mi is a 2 Gi limit
+  used lazily, not a working set: the live heap is 105 Mi, with Beyla in it. A 384 Mi
+  limit puts `GOMEMLIMIT` near 345 Mi and the collector collects sooner. Task 10.1 checks
+  it under the real limit.
+- Logs: unmeasured. The `alloy-logs` row stays an estimate until 10.1.
