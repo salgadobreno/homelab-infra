@@ -17,7 +17,7 @@ spec:
           # capability to bind a low port is needed and the container is not root.
           # Pinned rather than :latest — an unpinned tag makes a rebuild a different
           # deployment, which is what rebuilding exists to disprove.
-          image: nginxinc/nginx-unprivileged:1.31.4-alpine
+          image: nginx/nginx-unprivileged:1.31.9-alpine
           ports:
             - name: http
               containerPort: 8080
