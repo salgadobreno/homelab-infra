@@ -2,8 +2,9 @@
 # Bootstrap for a k3s server node (design D6).
 #
 # This file is deliberately short. It creates the operator account, installs the
-# guest agent, and installs k3s — nothing else. Everything above the OS is the
-# cluster's job, reconciled by GitOps, not configured here.
+# guest agent, and installs k3s with its shell completion — nothing else.
+# Everything above the OS is the cluster's job, reconciled by GitOps, not
+# configured here.
 #
 # If this grows past what fits on one screen, that is the signal to reconsider a
 # configuration-management layer — not a reason to pre-emptively add one.
@@ -57,6 +58,13 @@ runcmd:
     | INSTALL_K3S_VERSION="${k3s_version}"
     INSTALL_K3S_EXEC="server --tls-san ${node_address} --node-ip ${node_address} --write-kubeconfig-mode 644${disable_flags}"
     sh -
+
+  # Shell completion for the operator. bash-completion ships in the cloud image;
+  # the scripts are generated from the installed binaries rather than vendored, so
+  # they always match the pinned k3s. `kubectl` is the installer's symlink to k3s,
+  # but its completion is kubectl's own (cobra), hence two files.
+  - k3s completion bash > /etc/bash_completion.d/k3s
+  - k3s kubectl completion bash > /etc/bash_completion.d/kubectl
 
   # A marker the provisioner can wait on, written only after k3s reports ready.
   #
